@@ -1,0 +1,50 @@
+2025-12-02T21:36:25.478222242Z (node:68) DeprecationWarning: The ready event has been renamed to clientReady to distinguish it from the gateway READY event and will only emit under that name in v15. Please use clientReady instead.
+2025-12-02T21:36:25.478240952Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2025-12-02T21:36:27.49442154Z ==> Your service is live 🎉
+2025-12-02T21:36:27.552352471Z ==> 
+2025-12-02T21:36:27.581730666Z ==> ///////////////////////////////////////////////////////////
+2025-12-02T21:36:27.61461234Z ==> 
+2025-12-02T21:36:27.649609634Z ==> Available at your primary URL https://test123423.onrender.com
+2025-12-02T21:36:27.67732728Z ==> 
+2025-12-02T21:36:27.704991836Z ==> ///////////////////////////////////////////////////////////
+2025-12-02T21:36:31.51741796Z 9:36:31 PM [express] GET /api/auth/user 401 in 2ms :: {"message":"Unauthorized"}
+2025-12-02T21:36:31.687244707Z Error fetching news: Error: getaddrinfo ENOTFOUND dpg-d4n1gimuk2gs739dv9ug-a
+2025-12-02T21:36:31.687276287Z     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+2025-12-02T21:36:31.687281057Z   errno: -3008,
+2025-12-02T21:36:31.687313808Z   code: 'ENOTFOUND',
+2025-12-02T21:36:31.687321998Z   syscall: 'getaddrinfo',
+2025-12-02T21:36:31.687326738Z   hostname: 'dpg-d4n1gimuk2gs739dv9ug-a'
+2025-12-02T21:36:31.687330778Z }
+2025-12-02T21:36:31.688174547Z 9:36:31 PM [express] GET /api/news 500 in 13ms :: {"message":"Failed to fetch news"}
+2025-12-02T21:36:31.693276158Z Error fetching current week games: Error: getaddrinfo ENOTFOUND dpg-d4n1gimuk2gs739dv9ug-a
+2025-12-02T21:36:31.693291188Z     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+2025-12-02T21:36:31.693294519Z   errno: -3008,
+2025-12-02T21:36:31.693297979Z   code: 'ENOTFOUND',
+2025-12-02T21:36:31.693301249Z   syscall: 'getaddrinfo',
+2025-12-02T21:36:31.693304659Z   hostname: 'dpg-d4n1gimuk2gs739dv9ug-a'
+2025-12-02T21:36:31.693307569Z }
+2025-12-02T21:36:31.694244629Z 9:36:31 PM [express] GET /api/games/current 500 in 4ms :: {"message":"Failed to fetch games"}
+2025-12-02T21:36:33.601539651Z Error fetching current week games: Error: getaddrinfo ENOTFOUND dpg-d4n1gimuk2gs739dv9ug-a
+2025-12-02T21:36:33.601613562Z     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+2025-12-02T21:36:33.601621543Z   errno: -3008,
+2025-12-02T21:36:33.601626953Z   code: 'ENOTFOUND',
+2025-12-02T21:36:33.601631573Z   syscall: 'getaddrinfo',
+2025-12-02T21:36:33.601636543Z   hostname: 'dpg-d4n1gimuk2gs739dv9ug-a'
+2025-12-02T21:36:33.601640693Z }
+2025-12-02T21:36:33.602338208Z 9:36:33 PM [express] GET /api/games/current 500 in 5ms :: {"message":"Failed to fetch games"}
+2025-12-02T21:36:35.079494283Z Error fetching current week games: Error: getaddrinfo ENOTFOUND dpg-d4n1gimuk2gs739dv9ug-a
+2025-12-02T21:36:35.079521094Z     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+2025-12-02T21:36:35.079526174Z   errno: -3008,
+2025-12-02T21:36:35.079531354Z   code: 'ENOTFOUND',
+2025-12-02T21:36:35.079536504Z   syscall: 'getaddrinfo',
+2025-12-02T21:36:35.079541634Z   hostname: 'dpg-d4n1gimuk2gs739dv9ug-a'
+2025-12-02T21:36:35.079546434Z }
+2025-12-02T21:36:35.080225779Z 9:36:35 PM [express] GET /api/games/current 500 in 4ms :: {"message":"Failed to fetch games"}
+2025-12-02T21:36:35.0834587Z Error fetching news: Error: getaddrinfo ENOTFOUND dpg-d4n1gimuk2gs739dv9ug-a
+2025-12-02T21:36:35.08347077Z     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+2025-12-02T21:36:35.08348574Z   errno: -3008,
+2025-12-02T21:36:35.08348861Z   code: 'ENOTFOUND',
+2025-12-02T21:36:35.08349077Z   syscall: 'getaddrinfo',
+2025-12-02T21:36:35.08349308Z   hostname: 'dpg-d4n1gimuk2gs739dv9ug-a'
+2025-12-02T21:36:35.08349493Z }
+2025-12-02T21:36:35.084224106Z 9:36:35 PM [express] GET /api/news 500 in 3ms :: {"message":"Failed to fetch news"}
