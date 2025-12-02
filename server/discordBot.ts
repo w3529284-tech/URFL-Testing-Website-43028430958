@@ -191,7 +191,7 @@ export async function startDiscordBot() {
     ],
   });
   
-  client.on('ready', () => {
+  client.on('clientReady', () => {
     console.log(`Discord bot logged in as ${client.user?.tag}`);
   });
   
