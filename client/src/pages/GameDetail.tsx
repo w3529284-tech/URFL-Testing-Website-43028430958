@@ -14,7 +14,7 @@ import { TEAMS } from "@/lib/teams";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { calculateWinProbability } from "@/lib/winProbability";
+import { calculateWinProbability, getWinProbabilityFactors } from "@/lib/winProbability";
 
 export default function GameDetail() {
   const [, params] = useRoute("/game/:id");
@@ -459,6 +459,59 @@ export default function GameDetail() {
                       <p className="text-xs text-muted-foreground text-center mt-3 pt-2 border-t">
                         {game.isLive ? `Updated live during ${game.quarter}` : 'Based on ranking, record, point differential & schedule strength'}
                       </p>
+                      
+                      {(() => {
+                        const factorData = getWinProbabilityFactors(game, standings, allGames);
+                        if (!factorData) return null;
+                        
+                        return (
+                          <div className="mt-4 pt-4 border-t space-y-2">
+                            <p className="text-xs font-semibold text-muted-foreground mb-2">Factor Breakdown:</p>
+                            
+                            <div className="grid grid-cols-3 gap-2 text-xs">
+                              <div className="text-left font-medium">Factor</div>
+                              <div className="text-center font-medium">{game.team1}</div>
+                              <div className="text-center font-medium">{game.team2}</div>
+                              
+                              <div className="text-left text-muted-foreground">Ranking</div>
+                              <div className={`text-center ${factorData.factors.ranking.advantage === game.team1 ? 'text-primary font-semibold' : ''}`}>
+                                #{factorData.factors.ranking.team1Rank}
+                              </div>
+                              <div className={`text-center ${factorData.factors.ranking.advantage === game.team2 ? 'text-primary font-semibold' : ''}`}>
+                                #{factorData.factors.ranking.team2Rank}
+                              </div>
+                              
+                              <div className="text-left text-muted-foreground">Record</div>
+                              <div className={`text-center ${factorData.factors.record.advantage === game.team1 ? 'text-primary font-semibold' : ''}`}>
+                                {factorData.factors.record.team1Record}
+                              </div>
+                              <div className={`text-center ${factorData.factors.record.advantage === game.team2 ? 'text-primary font-semibold' : ''}`}>
+                                {factorData.factors.record.team2Record}
+                              </div>
+                              
+                              <div className="text-left text-muted-foreground">Point Diff</div>
+                              <div className={`text-center ${factorData.factors.pointDiff.advantage === game.team1 ? 'text-primary font-semibold' : ''}`}>
+                                {factorData.factors.pointDiff.team1PD > 0 ? '+' : ''}{factorData.factors.pointDiff.team1PD}
+                              </div>
+                              <div className={`text-center ${factorData.factors.pointDiff.advantage === game.team2 ? 'text-primary font-semibold' : ''}`}>
+                                {factorData.factors.pointDiff.team2PD > 0 ? '+' : ''}{factorData.factors.pointDiff.team2PD}
+                              </div>
+                              
+                              <div className="text-left text-muted-foreground">Schedule</div>
+                              <div className={`text-center ${factorData.factors.schedule.advantage === game.team1 ? 'text-primary font-semibold' : ''}`}>
+                                {factorData.factors.schedule.team1SOS}%
+                              </div>
+                              <div className={`text-center ${factorData.factors.schedule.advantage === game.team2 ? 'text-primary font-semibold' : ''}`}>
+                                {factorData.factors.schedule.team2SOS}%
+                              </div>
+                            </div>
+                            
+                            <p className="text-xs text-muted-foreground italic mt-2">
+                              Bold = Advantage in that factor
+                            </p>
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })()}
