@@ -54,6 +54,10 @@ export default function GameDetail() {
     queryKey: ["/api/standings"],
   });
 
+  const { data: allGames } = useQuery<Game[]>({
+    queryKey: ["/api/games"],
+  });
+
   const voteMutation = useMutation({
     mutationFn: async (teamVote: string) => {
       return await apiRequest("POST", "/api/predictions", {
@@ -385,9 +389,6 @@ export default function GameDetail() {
                   
                   const team1PD = team1Standing?.pointDifferential || 0;
                   const team2PD = team2Standing?.pointDifferential || 0;
-                  
-                  // Get all games for schedule strength calculation
-                  const allGames = standings ? [] : undefined;
                   
                   // Calculate dynamic win probability using all factors
                   const team1Percent = calculateWinProbability(game, "team1", standings, allGames);
