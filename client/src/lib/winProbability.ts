@@ -54,15 +54,16 @@ function calculateScheduleStrength(
   games: Game[],
   standings: Standings[]
 ): number {
-  const completedGames = games.filter(
-    g => g.isFinal && (g.team1 === teamName || g.team2 === teamName)
+  // Include both completed and upcoming games to calculate schedule strength
+  const relevantGames = games.filter(
+    g => g.team1 === teamName || g.team2 === teamName
   );
 
-  if (completedGames.length === 0) return -1; // Return -1 to indicate no data
+  if (relevantGames.length === 0) return -1; // Return -1 to indicate no data
 
   let totalOpponentWinPct = 0;
 
-  completedGames.forEach(game => {
+  relevantGames.forEach(game => {
     const opponent = game.team1 === teamName ? game.team2 : game.team1;
     const opponentStanding = standings.find(s => s.team === opponent);
 
@@ -81,7 +82,7 @@ function calculateScheduleStrength(
     }
   });
 
-  return totalOpponentWinPct / completedGames.length;
+  return totalOpponentWinPct / relevantGames.length;
 }
 
 function analyzeTeam(
