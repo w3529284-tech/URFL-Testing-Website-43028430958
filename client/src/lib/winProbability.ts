@@ -54,16 +54,15 @@ function calculateScheduleStrength(
   games: Game[],
   standings: Standings[]
 ): number {
-  // Include both completed and upcoming games to calculate schedule strength
-  const relevantGames = games.filter(
-    g => g.team1 === teamName || g.team2 === teamName
+  // First try to calculate from completed games
+  const completedGames = games.filter(
+    g => g.isFinal && (g.team1 === teamName || g.team2 === teamName)
   );
 
-  // If we have games, calculate SOS from them
-  if (relevantGames.length > 0) {
+  if (completedGames.length > 0) {
     let totalOpponentWinPct = 0;
 
-    relevantGames.forEach(game => {
+    completedGames.forEach(game => {
       const opponent = game.team1 === teamName ? game.team2 : game.team1;
       const opponentStanding = standings.find(s => s.team === opponent);
 
@@ -82,22 +81,40 @@ function calculateScheduleStrength(
       }
     });
 
-    return totalOpponentWinPct / relevantGames.length;
+    return totalOpponentWinPct / completedGames.length;
   }
 
-  // If no games in array, use average league strength as fallback
-  // This allows scheduled games to show a default SOS even before games are in the array
-  const teamsWithGames = standings.filter(s => (s.wins || 0) + (s.losses || 0) > 0);
-  if (teamsWithGames.length === 0) {
-    return 0.5; // Default to 50% if no teams have played
+  // If no completed games, try upcoming/scheduled games
+  const allRelevantGames = games.filter(
+    g => g.team1 === teamName || g.team2 === teamName
+  );
+
+  if (allRelevantGames.length > 0) {
+    let totalOpponentWinPct = 0;
+
+    allRelevantGames.forEach(game => {
+      const opponent = game.team1 === teamName ? game.team2 : game.team1;
+      const opponentStanding = standings.find(s => s.team === opponent);
+
+      if (opponentStanding) {
+        const wins = opponentStanding.wins || 0;
+        const losses = opponentStanding.losses || 0;
+        const totalGames = wins + losses;
+
+        if (totalGames > 0) {
+          totalOpponentWinPct += wins / totalGames;
+        } else {
+          totalOpponentWinPct += 0.5;
+        }
+      } else {
+        totalOpponentWinPct += 0.5;
+      }
+    });
+
+    return totalOpponentWinPct / allRelevantGames.length;
   }
 
-  const avgWinPct = teamsWithGames.reduce(
-    (sum, s) => sum + ((s.wins || 0) / ((s.wins || 0) + (s.losses || 0))),
-    0
-  ) / teamsWithGames.length;
-
-  return isNaN(avgWinPct) ? 0.5 : avgWinPct;
+  return -1; // Return -1 to indicate no data
 }
 
 function analyzeTeam(
