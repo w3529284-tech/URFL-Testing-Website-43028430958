@@ -153,11 +153,11 @@ export function calculateWinProbability(
   const hasGames2 = team2Analysis.totalGamesPlayed > 0;
 
   if (hasGames1 && hasGames2) {
-    // More balanced weights
-    probability += rankingImpact * 0.35;
-    probability += recordImpact * 0.30;
-    probability += pdImpact * 0.25;
-    probability += sosImpact * 0.10;
+    // Balanced weights with stronger schedule strength impact
+    probability += rankingImpact * 0.30;
+    probability += recordImpact * 0.25;
+    probability += pdImpact * 0.20;
+    probability += sosImpact * 0.25;
   } else if (hasGames1 || hasGames2) {
     probability += rankingImpact * 0.40;
     probability += pdImpact * 0.30;
