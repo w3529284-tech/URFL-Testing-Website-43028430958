@@ -59,7 +59,20 @@ function calculateScheduleStrength(
     g => g.team1 === teamName || g.team2 === teamName
   );
 
-  if (relevantGames.length === 0) return -1; // Return -1 to indicate no data
+  // If no games in the array but team exists in standings, return based on standings only
+  if (relevantGames.length === 0) {
+    // Check if team has a standing (meaning they have played or will play games)
+    const teamStanding = standings.find(s => s.team === teamName);
+    if (teamStanding && (teamStanding.wins || 0) + (teamStanding.losses || 0) === 0) {
+      // Team exists but hasn't played any games - use average strength
+      const avgWinPct = standings
+        .filter(s => (s.wins || 0) + (s.losses || 0) > 0)
+        .reduce((sum, s) => sum + ((s.wins || 0) / ((s.wins || 0) + (s.losses || 0))), 0) / 
+        standings.filter(s => (s.wins || 0) + (s.losses || 0) > 0).length;
+      return isNaN(avgWinPct) ? 0.5 : avgWinPct;
+    }
+    return -1; // Return -1 to indicate no data
+  }
 
   let totalOpponentWinPct = 0;
 
