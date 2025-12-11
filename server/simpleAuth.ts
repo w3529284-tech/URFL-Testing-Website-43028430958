@@ -1,9 +1,43 @@
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
+import { storage } from "./storage";
 
-const ADMIN_USERNAME = "popfork1";
-const ADMIN_PASSWORD = "dairyqueen12";
+interface AdminCredentials {
+  username: string;
+  password: string;
+  role: "admin" | "streamer";
+}
+
+function getAdminCredentials(): AdminCredentials[] {
+  const credentials: AdminCredentials[] = [];
+  
+  if (process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD) {
+    credentials.push({
+      username: process.env.ADMIN_USERNAME,
+      password: process.env.ADMIN_PASSWORD,
+      role: "admin"
+    });
+  }
+  
+  if (process.env.STREAMER1_USERNAME && process.env.STREAMER1_PASSWORD) {
+    credentials.push({
+      username: process.env.STREAMER1_USERNAME,
+      password: process.env.STREAMER1_PASSWORD,
+      role: "streamer"
+    });
+  }
+  
+  if (process.env.STREAMER2_USERNAME && process.env.STREAMER2_PASSWORD) {
+    credentials.push({
+      username: process.env.STREAMER2_USERNAME,
+      password: process.env.STREAMER2_PASSWORD,
+      role: "streamer"
+    });
+  }
+  
+  return credentials;
+}
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000;
@@ -31,11 +65,30 @@ export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
 
-  app.post("/api/login", (req, res) => {
+  app.post("/api/login", async (req, res) => {
     const { username, password } = req.body;
+    const credentials = getAdminCredentials();
+    
+    const matchedUser = credentials.find(
+      c => c.username === username && c.password === password
+    );
 
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    if (matchedUser) {
+      const userId = `user_${matchedUser.username}`;
+      
+      await storage.upsertUser({
+        id: userId,
+        email: `${matchedUser.username}@urfl.com`,
+        firstName: matchedUser.username,
+        lastName: "",
+        role: matchedUser.role,
+      });
+      
       (req.session as any).authenticated = true;
+      (req.session as any).userId = userId;
+      (req.session as any).username = matchedUser.username;
+      (req.session as any).role = matchedUser.role;
+      
       res.json({ success: true });
     } else {
       res.status(401).json({ message: "Invalid credentials" });
@@ -48,9 +101,31 @@ export async function setupAuth(app: Express) {
     });
   });
 
-  app.get("/api/auth/user", (req, res) => {
+  app.get("/api/auth/user", async (req, res) => {
     if ((req.session as any).authenticated) {
-      res.json({ authenticated: true });
+      const userId = (req.session as any).userId;
+      const username = (req.session as any).username;
+      const role = (req.session as any).role;
+      
+      let user = await storage.getUser(userId);
+      if (!user) {
+        user = await storage.upsertUser({
+          id: userId,
+          email: `${username}@urfl.com`,
+          firstName: username,
+          lastName: "",
+          role: role,
+        });
+      }
+      
+      res.json({ 
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role || role,
+        authenticated: true 
+      });
     } else {
       res.status(401).json({ message: "Unauthorized" });
     }

@@ -30,6 +30,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  role: varchar("role", { length: 20 }).default("admin"), // "admin" = full access, "streamer" = stream links only
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -50,6 +51,7 @@ export const games = pgTable("games", {
   location: varchar("location", { length: 200 }),
   isFinal: boolean("is_final").default(false),
   isLive: boolean("is_live").default(false),
+  streamLink: text("stream_link"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -233,3 +235,23 @@ export const insertBracketImageSchema = createInsertSchema(bracketImages).omit({
 
 export type InsertBracketImage = z.infer<typeof insertBracketImageSchema>;
 export type BracketImage = typeof bracketImages.$inferSelect;
+
+// Stream requests table (for streamer approval workflow)
+export const streamRequests = pgTable("stream_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  gameId: varchar("game_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  streamLink: text("stream_link"),
+  status: varchar("status", { length: 20 }).default("pending"), // "pending", "approved", "rejected"
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertStreamRequestSchema = createInsertSchema(streamRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertStreamRequest = z.infer<typeof insertStreamRequestSchema>;
+export type StreamRequest = typeof streamRequests.$inferSelect;

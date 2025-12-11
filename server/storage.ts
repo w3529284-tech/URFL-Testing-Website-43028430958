@@ -10,6 +10,7 @@ import {
   changelogs,
   predictions,
   bracketImages,
+  streamRequests,
   type User,
   type UpsertUser,
   type Game,
@@ -32,6 +33,8 @@ import {
   type InsertPrediction,
   type BracketImage,
   type InsertBracketImage,
+  type StreamRequest,
+  type InsertStreamRequest,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -82,6 +85,16 @@ export interface IStorage {
   
   getBracketImage(): Promise<BracketImage | undefined>;
   upsertBracketImage(image: InsertBracketImage): Promise<BracketImage>;
+  
+  getAllStreamRequests(): Promise<StreamRequest[]>;
+  getStreamRequestsByUser(userId: string): Promise<StreamRequest[]>;
+  getStreamRequestsByGame(gameId: string): Promise<StreamRequest[]>;
+  createStreamRequest(request: InsertStreamRequest): Promise<StreamRequest>;
+  updateStreamRequest(id: string, request: Partial<StreamRequest>): Promise<StreamRequest>;
+  deleteStreamRequest(id: string): Promise<void>;
+  
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(id: string, role: string): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -317,6 +330,49 @@ export class DatabaseStorage implements IStorage {
     }
     const [created] = await db.insert(bracketImages).values(imageData).returning();
     return created;
+  }
+
+  async getAllStreamRequests(): Promise<StreamRequest[]> {
+    return await db.select().from(streamRequests).orderBy(desc(streamRequests.createdAt));
+  }
+
+  async getStreamRequestsByUser(userId: string): Promise<StreamRequest[]> {
+    return await db.select().from(streamRequests).where(eq(streamRequests.userId, userId)).orderBy(desc(streamRequests.createdAt));
+  }
+
+  async getStreamRequestsByGame(gameId: string): Promise<StreamRequest[]> {
+    return await db.select().from(streamRequests).where(eq(streamRequests.gameId, gameId)).orderBy(desc(streamRequests.createdAt));
+  }
+
+  async createStreamRequest(requestData: InsertStreamRequest): Promise<StreamRequest> {
+    const [request] = await db.insert(streamRequests).values(requestData).returning();
+    return request;
+  }
+
+  async updateStreamRequest(id: string, requestData: Partial<StreamRequest>): Promise<StreamRequest> {
+    const [request] = await db
+      .update(streamRequests)
+      .set({ ...requestData, updatedAt: new Date() })
+      .where(eq(streamRequests.id, id))
+      .returning();
+    return request;
+  }
+
+  async deleteStreamRequest(id: string): Promise<void> {
+    await db.delete(streamRequests).where(eq(streamRequests.id, id));
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.createdAt);
+  }
+
+  async updateUserRole(id: string, role: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ role, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
   }
 }
 

@@ -14,24 +14,13 @@ import {
   insertChangelogSchema,
   insertPredictionSchema,
   insertBracketImageSchema,
+  insertStreamRequestSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      let user = await storage.getUser(userId);
-      if (!user) {
-        user = await storage.upsertUser({ id: userId });
-      }
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Note: /api/auth/user is handled in simpleAuth.ts
 
   app.get("/api/games/all", async (req, res) => {
     try {
@@ -419,6 +408,159 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating prediction:", error);
       res.status(400).json({ message: "Failed to create prediction" });
+    }
+  });
+
+  // Stream requests endpoints
+  app.get("/api/stream-requests", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const role = req.session?.role;
+      
+      // Full admins can see all requests, streamers can only see their own
+      if (role === "admin") {
+        const requests = await storage.getAllStreamRequests();
+        res.json(requests);
+      } else {
+        const requests = await storage.getStreamRequestsByUser(userId);
+        res.json(requests);
+      }
+    } catch (error) {
+      console.error("Error fetching stream requests:", error);
+      res.status(500).json({ message: "Failed to fetch stream requests" });
+    }
+  });
+
+  app.get("/api/stream-requests/game/:gameId", async (req, res) => {
+    try {
+      const requests = await storage.getStreamRequestsByGame(req.params.gameId);
+      // Only return approved requests with stream links for public view
+      const approved = requests.filter(r => r.status === "approved" && r.streamLink);
+      res.json(approved);
+    } catch (error) {
+      console.error("Error fetching stream requests for game:", error);
+      res.status(500).json({ message: "Failed to fetch stream requests" });
+    }
+  });
+
+  app.post("/api/stream-requests", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User not identified" });
+      }
+      
+      const requestData = insertStreamRequestSchema.parse({
+        ...req.body,
+        userId,
+        status: "pending",
+      });
+      const request = await storage.createStreamRequest(requestData);
+      res.json(request);
+    } catch (error) {
+      console.error("Error creating stream request:", error);
+      res.status(400).json({ message: "Failed to create stream request" });
+    }
+  });
+
+  app.patch("/api/stream-requests/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const role = req.session?.role;
+      
+      // Only full admins can approve/reject, or the owner can update stream link
+      const allRequests = await storage.getAllStreamRequests();
+      const existingRequest = allRequests.find(r => r.id === req.params.id);
+      
+      if (!existingRequest) {
+        return res.status(404).json({ message: "Stream request not found" });
+      }
+      
+      // Admin can approve/reject and update anything
+      if (role === "admin") {
+        const request = await storage.updateStreamRequest(req.params.id, req.body);
+        
+        // If approved and has stream link, update game
+        if (req.body.status === "approved" && (req.body.streamLink || existingRequest.streamLink)) {
+          await storage.updateGame(existingRequest.gameId, { 
+            streamLink: req.body.streamLink || existingRequest.streamLink 
+          });
+        }
+        
+        return res.json(request);
+      }
+      
+      // Streamer can only update their own approved requests (add stream link)
+      if (existingRequest.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized" });
+      }
+      if (existingRequest.status !== "approved") {
+        return res.status(403).json({ message: "Can only update approved requests" });
+      }
+      // Streamers can only update the stream link
+      const { streamLink } = req.body;
+      const request = await storage.updateStreamRequest(req.params.id, { streamLink });
+      
+      // Also update the game's stream link
+      if (streamLink) {
+        await storage.updateGame(existingRequest.gameId, { streamLink });
+      }
+      
+      res.json(request);
+    } catch (error) {
+      console.error("Error updating stream request:", error);
+      res.status(400).json({ message: "Failed to update stream request" });
+    }
+  });
+
+  app.delete("/api/stream-requests/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const role = req.session?.role;
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can delete stream requests" });
+      }
+      
+      await storage.deleteStreamRequest(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting stream request:", error);
+      res.status(400).json({ message: "Failed to delete stream request" });
+    }
+  });
+
+  // User management endpoints (admin only)
+  app.get("/api/users", isAuthenticated, async (req: any, res) => {
+    try {
+      const role = req.session?.role;
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can view users" });
+      }
+      
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.patch("/api/users/:id/role", isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionRole = req.session?.role;
+      if (sessionRole !== "admin") {
+        return res.status(403).json({ message: "Only admins can change roles" });
+      }
+      
+      const { role } = req.body;
+      if (!["admin", "streamer"].includes(role)) {
+        return res.status(400).json({ message: "Invalid role" });
+      }
+      
+      const user = await storage.updateUserRole(req.params.id, role);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(400).json({ message: "Failed to update user role" });
     }
   });
 

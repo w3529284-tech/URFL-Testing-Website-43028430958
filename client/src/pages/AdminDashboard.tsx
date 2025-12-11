@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Game, News as NewsType, Pickem, PickemRules, Changelog, InsertChangelog } from "@shared/schema";
+import type { Game, News as NewsType, Pickem, PickemRules, Changelog, InsertChangelog, StreamRequest, User } from "@shared/schema";
 import { format } from "date-fns";
 import { Plus, Trash2, Edit, Save } from "lucide-react";
 
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
       </h1>
 
       <Tabs defaultValue="games" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-9">
           <TabsTrigger value="games" data-testid="tab-games">Games</TabsTrigger>
           <TabsTrigger value="scores" data-testid="tab-scores">Scores</TabsTrigger>
           <TabsTrigger value="news" data-testid="tab-news">News</TabsTrigger>
@@ -81,6 +81,8 @@ export default function AdminDashboard() {
           <TabsTrigger value="rules" data-testid="tab-rules">Rules</TabsTrigger>
           <TabsTrigger value="bracket" data-testid="tab-bracket">Bracket</TabsTrigger>
           <TabsTrigger value="changelogs" data-testid="tab-changelogs">Changelogs</TabsTrigger>
+          <TabsTrigger value="streams" data-testid="tab-streams">Streams</TabsTrigger>
+          <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
         </TabsList>
 
         <TabsContent value="games">
@@ -109,6 +111,14 @@ export default function AdminDashboard() {
 
         <TabsContent value="changelogs">
           <ChangelogManager />
+        </TabsContent>
+
+        <TabsContent value="streams">
+          <StreamRequestsManager />
+        </TabsContent>
+
+        <TabsContent value="users">
+          <UsersManager />
         </TabsContent>
       </Tabs>
     </div>
@@ -1287,6 +1297,227 @@ function BracketManager() {
               </div>
             )}
           </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function StreamRequestsManager() {
+  const { toast } = useToast();
+
+  const { data: streamRequests = [], refetch } = useQuery<StreamRequest[]>({
+    queryKey: ["/api/stream-requests"],
+  });
+
+  const { data: games = [] } = useQuery<Game[]>({
+    queryKey: ["/api/games/all"],
+  });
+
+  const { data: users = [] } = useQuery<User[]>({
+    queryKey: ["/api/users"],
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, status, streamLink }: { id: string; status: string; streamLink?: string }) => {
+      const res = await apiRequest("PATCH", `/api/stream-requests/${id}`, { status, streamLink });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/stream-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/games"] });
+      toast({ title: "Success", description: "Stream request updated" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update stream request", variant: "destructive" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/stream-requests/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/stream-requests"] });
+      toast({ title: "Success", description: "Stream request deleted" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete stream request", variant: "destructive" });
+    },
+  });
+
+  const getGameInfo = (gameId: string) => {
+    const game = games.find(g => g.id === gameId);
+    return game ? `${game.team1} vs ${game.team2} (Week ${game.week})` : gameId;
+  };
+
+  const getUserInfo = (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || userId : userId;
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-4">Stream Requests</h2>
+          <p className="text-muted-foreground mb-4">
+            Manage streaming requests from secondary admin accounts. Approve requests to allow streamers to post their stream links.
+          </p>
+          
+          {streamRequests.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No stream requests yet</p>
+          ) : (
+            <div className="space-y-4">
+              {streamRequests.map((request) => (
+                <div 
+                  key={request.id} 
+                  className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                >
+                  <div className="space-y-1">
+                    <p className="font-semibold">{getGameInfo(request.gameId)}</p>
+                    <p className="text-sm text-muted-foreground">Requested by: {getUserInfo(request.userId)}</p>
+                    {request.streamLink && (
+                      <a 
+                        href={request.streamLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        {request.streamLink}
+                      </a>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {request.createdAt ? format(new Date(request.createdAt), "MMM d, yyyy 'at' h:mm a") : ''}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Badge 
+                      variant={
+                        request.status === "approved" ? "default" : 
+                        request.status === "rejected" ? "destructive" : 
+                        "secondary"
+                      }
+                      className={request.status === "approved" ? "bg-green-600" : ""}
+                    >
+                      {request.status}
+                    </Badge>
+                    
+                    {request.status === "pending" && (
+                      <>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => updateMutation.mutate({ id: request.id, status: "approved" })}
+                          disabled={updateMutation.isPending}
+                        >
+                          Approve
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => updateMutation.mutate({ id: request.id, status: "rejected" })}
+                          disabled={updateMutation.isPending}
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                    
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => deleteMutation.mutate(request.id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function UsersManager() {
+  const { toast } = useToast();
+
+  const { data: users = [], refetch } = useQuery<User[]>({
+    queryKey: ["/api/users"],
+  });
+
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ id, role }: { id: string; role: string }) => {
+      const res = await apiRequest("PATCH", `/api/users/${id}/role`, { role });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      toast({ title: "Success", description: "User role updated" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update user role", variant: "destructive" });
+    },
+  });
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-4">User Management</h2>
+          <p className="text-muted-foreground mb-4">
+            Manage user roles. <strong>Admin</strong> users have full access. <strong>Streamer</strong> users can only request and post stream links.
+          </p>
+          
+          {users.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No users found</p>
+          ) : (
+            <div className="space-y-4">
+              {users.map((user) => (
+                <div 
+                  key={user.id} 
+                  className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                >
+                  <div className="space-y-1">
+                    <p className="font-semibold">
+                      {user.firstName || user.lastName 
+                        ? `${user.firstName || ''} ${user.lastName || ''}`.trim() 
+                        : 'Unknown User'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">{user.email || 'No email'}</p>
+                    <p className="text-xs text-muted-foreground">ID: {user.id}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <Select 
+                      value={user.role || "admin"} 
+                      onValueChange={(role) => updateRoleMutation.mutate({ id: user.id, role })}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="streamer">Streamer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Badge 
+                      variant={user.role === "admin" ? "default" : "secondary"}
+                    >
+                      {user.role || "admin"}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </Card>
     </div>

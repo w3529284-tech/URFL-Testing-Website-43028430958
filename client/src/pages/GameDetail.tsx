@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChatComponent } from "@/components/ChatComponent";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Game, ChatMessage, Prediction, Standings } from "@shared/schema";
+import type { Game, ChatMessage, Prediction, Standings, StreamRequest, User } from "@shared/schema";
 import { formatInTimeZone } from "date-fns-tz";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { ArrowLeft, AlertCircle, Video, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { TEAMS } from "@/lib/teams";
@@ -15,15 +15,19 @@ import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateWinProbability, getWinProbabilityFactors } from "@/lib/winProbability";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 export default function GameDetail() {
   const [, params] = useRoute("/game/:id");
   const gameId = params?.id;
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [celebrationTriggered, setCelebrationTriggered] = useState(false);
+  const [streamLinkInput, setStreamLinkInput] = useState("");
   const wsRef = useRef<WebSocket | null>(null);
   const confettiTimeoutsRef = useRef<number[]>([]);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const { data: game, isLoading: gameLoading, error: gameError, refetch } = useQuery<Game>({
     queryKey: ["/api/games", gameId],
@@ -56,6 +60,54 @@ export default function GameDetail() {
 
   const { data: allGames } = useQuery<Game[]>({
     queryKey: ["/api/games/all"],
+  });
+
+  const { data: streamRequests, refetch: refetchStreamRequests } = useQuery<StreamRequest[]>({
+    queryKey: ["/api/stream-requests/game", gameId],
+    enabled: !!gameId,
+  });
+
+  const { data: currentUser } = useQuery<User>({
+    queryKey: ["/api/auth/user"],
+    enabled: !!user,
+    retry: false,
+  });
+
+  const { data: myStreamRequests } = useQuery<StreamRequest[]>({
+    queryKey: ["/api/stream-requests"],
+    enabled: !!user,
+    retry: false,
+  });
+
+  const requestStreamMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/stream-requests", {
+        gameId: gameId,
+      });
+    },
+    onSuccess: () => {
+      toast({ title: "Stream request submitted", description: "Waiting for admin approval" });
+      queryClient.invalidateQueries({ queryKey: ["/api/stream-requests"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to submit stream request", variant: "destructive" });
+    },
+  });
+
+  const updateStreamLinkMutation = useMutation({
+    mutationFn: async ({ requestId, streamLink }: { requestId: string; streamLink: string }) => {
+      return await apiRequest("PATCH", `/api/stream-requests/${requestId}`, { streamLink });
+    },
+    onSuccess: () => {
+      toast({ title: "Stream link updated", description: "Your stream link is now live!" });
+      setStreamLinkInput("");
+      refetch();
+      refetchStreamRequests();
+      queryClient.invalidateQueries({ queryKey: ["/api/stream-requests"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update stream link", variant: "destructive" });
+    },
   });
 
   const voteMutation = useMutation({
@@ -378,6 +430,100 @@ export default function GameDetail() {
                 </p>
               </div>
             )}
+
+            {/* Stream Link Section */}
+            <div className="pt-4 border-t">
+              <div className="flex items-center gap-2 mb-3">
+                <Video className="w-5 h-5 text-primary" />
+                <span className="font-semibold">Watch Live</span>
+              </div>
+              
+              {game.streamLink ? (
+                <a 
+                  href={game.streamLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Watch Stream
+                </a>
+              ) : (
+                <p className="text-sm text-muted-foreground mb-3">No stream available yet</p>
+              )}
+
+              {/* Streamer controls - show if user is logged in and is a streamer/admin */}
+              {currentUser && (currentUser.role === "streamer" || currentUser.role === "admin") && (
+                <div className="mt-3 pt-3 border-t">
+                  {(() => {
+                    const myRequest = myStreamRequests?.find(r => r.gameId === gameId);
+                    
+                    if (!myRequest) {
+                      return (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => requestStreamMutation.mutate()}
+                          disabled={requestStreamMutation.isPending}
+                        >
+                          Request to Stream This Game
+                        </Button>
+                      );
+                    }
+                    
+                    if (myRequest.status === "pending") {
+                      return (
+                        <div className="text-sm">
+                          <Badge variant="secondary">Pending Approval</Badge>
+                          <p className="text-muted-foreground mt-1">Your stream request is awaiting admin approval</p>
+                        </div>
+                      );
+                    }
+                    
+                    if (myRequest.status === "rejected") {
+                      return (
+                        <div className="text-sm">
+                          <Badge variant="destructive">Request Rejected</Badge>
+                        </div>
+                      );
+                    }
+                    
+                    if (myRequest.status === "approved") {
+                      return (
+                        <div className="space-y-2">
+                          <Badge variant="default" className="bg-green-600">Approved</Badge>
+                          <div className="flex gap-2">
+                            <Input 
+                              placeholder="Enter your stream link..."
+                              value={streamLinkInput}
+                              onChange={(e) => setStreamLinkInput(e.target.value)}
+                              className="flex-1"
+                            />
+                            <Button 
+                              size="sm"
+                              onClick={() => updateStreamLinkMutation.mutate({ 
+                                requestId: myRequest.id, 
+                                streamLink: streamLinkInput 
+                              })}
+                              disabled={!streamLinkInput || updateStreamLinkMutation.isPending}
+                            >
+                              Post Link
+                            </Button>
+                          </div>
+                          {myRequest.streamLink && (
+                            <p className="text-xs text-muted-foreground">
+                              Current link: {myRequest.streamLink}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    }
+                    
+                    return null;
+                  })()}
+                </div>
+              )}
+            </div>
 
             {!game.isFinal && (isScheduled || game.isLive) && (
               <div className="pt-4 border-t">
