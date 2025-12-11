@@ -269,13 +269,26 @@ export function getWinProbabilityFactors(
         advantage: team1Analysis.pointDifferential > team2Analysis.pointDifferential ? game.team1 :
                    team2Analysis.pointDifferential > team1Analysis.pointDifferential ? game.team2 : "Even"
       },
-      schedule: {
-        team1SOS: team1Analysis.scheduleStrength >= 0 ? Math.round(team1Analysis.scheduleStrength * 100) : -1,
-        team2SOS: team2Analysis.scheduleStrength >= 0 ? Math.round(team2Analysis.scheduleStrength * 100) : -1,
-        advantage: team1Analysis.scheduleStrength >= 0 && team2Analysis.scheduleStrength >= 0 ?
-                   (team1Analysis.scheduleStrength > team2Analysis.scheduleStrength ? game.team1 :
-                    team2Analysis.scheduleStrength > team1Analysis.scheduleStrength ? game.team2 : "Even") : "Even"
-      }
+      schedule: (() => {
+        if (team1Analysis.scheduleStrength < 0 || team2Analysis.scheduleStrength < 0) {
+          return {
+            team1SOS: -1,
+            team2SOS: -1,
+            advantage: "Even"
+          };
+        }
+        
+        const totalSOS = team1Analysis.scheduleStrength + team2Analysis.scheduleStrength;
+        const team1SOS = totalSOS > 0 ? Math.round((team1Analysis.scheduleStrength / totalSOS) * 100) : 50;
+        const team2SOS = totalSOS > 0 ? Math.round((team2Analysis.scheduleStrength / totalSOS) * 100) : 50;
+        
+        return {
+          team1SOS,
+          team2SOS,
+          advantage: team1Analysis.scheduleStrength > team2Analysis.scheduleStrength ? game.team1 :
+                     team2Analysis.scheduleStrength > team1Analysis.scheduleStrength ? game.team2 : "Even"
+        };
+      })()
     }
   };
 }
