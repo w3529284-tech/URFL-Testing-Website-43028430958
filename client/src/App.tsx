@@ -91,14 +91,15 @@ function MainContent() {
   }
 
   const isAdmin = isAuthenticated && (user as any)?.role === "admin";
+  const showSidebar = !maintenanceMode || isAdmin;
 
   return (
     <div className="min-h-screen bg-background">
       <ChristmasDecorations />
-      <Sidebar />
+      {showSidebar && <Sidebar />}
       
       <main className={`min-h-screen pb-20 md:pb-0 transition-all duration-300 ${
-        collapsed ? 'md:ml-20' : 'md:ml-64'
+        showSidebar && !collapsed ? 'md:ml-64' : showSidebar && collapsed ? 'md:ml-20' : ''
       }`}>
         <Switch>
           <Route path="/" component={Landing} />

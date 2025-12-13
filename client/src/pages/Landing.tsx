@@ -8,9 +8,11 @@ import type { Game, News as NewsType } from "@shared/schema";
 import { useLocation, Link } from "wouter";
 import { ArrowRight, Trophy, Newspaper, Zap, Calendar, BarChart3, Target, Sparkles, Gift, Star, Snowflake, Wrench } from "lucide-react";
 import { format } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
+  const { user, isAuthenticated } = useAuth();
 
   const { data: games, isLoading: gamesLoading } = useQuery<Game[]>({
     queryKey: ["/api/games/current"],
@@ -24,14 +26,29 @@ export default function Landing() {
     queryKey: ["/api/settings/maintenance-mode"],
   });
 
+  const isAdmin = isAuthenticated && (user as any)?.role === "admin";
   const currentWeek = games && games.length > 0 ? games[0].week : 1;
   const featuredNews = news?.slice(0, 2) || [];
   const liveGames = games?.filter(g => g.isLive) || [];
   const upcomingGames = games?.filter(g => !g.isLive && !g.isFinal)?.slice(0, 3) || [];
 
+  if (maintenanceStatus?.enabled && !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="max-w-md w-full p-8 border-2 border-yellow-500/30 bg-yellow-500/5">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <Wrench className="w-16 h-16 text-yellow-600" />
+            <h1 className="text-3xl font-bold text-yellow-900">Under Maintenance</h1>
+            <p className="text-yellow-800">We're currently updating the website. Please check back soon!</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8">
-      {maintenanceStatus?.enabled && (
+      {maintenanceStatus?.enabled && isAdmin && (
         <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
           <div className="flex items-center gap-3">
             <Wrench className="w-5 h-5 text-yellow-600" />
