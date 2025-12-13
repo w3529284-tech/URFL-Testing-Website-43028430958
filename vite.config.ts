@@ -36,5 +36,11 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    hmr: {
+      host: "0.0.0.0",
+      port: 5173,
+      protocol: "ws",
+    },
+    allowedHosts: true,
   },
 });
