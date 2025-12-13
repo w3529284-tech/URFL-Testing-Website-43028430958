@@ -12,7 +12,6 @@ export const TEAMS = {
   "Minnesota Vikings": "https://a.espncdn.com/i/teamlogos/nfl/500/min.png",
   "Los Angeles Rams": "https://a.espncdn.com/i/teamlogos/nfl/500/lar.png",
   "Las Vegas Raiders": "https://a.espncdn.com/i/teamlogos/nfl/500/lv.png",
-  "Kansas City Chiefs": "https://a.espncdn.com/i/teamlogos/nfl/500/kc.png",
   "Indianapolis Colts": "https://a.espncdn.com/i/teamlogos/nfl/500/ind.png",
   "Houston Texans": "https://a.espncdn.com/i/teamlogos/nfl/500/hou.png",
   "Denver Broncos": "https://a.espncdn.com/i/teamlogos/nfl/500/den.png",
