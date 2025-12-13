@@ -77,27 +77,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/games/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/games/:id", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session?.userId;
-      const role = req.session?.role;
-      
-      // Admins can update any game
-      if (role === "admin") {
-        const game = await storage.updateGame(req.params.id, req.body);
-        return res.json(game);
-      }
-      
-      // Streamers can only update if they have an approved request for this game
-      const streamRequests = await storage.getStreamRequestsByGame(req.params.id);
-      const hasApprovedRequest = streamRequests.some(r => 
-        r.userId === userId && r.status === "approved"
-      );
-      
-      if (!hasApprovedRequest) {
-        return res.status(403).json({ message: "Not authorized to update this game" });
-      }
-      
       const game = await storage.updateGame(req.params.id, req.body);
       res.json(game);
     } catch (error) {

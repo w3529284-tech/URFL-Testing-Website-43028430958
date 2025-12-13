@@ -24,9 +24,6 @@ export default function GameDetail() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [celebrationTriggered, setCelebrationTriggered] = useState(false);
   const [streamLinkInput, setStreamLinkInput] = useState("");
-  const [quarterInput, setQuarterInput] = useState("");
-  const [team1ScoreInput, setTeam1ScoreInput] = useState("");
-  const [team2ScoreInput, setTeam2ScoreInput] = useState("");
   const wsRef = useRef<WebSocket | null>(null);
   const confettiTimeoutsRef = useRef<number[]>([]);
   const { user } = useAuth();
@@ -122,26 +119,6 @@ export default function GameDetail() {
     },
     onSuccess: () => {
       refetchPredictions();
-    },
-  });
-
-  const updateGameMutation = useMutation({
-    mutationFn: async ({ quarter, team1Score, team2Score }: { quarter: string; team1Score: number; team2Score: number }) => {
-      return await apiRequest("PATCH", `/api/games/${gameId}`, {
-        quarter,
-        team1Score,
-        team2Score,
-      });
-    },
-    onSuccess: () => {
-      toast({ title: "Game updated", description: "Score and quarter updated successfully!" });
-      setQuarterInput("");
-      setTeam1ScoreInput("");
-      setTeam2ScoreInput("");
-      refetch();
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to update game", variant: "destructive" });
     },
   });
 
@@ -513,79 +490,31 @@ export default function GameDetail() {
                     
                     if (myRequest.status === "approved") {
                       return (
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                           <Badge variant="default" className="bg-green-600">Approved</Badge>
-                          
-                          {/* Stream Link Controls */}
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Stream Link</label>
-                            <div className="flex gap-2">
-                              <Input 
-                                placeholder="Enter your stream link..."
-                                value={streamLinkInput}
-                                onChange={(e) => setStreamLinkInput(e.target.value)}
-                                className="flex-1"
-                              />
-                              <Button 
-                                size="sm"
-                                onClick={() => updateStreamLinkMutation.mutate({ 
-                                  requestId: myRequest.id, 
-                                  streamLink: streamLinkInput 
-                                })}
-                                disabled={!streamLinkInput || updateStreamLinkMutation.isPending}
-                              >
-                                Post Link
-                              </Button>
-                            </div>
-                            {myRequest.streamLink && (
-                              <p className="text-xs text-muted-foreground">
-                                Current link: {myRequest.streamLink}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Score & Quarter Controls */}
-                          <div className="space-y-2 pt-2 border-t">
-                            <label className="text-sm font-medium">Update Game Status</label>
-                            <div className="grid grid-cols-3 gap-2">
-                              <Input 
-                                placeholder="Quarter (e.g., Q1, Q2)"
-                                value={quarterInput}
-                                onChange={(e) => setQuarterInput(e.target.value)}
-                                className="flex-1"
-                              />
-                              <Input 
-                                placeholder={`${game.team1} Score`}
-                                type="number"
-                                value={team1ScoreInput}
-                                onChange={(e) => setTeam1ScoreInput(e.target.value)}
-                                className="flex-1"
-                              />
-                              <Input 
-                                placeholder={`${game.team2} Score`}
-                                type="number"
-                                value={team2ScoreInput}
-                                onChange={(e) => setTeam2ScoreInput(e.target.value)}
-                                className="flex-1"
-                              />
-                            </div>
+                          <div className="flex gap-2">
+                            <Input 
+                              placeholder="Enter your stream link..."
+                              value={streamLinkInput}
+                              onChange={(e) => setStreamLinkInput(e.target.value)}
+                              className="flex-1"
+                            />
                             <Button 
                               size="sm"
-                              onClick={() => {
-                                if (quarterInput && team1ScoreInput && team2ScoreInput) {
-                                  updateGameMutation.mutate({
-                                    quarter: quarterInput,
-                                    team1Score: parseInt(team1ScoreInput, 10),
-                                    team2Score: parseInt(team2ScoreInput, 10),
-                                  });
-                                }
-                              }}
-                              disabled={!quarterInput || !team1ScoreInput || !team2ScoreInput || updateGameMutation.isPending}
-                              className="w-full"
+                              onClick={() => updateStreamLinkMutation.mutate({ 
+                                requestId: myRequest.id, 
+                                streamLink: streamLinkInput 
+                              })}
+                              disabled={!streamLinkInput || updateStreamLinkMutation.isPending}
                             >
-                              Update Score
+                              Post Link
                             </Button>
                           </div>
+                          {myRequest.streamLink && (
+                            <p className="text-xs text-muted-foreground">
+                              Current link: {myRequest.streamLink}
+                            </p>
+                          )}
                         </div>
                       );
                     }
