@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./simpleAuth";
+import { isAuthenticated } from "./replitAuth";
 import {
   insertGameSchema,
   insertNewsSchema,
@@ -16,6 +16,7 @@ import {
   insertBracketImageSchema,
   insertStreamRequestSchema,
 } from "@shared/schema";
+import { setupAuth } from "./replitAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
