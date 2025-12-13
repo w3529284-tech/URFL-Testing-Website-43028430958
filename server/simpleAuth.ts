@@ -68,30 +68,44 @@ export async function setupAuth(app: Express) {
     const { username, password } = req.body;
     const credentials = getAdminCredentials();
     
-    const matchedUser = credentials.find(
+    const matchedEnvUser = credentials.find(
       c => c.username === username && c.password === password
     );
 
-    if (matchedUser) {
-      const userId = `user_${matchedUser.username}`;
+    if (matchedEnvUser) {
+      const userId = `user_${matchedEnvUser.username}`;
       
       await storage.upsertUser({
         id: userId,
-        email: `${matchedUser.username}@urfl.com`,
-        firstName: matchedUser.username,
+        username: matchedEnvUser.username,
+        password: matchedEnvUser.password,
+        email: `${matchedEnvUser.username}@urfl.com`,
+        firstName: matchedEnvUser.username,
         lastName: "",
-        role: matchedUser.role,
+        role: matchedEnvUser.role,
       });
       
       (req.session as any).authenticated = true;
       (req.session as any).userId = userId;
-      (req.session as any).username = matchedUser.username;
-      (req.session as any).role = matchedUser.role;
+      (req.session as any).username = matchedEnvUser.username;
+      (req.session as any).role = matchedEnvUser.role;
       
       res.json({ success: true });
-    } else {
-      res.status(401).json({ message: "Invalid credentials" });
+      return;
     }
+    
+    const dbUser = await storage.getUserByUsername(username);
+    if (dbUser && dbUser.password === password) {
+      (req.session as any).authenticated = true;
+      (req.session as any).userId = dbUser.id;
+      (req.session as any).username = dbUser.username;
+      (req.session as any).role = dbUser.role || "streamer";
+      
+      res.json({ success: true });
+      return;
+    }
+    
+    res.status(401).json({ message: "Invalid credentials" });
   });
 
   app.get("/api/logout", (req, res) => {

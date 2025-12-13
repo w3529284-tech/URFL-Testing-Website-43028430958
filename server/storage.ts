@@ -95,6 +95,9 @@ export interface IStorage {
   
   getAllUsers(): Promise<User[]>;
   updateUserRole(id: string, role: string): Promise<User>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUserWithPassword(username: string, password: string, role: string): Promise<User>;
+  deleteUser(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -373,6 +376,27 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUserWithPassword(username: string, password: string, role: string): Promise<User> {
+    const [user] = await db.insert(users).values({
+      username,
+      password,
+      email: `${username}@urfl.com`,
+      firstName: username,
+      lastName: "",
+      role,
+    }).returning();
+    return user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
   }
 }
 

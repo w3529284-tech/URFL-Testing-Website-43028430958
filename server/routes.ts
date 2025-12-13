@@ -564,6 +564,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/users", isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionRole = req.session?.role;
+      if (sessionRole !== "admin") {
+        return res.status(403).json({ message: "Only admins can create users" });
+      }
+      
+      const { username, password, role } = req.body;
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+      if (!["admin", "streamer"].includes(role)) {
+        return res.status(400).json({ message: "Invalid role" });
+      }
+      
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      
+      const user = await storage.createUserWithPassword(username, password, role);
+      res.json(user);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(400).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.delete("/api/users/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionRole = req.session?.role;
+      if (sessionRole !== "admin") {
+        return res.status(403).json({ message: "Only admins can delete users" });
+      }
+      
+      const currentUserId = req.session?.userId;
+      if (req.params.id === currentUserId) {
+        return res.status(400).json({ message: "Cannot delete yourself" });
+      }
+      
+      await storage.deleteUser(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(400).json({ message: "Failed to delete user" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
