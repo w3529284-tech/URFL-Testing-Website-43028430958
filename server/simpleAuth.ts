@@ -12,13 +12,12 @@ interface AdminCredentials {
 function getAdminCredentials(): AdminCredentials[] {
   const credentials: AdminCredentials[] = [];
   
-  if (process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD) {
-    credentials.push({
-      username: process.env.ADMIN_USERNAME,
-      password: process.env.ADMIN_PASSWORD,
-      role: "admin"
-    });
-  }
+  // Default credentials for development
+  credentials.push({
+    username: process.env.ADMIN_USERNAME || "admin",
+    password: process.env.ADMIN_PASSWORD || "admin",
+    role: "admin"
+  });
   
   if (process.env.STREAMER1_USERNAME && process.env.STREAMER1_PASSWORD) {
     credentials.push({
