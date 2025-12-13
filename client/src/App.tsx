@@ -103,9 +103,9 @@ function MainContent() {
       }`}>
         <Switch>
           <Route path="/" component={Landing} />
+          <Route path="/login" component={Login} />
           {!maintenanceMode && (
             <>
-              <Route path="/login" component={Login} />
               <Route path="/scores" component={LiveScores} />
               <Route path="/game/:id" component={GameDetail} />
               <Route path="/previous-weeks" component={PreviousWeeks} />
