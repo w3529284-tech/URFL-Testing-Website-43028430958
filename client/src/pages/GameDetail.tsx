@@ -439,15 +439,20 @@ export default function GameDetail() {
               </div>
               
               {game.streamLink ? (
-                <a 
-                  href={game.streamLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const url = game.streamLink.startsWith('http://') || game.streamLink.startsWith('https://') 
+                      ? game.streamLink 
+                      : `https://${game.streamLink}`;
+                    window.open(url, '_blank');
+                  }}
+                  className="gap-2"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Watch Stream
-                </a>
+                </Button>
               ) : (
                 <p className="text-sm text-muted-foreground mb-3">No stream available yet</p>
               )}
