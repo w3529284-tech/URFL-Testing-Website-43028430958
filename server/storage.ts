@@ -106,15 +106,30 @@ export interface IStorage {
   setSetting(key: string, value: string): Promise<void>;
 }
 
-// Helper function to clean undefined values from objects
-function cleanObject(obj: Record<string, any>): Record<string, any> {
-  const cleaned: Record<string, any> = {};
-  for (const [key, value] of Object.entries(obj)) {
-    if (value !== undefined) {
-      cleaned[key] = value;
-    }
+// Helper function to deeply clean undefined values from objects (recursive)
+function cleanObject(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return undefined;
   }
-  return cleaned;
+  
+  if (Array.isArray(obj)) {
+    return obj
+      .map(item => cleanObject(item))
+      .filter(item => item !== undefined);
+  }
+  
+  if (typeof obj === 'object' && obj.constructor === Object) {
+    const cleaned: Record<string, any> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const cleanedValue = cleanObject(value);
+      if (cleanedValue !== undefined) {
+        cleaned[key] = cleanedValue;
+      }
+    }
+    return cleaned;
+  }
+  
+  return obj;
 }
 
 export class DatabaseStorage implements IStorage {
