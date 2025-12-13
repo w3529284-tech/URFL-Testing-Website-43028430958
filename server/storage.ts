@@ -113,13 +113,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    // Filter out undefined values to avoid postgres driver errors
+    const cleanData: Record<string, any> = {};
+    for (const [key, value] of Object.entries(userData)) {
+      if (value !== undefined) {
+        cleanData[key] = value;
+      }
+    }
+    
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values(cleanData as UpsertUser)
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          ...userData,
+          ...cleanData,
           updatedAt: new Date(),
         },
       })
@@ -158,7 +166,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateGame(id: string, gameData: Partial<Game>): Promise<Game> {
-    const updateData: any = { ...gameData };
+    // Filter out undefined values to avoid postgres driver errors
+    const updateData: Record<string, any> = {};
+    for (const [key, value] of Object.entries(gameData)) {
+      if (value !== undefined) {
+        updateData[key] = value;
+      }
+    }
     if (updateData.gameTime && typeof updateData.gameTime === 'string') {
       updateData.gameTime = new Date(updateData.gameTime);
     }
@@ -359,9 +373,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateStreamRequest(id: string, requestData: Partial<StreamRequest>): Promise<StreamRequest> {
+    // Filter out undefined values to avoid postgres driver errors
+    const cleanData: Record<string, any> = {};
+    for (const [key, value] of Object.entries(requestData)) {
+      if (value !== undefined) {
+        cleanData[key] = value;
+      }
+    }
     const [request] = await db
       .update(streamRequests)
-      .set({ ...requestData, updatedAt: new Date() })
+      .set({ ...cleanData, updatedAt: new Date() })
       .where(eq(streamRequests.id, id))
       .returning();
     return request;
