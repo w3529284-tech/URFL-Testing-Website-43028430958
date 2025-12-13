@@ -106,6 +106,17 @@ export interface IStorage {
   setSetting(key: string, value: string): Promise<void>;
 }
 
+// Helper function to clean undefined values from objects
+function cleanObject(obj: Record<string, any>): Record<string, any> {
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      cleaned[key] = value;
+    }
+  }
+  return cleaned;
+}
+
 export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
@@ -113,14 +124,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    // Filter out undefined values to avoid postgres driver errors
-    const cleanData: Record<string, any> = {};
-    for (const [key, value] of Object.entries(userData)) {
-      if (value !== undefined) {
-        cleanData[key] = value;
-      }
-    }
-    
+    const cleanData = cleanObject(userData);
     const [user] = await db
       .insert(users)
       .values(cleanData as UpsertUser)
@@ -166,13 +170,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateGame(id: string, gameData: Partial<Game>): Promise<Game> {
-    // Filter out undefined values to avoid postgres driver errors
-    const updateData: Record<string, any> = {};
-    for (const [key, value] of Object.entries(gameData)) {
-      if (value !== undefined) {
-        updateData[key] = value;
-      }
-    }
+    const updateData = cleanObject(gameData);
     if (updateData.gameTime && typeof updateData.gameTime === 'string') {
       updateData.gameTime = new Date(updateData.gameTime);
     }
@@ -247,17 +245,18 @@ export class DatabaseStorage implements IStorage {
 
   async upsertPickemRules(rulesData: InsertPickemRules): Promise<PickemRules> {
     const existing = await this.getPickemRules();
+    const cleanData = cleanObject(rulesData);
     
     if (existing) {
       const [updated] = await db
         .update(pickemRules)
-        .set({ ...rulesData, updatedAt: new Date() })
+        .set({ ...cleanData, updatedAt: new Date() })
         .where(eq(pickemRules.id, existing.id))
         .returning();
       return updated;
     }
     
-    const [created] = await db.insert(pickemRules).values(rulesData).returning();
+    const [created] = await db.insert(pickemRules).values(cleanData as InsertPickemRules).returning();
     return created;
   }
 
@@ -266,21 +265,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertStandings(standingData: InsertStandings): Promise<Standings> {
+    const cleanData = cleanObject(standingData);
     const existing = await db
       .select()
       .from(standings)
-      .where(and(eq(standings.team, standingData.team), eq(standings.division, standingData.division)));
+      .where(and(eq(standings.team, cleanData.team as string), eq(standings.division, cleanData.division as string)));
     
     if (existing.length > 0) {
       const [updated] = await db
         .update(standings)
-        .set({ ...standingData, updatedAt: new Date() })
+        .set({ ...cleanData, updatedAt: new Date() })
         .where(eq(standings.id, existing[0].id))
         .returning();
       return updated;
     }
 
-    const [created] = await db.insert(standings).values(standingData).returning();
+    const [created] = await db.insert(standings).values(cleanData as InsertStandings).returning();
     return created;
   }
 
@@ -302,9 +302,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updatePlayoffMatch(id: string, matchData: Partial<PlayoffMatch>): Promise<PlayoffMatch> {
+    const cleanData = cleanObject(matchData);
     const [match] = await db
       .update(playoffMatches)
-      .set({ ...matchData, updatedAt: new Date() })
+      .set({ ...cleanData, updatedAt: new Date() })
       .where(eq(playoffMatches.id, id))
       .returning();
     return match;
@@ -342,16 +343,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertBracketImage(imageData: InsertBracketImage): Promise<BracketImage> {
+    const cleanData = cleanObject(imageData);
     const existing = await this.getBracketImage();
     if (existing) {
       const [updated] = await db
         .update(bracketImages)
-        .set({ ...imageData, updatedAt: new Date() })
+        .set({ ...cleanData, updatedAt: new Date() })
         .where(eq(bracketImages.id, existing.id))
         .returning();
       return updated;
     }
-    const [created] = await db.insert(bracketImages).values(imageData).returning();
+    const [created] = await db.insert(bracketImages).values(cleanData as InsertBracketImage).returning();
     return created;
   }
 
@@ -373,13 +375,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateStreamRequest(id: string, requestData: Partial<StreamRequest>): Promise<StreamRequest> {
-    // Filter out undefined values to avoid postgres driver errors
-    const cleanData: Record<string, any> = {};
-    for (const [key, value] of Object.entries(requestData)) {
-      if (value !== undefined) {
-        cleanData[key] = value;
-      }
-    }
+    const cleanData = cleanObject(requestData);
     const [request] = await db
       .update(streamRequests)
       .set({ ...cleanData, updatedAt: new Date() })
