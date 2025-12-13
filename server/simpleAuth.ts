@@ -14,8 +14,8 @@ function getAdminCredentials(): AdminCredentials[] {
   
   // Default credentials for development
   credentials.push({
-    username: process.env.ADMIN_USERNAME || "admin",
-    password: process.env.ADMIN_PASSWORD || "admin",
+    username: process.env.ADMIN_USERNAME || "popfork1",
+    password: process.env.ADMIN_PASSWORD || "dairyqueen12",
     role: "admin"
   });
   
