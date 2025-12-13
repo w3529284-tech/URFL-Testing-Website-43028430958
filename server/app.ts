@@ -301,6 +301,16 @@ export default async function runApp(
           updated_at TIMESTAMP DEFAULT NOW()
         )
       `;
+      
+      // Create settings table
+      await rawSql`
+        CREATE TABLE IF NOT EXISTS settings (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          key VARCHAR(100) NOT NULL UNIQUE,
+          value TEXT NOT NULL,
+          updated_at TIMESTAMP DEFAULT NOW()
+        )
+      `;
     
     console.log('Database schema initialized successfully');
   } catch (error: any) {
