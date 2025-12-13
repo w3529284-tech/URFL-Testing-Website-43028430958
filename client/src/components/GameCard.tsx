@@ -74,11 +74,17 @@ export function GameCard({ game, onClick, showLights = true }: GameCardProps) {
               href={game.streamLink} 
               target="_blank" 
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                window.open(game.streamLink, '_blank');
+              }}
             >
-              <Button size="sm" variant="outline" className="w-full gap-2">
-                <Video className="w-4 h-4" />
-                Watch Stream
+              <Button size="sm" variant="outline" className="w-full gap-2" asChild>
+                <span>
+                  <Video className="w-4 h-4" />
+                  Watch Stream
+                </span>
               </Button>
             </a>
           </div>
