@@ -1,8 +1,10 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { Game } from "@shared/schema";
 import { formatInTimeZone } from "date-fns-tz";
 import { TEAMS } from "@/lib/teams";
+import { Video } from "lucide-react";
 
 interface GameCardProps {
   game: Game;
@@ -63,6 +65,22 @@ export function GameCard({ game, onClick, showLights = true }: GameCardProps) {
         {game.location && (
           <div className="text-sm text-muted-foreground" data-testid={`text-location-${game.id}`}>
             {game.location}
+          </div>
+        )}
+
+        {game.streamLink && (
+          <div className="pt-3 border-t">
+            <a 
+              href={game.streamLink} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button size="sm" variant="outline" className="w-full gap-2">
+                <Video className="w-4 h-4" />
+                Watch Stream
+              </Button>
+            </a>
           </div>
         )}
       </div>
