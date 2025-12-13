@@ -165,7 +165,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createGame(gameData: InsertGame): Promise<Game> {
-    const [game] = await db.insert(games).values(gameData).returning();
+    const [game] = await db.insert(games).values(cleanObject(gameData) as InsertGame).returning();
     return game;
   }
 
@@ -191,7 +191,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createNews(newsData: InsertNews): Promise<News> {
-    const [newsItem] = await db.insert(news).values(newsData).returning();
+    const [newsItem] = await db.insert(news).values(cleanObject(newsData) as InsertNews).returning();
     return newsItem;
   }
 
@@ -216,7 +216,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
-    const [message] = await db.insert(chatMessages).values(messageData).returning();
+    const [message] = await db.insert(chatMessages).values(cleanObject(messageData) as InsertChatMessage).returning();
     return message;
   }
 
@@ -230,7 +230,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPickem(pickemData: InsertPickem): Promise<Pickem> {
-    const [pickem] = await db.insert(pickems).values(pickemData).returning();
+    const [pickem] = await db.insert(pickems).values(cleanObject(pickemData) as InsertPickem).returning();
     return pickem;
   }
 
@@ -266,6 +266,12 @@ export class DatabaseStorage implements IStorage {
 
   async upsertStandings(standingData: InsertStandings): Promise<Standings> {
     const cleanData = cleanObject(standingData);
+    // Only search if we have both team and division
+    if (!cleanData.team || !cleanData.division) {
+      const [created] = await db.insert(standings).values(cleanData as InsertStandings).returning();
+      return created;
+    }
+    
     const existing = await db
       .select()
       .from(standings)
@@ -297,7 +303,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPlayoffMatch(matchData: InsertPlayoffMatch): Promise<PlayoffMatch> {
-    const [match] = await db.insert(playoffMatches).values(matchData).returning();
+    const [match] = await db.insert(playoffMatches).values(cleanObject(matchData) as InsertPlayoffMatch).returning();
     return match;
   }
 
@@ -320,7 +326,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createChangelog(changelogData: InsertChangelog): Promise<Changelog> {
-    const [changelog] = await db.insert(changelogs).values(changelogData).returning();
+    const [changelog] = await db.insert(changelogs).values(cleanObject(changelogData) as InsertChangelog).returning();
     return changelog;
   }
 
@@ -333,7 +339,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPrediction(predictionData: InsertPrediction): Promise<Prediction> {
-    const [prediction] = await db.insert(predictions).values(predictionData).returning();
+    const [prediction] = await db.insert(predictions).values(cleanObject(predictionData) as InsertPrediction).returning();
     return prediction;
   }
 
@@ -370,7 +376,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createStreamRequest(requestData: InsertStreamRequest): Promise<StreamRequest> {
-    const [request] = await db.insert(streamRequests).values(requestData).returning();
+    const [request] = await db.insert(streamRequests).values(cleanObject(requestData) as InsertStreamRequest).returning();
     return request;
   }
 
