@@ -25,10 +25,16 @@ import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 import { useMemo, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useNotifications } from "@/hooks/useNotifications";
 
 function ChristmasDecorations() {
+  const preferences = useUserPreferences();
+  const particlePercentage = preferences.particleEffects ?? 100;
+  
   const snowflakes = useMemo(() => {
-    return Array.from({ length: 25 }).map((_, i) => ({
+    const count = Math.round((25 * particlePercentage) / 100);
+    return Array.from({ length: count }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
       size: Math.random() * 10 + 8,
@@ -36,7 +42,7 @@ function ChristmasDecorations() {
       delay: Math.random() * 15,
       opacity: Math.random() * 0.3 + 0.2,
     }));
-  }, []);
+  }, [particlePercentage]);
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-[1]">
@@ -64,6 +70,8 @@ function MainContent() {
   const { collapsed } = useSidebar();
   const [location, setLocation] = useLocation();
   const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const preferences = useUserPreferences();
+  useNotifications();
 
   const { data: maintenanceStatus } = useQuery<{ enabled: boolean }>({
     queryKey: ["/api/settings/maintenance-mode"],
@@ -97,11 +105,11 @@ function MainContent() {
   const showSidebar = !maintenanceMode || isAdmin;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${preferences.reduceAnimations ? 'reduce-motion' : ''}`}>
       <ChristmasDecorations />
       {showSidebar && <Sidebar />}
       
-      <main className={`min-h-screen pb-20 md:pb-0 transition-all duration-300 ${
+      <main className={`min-h-screen pb-20 md:pb-0 ${preferences.reduceAnimations ? '' : 'transition-all duration-300'} ${
         showSidebar && !collapsed ? 'md:ml-64' : showSidebar && collapsed ? 'md:ml-20' : ''
       }`}>
         <Switch>
