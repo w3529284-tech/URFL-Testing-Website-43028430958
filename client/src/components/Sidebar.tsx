@@ -48,6 +48,7 @@ export function Sidebar() {
     { path: "/previous-weeks", label: "Archives", icon: Calendar },
     { path: "/news", label: "News", icon: Newspaper },
     { path: "/pickems", label: "Pick'ems", icon: Target },
+    { path: "/partners", label: "Partners", icon: Users },
     { path: "/social", label: "Social", icon: Users },
     { path: "/changelogs", label: "Updates", icon: BookOpen },
   ];
