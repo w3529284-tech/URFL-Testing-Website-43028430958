@@ -113,14 +113,33 @@ export async function setupAuth(app: Express) {
   });
 
   app.post("/api/signup", async (req, res) => {
-    const { username, email, password } = req.body;
+    const rawUsername = req.body.username;
+    const rawEmail = req.body.email;
+    const rawPassword = req.body.password;
 
-    if (!username || !email || !password) {
+    if (!rawUsername || !rawEmail || !rawPassword) {
       return res.status(400).json({ message: "Username, email, and password are required" });
     }
 
+    const username = String(rawUsername).trim().toLowerCase();
+    const email = String(rawEmail).trim().toLowerCase();
+    const password = String(rawPassword);
+
     if (username.length < 3) {
       return res.status(400).json({ message: "Username must be at least 3 characters" });
+    }
+
+    if (username.length > 30) {
+      return res.status(400).json({ message: "Username must be 30 characters or less" });
+    }
+
+    if (!/^[a-z0-9_]+$/.test(username)) {
+      return res.status(400).json({ message: "Username can only contain letters, numbers, and underscores" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Please enter a valid email address" });
     }
 
     if (password.length < 6) {
