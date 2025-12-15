@@ -31,6 +31,12 @@ import { useNotifications } from "@/hooks/useNotifications";
 function ChristmasDecorations() {
   const preferences = useUserPreferences();
   const particlePercentage = preferences.particleEffects ?? 100;
+  const reduceAnimations = preferences.reduceAnimations ?? false;
+  
+  // Don't render snowflakes if animations are reduced
+  if (reduceAnimations) {
+    return null;
+  }
   
   const snowflakes = useMemo(() => {
     const count = Math.round((25 * particlePercentage) / 100);

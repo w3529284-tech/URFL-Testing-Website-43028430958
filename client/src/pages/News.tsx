@@ -7,13 +7,26 @@ import type { News as NewsType } from "@shared/schema";
 import { format } from "date-fns";
 import { Plus, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 export default function News() {
   const { isAuthenticated } = useAuth();
+  const preferences = useUserPreferences();
 
   const { data: news, isLoading, error } = useQuery<NewsType[]>({
     queryKey: ["/api/news"],
   });
+
+  // Sort news with favorite team first
+  const sortedNews = news ? [...news].sort((a, b) => {
+    if (preferences.favoriteTeam) {
+      const aHasFavorite = a.title.includes(preferences.favoriteTeam) || (a.excerpt && a.excerpt.includes(preferences.favoriteTeam));
+      const bHasFavorite = b.title.includes(preferences.favoriteTeam) || (b.excerpt && b.excerpt.includes(preferences.favoriteTeam));
+      if (aHasFavorite && !bHasFavorite) return -1;
+      if (!aHasFavorite && bHasFavorite) return 1;
+    }
+    return 0;
+  }) : [];
 
   if (error) {
     return (
@@ -53,9 +66,9 @@ export default function News() {
             <Skeleton key={i} className="h-80" />
           ))}
         </div>
-      ) : news && news.length > 0 ? (
+      ) : sortedNews && sortedNews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {news.map((post) => (
+          {sortedNews.map((post) => (
             <Link key={post.id} href={`/news/${post.id}`}>
               <Card className="p-6 flex flex-col hover-elevate active-elevate-2 cursor-pointer h-full" data-testid={`card-news-${post.id}`}>
                 <div className="flex-1">

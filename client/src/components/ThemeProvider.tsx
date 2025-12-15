@@ -1,4 +1,5 @@
 import { useState, useEffect, ReactNode, createContext, useContext } from "react";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 export const ThemeContext = createContext<{
   isDark: boolean;
@@ -7,16 +8,22 @@ export const ThemeContext = createContext<{
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isDark, setIsDark] = useState(false);
+  const preferences = useUserPreferences();
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved) {
-      setIsDark(saved === "dark");
+    // Use user preference if available, otherwise use localStorage/system preference
+    if (preferences.darkMode !== undefined) {
+      setIsDark(preferences.darkMode);
     } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setIsDark(prefersDark);
+      const saved = localStorage.getItem("theme");
+      if (saved) {
+        setIsDark(saved === "dark");
+      } else {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        setIsDark(prefersDark);
+      }
     }
-  }, []);
+  }, [preferences.darkMode]);
 
   useEffect(() => {
     if (isDark) {

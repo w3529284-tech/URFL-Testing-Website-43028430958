@@ -5,14 +5,27 @@ import { Badge } from "@/components/ui/badge";
 import type { Game } from "@shared/schema";
 import { useLocation } from "wouter";
 import { AlertCircle } from "lucide-react";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 export default function LiveScores() {
   const [, setLocation] = useLocation();
+  const preferences = useUserPreferences();
   
   const { data: games, isLoading, error } = useQuery<Game[]>({
     queryKey: ["/api/games/current"],
     refetchInterval: 30000,
   });
+
+  // Sort games with favorite team first
+  const sortedGames = games ? [...games].sort((a, b) => {
+    if (preferences.favoriteTeam) {
+      const aHasFavorite = a.team1 === preferences.favoriteTeam || a.team2 === preferences.favoriteTeam;
+      const bHasFavorite = b.team1 === preferences.favoriteTeam || b.team2 === preferences.favoriteTeam;
+      if (aHasFavorite && !bHasFavorite) return -1;
+      if (!aHasFavorite && bHasFavorite) return 1;
+    }
+    return 0;
+  }) : [];
 
   if (error) {
     return (
@@ -49,9 +62,9 @@ export default function LiveScores() {
             <Skeleton key={i} className="h-64" />
           ))}
         </div>
-      ) : games && games.length > 0 ? (
+      ) : sortedGames && sortedGames.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {games.map((game) => (
+          {sortedGames.map((game) => (
             <GameCard
               key={game.id}
               game={game}

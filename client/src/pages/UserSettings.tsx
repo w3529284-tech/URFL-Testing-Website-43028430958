@@ -54,7 +54,6 @@ export default function UserSettings() {
     if (preferences && Object.keys(preferences).length > 0) {
       setParticles(preferences.particleEffects || 100);
       setDarkMode(preferences.darkMode || false);
-      setCompactLayout(preferences.compactLayout || false);
       setShowLogos(preferences.showTeamLogos !== false);
       setReduceAnimations(preferences.reduceAnimations || false);
       setFavoriteTeam(preferences.favoriteTeam || "");
@@ -69,7 +68,6 @@ export default function UserSettings() {
       await apiRequest("POST", "/api/user/preferences", {
         particleEffects: particles,
         darkMode,
-        compactLayout,
         showTeamLogos: showLogos,
         reduceAnimations,
         favoriteTeam: favoriteTeam || null,
@@ -123,10 +121,6 @@ export default function UserSettings() {
             <div className="flex items-center justify-between">
               <Label>Dark Mode</Label>
               <Switch checked={darkMode} onCheckedChange={setDarkMode} />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label>Compact Layout</Label>
-              <Switch checked={compactLayout} onCheckedChange={setCompactLayout} />
             </div>
             <div className="flex items-center justify-between">
               <Label>Show Team Logos</Label>

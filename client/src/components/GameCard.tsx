@@ -5,6 +5,7 @@ import type { Game } from "@shared/schema";
 import { formatInTimeZone } from "date-fns-tz";
 import { TEAMS } from "@/lib/teams";
 import { Video } from "lucide-react";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 interface GameCardProps {
   game: Game;
@@ -13,8 +14,10 @@ interface GameCardProps {
 }
 
 export function GameCard({ game, onClick, showLights = true }: GameCardProps) {
-  const team2Logo = TEAMS[game.team2 as keyof typeof TEAMS];
-  const team1Logo = TEAMS[game.team1 as keyof typeof TEAMS];
+  const preferences = useUserPreferences();
+  const showLogos = preferences.showTeamLogos !== false;
+  const team2Logo = showLogos ? TEAMS[game.team2 as keyof typeof TEAMS] : null;
+  const team1Logo = showLogos ? TEAMS[game.team1 as keyof typeof TEAMS] : null;
 
   const cardContent = (
     <Card

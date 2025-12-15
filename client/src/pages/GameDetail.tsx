@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { calculateWinProbability, getWinProbabilityFactors } from "@/lib/winProbability";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 export default function GameDetail() {
   const [, params] = useRoute("/game/:id");
@@ -28,6 +29,7 @@ export default function GameDetail() {
   const confettiTimeoutsRef = useRef<number[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
+  const preferences = useUserPreferences();
 
   const { data: game, isLoading: gameLoading, error: gameError, refetch } = useQuery<Game>({
     queryKey: ["/api/games", gameId],
@@ -139,11 +141,11 @@ export default function GameDetail() {
   }, []);
 
   useEffect(() => {
-    if (game?.isFinal && !celebrationTriggered) {
+    if (game?.isFinal && !celebrationTriggered && !preferences.reduceAnimations) {
       setCelebrationTriggered(true);
       createConfetti();
     }
-  }, [game?.isFinal, celebrationTriggered]);
+  }, [game?.isFinal, celebrationTriggered, preferences.reduceAnimations]);
 
   const createConfetti = () => {
     const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
