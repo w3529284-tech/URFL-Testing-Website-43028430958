@@ -49,7 +49,7 @@ export default function AdminDashboard() {
       </h1>
 
       <Tabs defaultValue="games" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-10">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-11">
           <TabsTrigger value="games" data-testid="tab-games">Games</TabsTrigger>
           <TabsTrigger value="scores" data-testid="tab-scores">Scores</TabsTrigger>
           <TabsTrigger value="news" data-testid="tab-news">News</TabsTrigger>
@@ -59,6 +59,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="changelogs" data-testid="tab-changelogs">Changelogs</TabsTrigger>
           <TabsTrigger value="streams" data-testid="tab-streams">Streams</TabsTrigger>
           <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
+          <TabsTrigger value="partners" data-testid="tab-partners">Partners</TabsTrigger>
           <TabsTrigger value="settings" data-testid="tab-settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -96,6 +97,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="users">
           <UsersManager />
+        </TabsContent>
+
+        <TabsContent value="partners">
+          <PartnersManager />
         </TabsContent>
 
         <TabsContent value="settings">
@@ -1601,6 +1606,111 @@ function UsersManager() {
               ))}
             </div>
           )}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function PartnersManager() {
+  const { toast } = useToast();
+  const [name, setName] = useState("");
+  const [quote, setQuote] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+
+  const { data: partners = [] } = useQuery<any[]>({
+    queryKey: ["/api/partners"],
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/partners", { name, quote, imageUrl: imageUrl || undefined });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
+      setName("");
+      setQuote("");
+      setImageUrl("");
+      toast({ title: "Success", description: "Partner added successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add partner", variant: "destructive" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/partners/${id}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
+      toast({ title: "Success", description: "Partner deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete partner", variant: "destructive" });
+    },
+  });
+
+  return (
+    <div className="space-y-6">
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Add Partner</h2>
+        <form onSubmit={(e) => { e.preventDefault(); createMutation.mutate(); }} className="space-y-4">
+          <div>
+            <Label htmlFor="name">Partner Name</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter partner name"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="quote">Quote</Label>
+            <Textarea
+              id="quote"
+              value={quote}
+              onChange={(e) => setQuote(e.target.value)}
+              placeholder="Enter partner quote"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="image">Image URL</Label>
+            <Input
+              id="image"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="Enter image URL (optional)"
+            />
+          </div>
+          <Button type="submit" disabled={createMutation.isPending || !name || !quote} className="w-full gap-2">
+            <Plus className="w-4 h-4" />
+            Add Partner
+          </Button>
+        </form>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Partners</h2>
+        <div className="space-y-3">
+          {partners.map((partner) => (
+            <div key={partner.id} className="flex items-center justify-between p-4 border rounded-md">
+              <div className="flex-1">
+                <p className="font-semibold">{partner.name}</p>
+                <p className="text-sm text-muted-foreground italic">"{partner.quote}"</p>
+              </div>
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => deleteMutation.mutate(partner.id)}
+                disabled={deleteMutation.isPending}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
         </div>
       </Card>
     </div>

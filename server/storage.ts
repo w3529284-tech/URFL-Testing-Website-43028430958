@@ -12,6 +12,7 @@ import {
   bracketImages,
   streamRequests,
   settings,
+  partners,
   type User,
   type UpsertUser,
   type Game,
@@ -38,6 +39,8 @@ import {
   type InsertStreamRequest,
   type Settings,
   type InsertSettings,
+  type Partner,
+  type InsertPartners,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -104,6 +107,11 @@ export interface IStorage {
   
   getSetting(key: string): Promise<string | null>;
   setSetting(key: string, value: string): Promise<void>;
+
+  getAllPartners(): Promise<Partner[]>;
+  createPartner(partner: InsertPartners): Promise<Partner>;
+  updatePartner(id: string, partner: Partial<Partner>): Promise<Partner>;
+  deletePartner(id: string): Promise<void>;
 }
 
 // Helper function to convert undefined to null (postgres requires explicit null, not undefined)
@@ -466,6 +474,29 @@ export class DatabaseStorage implements IStorage {
     } else {
       await db.insert(settings).values(cleanObject({ key, value }) as any);
     }
+  }
+
+  async getAllPartners(): Promise<Partner[]> {
+    return await db.select().from(partners).orderBy(partners.createdAt);
+  }
+
+  async createPartner(partnerData: InsertPartners): Promise<Partner> {
+    const [partner] = await db.insert(partners).values(cleanObject(partnerData) as InsertPartners).returning();
+    return partner;
+  }
+
+  async updatePartner(id: string, partnerData: Partial<Partner>): Promise<Partner> {
+    const cleanData = cleanObject(partnerData);
+    const [partner] = await db
+      .update(partners)
+      .set(cleanData)
+      .where(eq(partners.id, id))
+      .returning();
+    return partner;
+  }
+
+  async deletePartner(id: string): Promise<void> {
+    await db.delete(partners).where(eq(partners.id, id));
   }
 }
 

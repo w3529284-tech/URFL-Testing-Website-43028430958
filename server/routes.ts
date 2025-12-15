@@ -649,6 +649,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Partners endpoints
+  app.get("/api/partners", async (req, res) => {
+    try {
+      const partnersList = await storage.getAllPartners();
+      res.json(partnersList);
+    } catch (error) {
+      console.error("Error fetching partners:", error);
+      res.status(500).json({ message: "Failed to fetch partners" });
+    }
+  });
+
+  app.post("/api/partners", isAuthenticated, async (req: any, res) => {
+    try {
+      const role = req.session?.role;
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can create partners" });
+      }
+      
+      const { insertPartnersSchema } = await import("@shared/schema");
+      const partnerData = insertPartnersSchema.parse(req.body);
+      const partner = await storage.createPartner(partnerData);
+      res.json(partner);
+    } catch (error) {
+      console.error("Error creating partner:", error);
+      res.status(400).json({ message: "Failed to create partner" });
+    }
+  });
+
+  app.patch("/api/partners/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const role = req.session?.role;
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can update partners" });
+      }
+      
+      const partner = await storage.updatePartner(req.params.id, req.body);
+      res.json(partner);
+    } catch (error) {
+      console.error("Error updating partner:", error);
+      res.status(400).json({ message: "Failed to update partner" });
+    }
+  });
+
+  app.delete("/api/partners/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const role = req.session?.role;
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can delete partners" });
+      }
+      
+      await storage.deletePartner(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting partner:", error);
+      res.status(400).json({ message: "Failed to delete partner" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
