@@ -14,6 +14,19 @@ import { useState, useEffect } from "react";
 
 const AVAILABLE_TEAMS = Object.keys(TEAMS);
 
+interface UserPreferences {
+  id?: string;
+  particleEffects?: number;
+  darkMode?: boolean;
+  compactLayout?: boolean;
+  showTeamLogos?: boolean;
+  reduceAnimations?: boolean;
+  favoriteTeam?: string;
+  notifyGameLive?: boolean;
+  notifyGameFinal?: boolean;
+  notifyNews?: boolean;
+}
+
 export default function UserSettings() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -27,13 +40,18 @@ export default function UserSettings() {
   const [notifyFinal, setNotifyFinal] = useState(true);
   const [notifyNews, setNotifyNews] = useState(true);
 
-  const { data: preferences } = useQuery({
-    queryKey: ["/api/user/preferences", user?.id],
+  const { data: preferences, isLoading } = useQuery<UserPreferences>({
+    queryKey: ["/api/user/preferences"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/user/preferences");
+      const data: UserPreferences = await response.json();
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   useEffect(() => {
-    if (preferences) {
+    if (preferences && Object.keys(preferences).length > 0) {
       setParticles(preferences.particleEffects || 100);
       setDarkMode(preferences.darkMode || false);
       setCompactLayout(preferences.compactLayout || false);
@@ -73,6 +91,14 @@ export default function UserSettings() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <p className="text-muted-foreground">Please log in to access settings.</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <p className="text-muted-foreground">Loading settings...</p>
       </div>
     );
   }
