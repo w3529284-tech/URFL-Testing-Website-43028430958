@@ -57,15 +57,30 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication
 - Simple username/password authentication (not OAuth)
+- **Password Hashing**: bcrypt with 12 rounds for secure password storage
 - Primary admin credentials via environment variables: `ADMIN_USERNAME`, `ADMIN_PASSWORD` (defaults: popfork1/dairyqueen12)
 - Additional streamers can be created via the admin panel and stored in the database
-- Roles: "admin" (full access) or "streamer" (stream links only)
+- **Guest Signup**: Users can create their own accounts via `/api/signup` endpoint
+- Roles: "admin" (full access), "streamer" (stream links only), or "guest" (personal settings only)
 
 ### User Management API (Admin Only)
 - `GET /api/users` - List all users
 - `POST /api/users` - Create new user with username, password, and role
 - `PATCH /api/users/:id/role` - Update user role
 - `DELETE /api/users/:id` - Delete a user
+
+### Public Authentication API
+- `POST /api/signup` - Create a guest account (requires username, email, password)
+  - Username: 3-30 characters, alphanumeric and underscores only
+  - Email: Valid email format required
+  - Password: Minimum 6 characters
+- `POST /api/login` - Authenticate existing user
+- `GET /api/logout` - End current session
+
+### User Preferences
+- All authenticated users (including guests) can save preferences
+- `GET /api/user/preferences` - Get current user's preferences
+- `POST /api/user/preferences` - Update preferences (favorite team, dark mode, logos, animations, notifications)
 
 ### Third-Party UI Libraries
 - Radix UI primitives for accessible components
