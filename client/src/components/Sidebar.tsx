@@ -35,9 +35,10 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 
 export function Sidebar() {
   const [location] = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const { collapsed, setCollapsed } = useSidebar();
+  const isAdmin = isAuthenticated && (user as any)?.role === "admin";
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
@@ -126,7 +127,7 @@ export function Sidebar() {
             })}
           </nav>
 
-          {isAuthenticated && (
+          {isAdmin && (
             <div className={`mt-6 ${collapsed ? 'px-1' : 'px-2'}`}>
               {!collapsed && (
                 <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">Admin</p>
