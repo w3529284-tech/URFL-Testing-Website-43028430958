@@ -48,7 +48,7 @@ export default function Landing() {
             onClick={() => setLocation("/login")}
             className="shadow-lg"
           >
-            Admin Login
+            Login
           </Button>
         </div>
       </div>
@@ -293,7 +293,7 @@ export default function Landing() {
           <a href="/login">
             <Button variant="outline" className="gap-2 border-secondary/30 hover:bg-secondary/10">
               <span>🎅</span>
-              Admin Login
+              Login to your account
             </Button>
           </a>
         </div>

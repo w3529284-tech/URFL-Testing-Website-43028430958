@@ -109,7 +109,7 @@ export function Header() {
               <a href="/login" data-testid="link-login">
                 <Button size="sm" className="hidden md:flex gap-2 shadow-lg shadow-primary/25">
                   <span>🎅</span>
-                  Admin Login
+                  Login
                 </Button>
               </a>
             )}
@@ -180,7 +180,7 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span>🎅</span>
-                    Admin Login
+                    Login to your account
                   </Button>
                 </a>
               )}
