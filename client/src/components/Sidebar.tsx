@@ -175,7 +175,7 @@ export function Sidebar() {
                 title={collapsed ? 'Admin Login' : undefined}
               >
                 <LogIn className={`w-5 h-5 ${collapsed ? '' : 'mr-3'}`} />
-                {!collapsed && <span>Admin Login</span>}
+                {!collapsed && <span>Login</span>}
               </Button>
             </a>
           )}
