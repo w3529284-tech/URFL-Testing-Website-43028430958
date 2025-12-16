@@ -594,7 +594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Username already exists" });
       }
       
-      const user = await storage.createUserWithPassword(username, password, role);
+      const user = await storage.createUserWithPassword(username, `${username}@urfl.com`, password, role);
       res.json(user);
     } catch (error) {
       console.error("Error creating user:", error);
