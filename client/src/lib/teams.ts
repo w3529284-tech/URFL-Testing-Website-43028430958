@@ -1,14 +1,13 @@
 export const TEAMS = {
   "Roman Gladiators": "/roman-gladiators-logo.webp",
-  "Georgia Gators": "/georgia-gators-logo.webp",
+  "Miami Gators": "/georgia-gators-logo.webp",
   "Alaska Ice Dragons": "/alaska-ice-dragons-logo.webp",
-  "Agartha Mammoths": "/agartha-mammoths-logo.webp",
-  "Jacksonville Ironbacks": "/jacksonville-ironbacks-logo.webp",
+  "New York Cobras": "/new-york-cobras-logo.webp",
+  "Ironbacks": "/jacksonville-ironbacks-logo.webp",
   "Tampa Bay Buccaneers": "https://a.espncdn.com/i/teamlogos/nfl/500/tb.png",
   "Seattle Seahawks": "https://a.espncdn.com/i/teamlogos/nfl/500/sea.png",
   "San Francisco 49ers": "https://a.espncdn.com/i/teamlogos/nfl/500/sf.png",
   "Philadelphia Eagles": "https://a.espncdn.com/i/teamlogos/nfl/500/phi.png",
-  "Pittsburgh Steelers": "https://a.espncdn.com/i/teamlogos/nfl/500/pit.png",
   "New England Patriots": "https://a.espncdn.com/i/teamlogos/nfl/500/ne.png",
   "Minnesota Vikings": "https://a.espncdn.com/i/teamlogos/nfl/500/min.png",
   "Los Angeles Rams": "https://a.espncdn.com/i/teamlogos/nfl/500/lar.png",
@@ -23,4 +22,5 @@ export const TEAMS = {
   "Baltimore Ravens": "https://a.espncdn.com/i/teamlogos/nfl/500/bal.png",
   "Atlanta Falcons": "https://a.espncdn.com/i/teamlogos/nfl/500/atl.png",
   "Arizona Cardinals": "https://a.espncdn.com/i/teamlogos/nfl/500/ari.png",
+  "San Antonio Brahamas": "/san-antonio-brahamas-logo.webp",
 };
