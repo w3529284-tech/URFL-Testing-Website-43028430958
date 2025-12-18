@@ -2009,12 +2009,17 @@ function UpdatePlanManager() {
         <h3 className="font-semibold mb-3">Scheduled Updates:</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {plans && plans.length > 0 ? (
-            plans.map((plan) => (
+            plans.map((plan) => {
+              // Parse the date string and adjust for timezone to display correct date
+              const date = new Date(plan.updateDate);
+              const offset = date.getTimezoneOffset() * 60000;
+              const adjustedDate = new Date(date.getTime() + offset);
+              return (
               <div
                 key={plan.updateDate}
                 className="flex items-center justify-between p-3 bg-primary/10 border border-primary/30 rounded-lg"
               >
-                <span className="text-sm font-medium">{format(new Date(plan.updateDate), "MMM d, yyyy")}</span>
+                <span className="text-sm font-medium">{format(adjustedDate, "MMM d, yyyy")}</span>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -2025,7 +2030,8 @@ function UpdatePlanManager() {
                   ×
                 </Button>
               </div>
-            ))
+            );
+            })
           ) : (
             <p className="text-sm text-muted-foreground col-span-full">No updates scheduled</p>
           )}
