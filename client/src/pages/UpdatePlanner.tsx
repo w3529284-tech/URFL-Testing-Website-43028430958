@@ -10,7 +10,7 @@ export default function UpdatePlanner() {
 
   const now = new Date();
   const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endDate = new Date(now.getFullYear() + 2, 11, 31);
+  const endDate = new Date(2026, 11, 31);
   
   const months: Date[] = [];
   for (let d = new Date(startDate); d <= endDate; d.setMonth(d.getMonth() + 1)) {
