@@ -482,12 +482,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setSetting(key: string, value: string): Promise<void> {
-    const existing = await this.getSetting(key);
-    if (existing) {
-      await db.update(settings).set(cleanObject({ value }) as any).where(eq(settings.key, key));
-    } else {
-      await db.insert(settings).values(cleanObject({ key, value }) as any);
-    }
+    const cleanData = cleanObject({ key, value });
+    await db
+      .insert(settings)
+      .values(cleanData as any)
+      .onConflictDoUpdate({
+        target: settings.key,
+        set: { value: cleanData.value },
+      });
   }
 
   async getAllPartners(): Promise<Partner[]> {
