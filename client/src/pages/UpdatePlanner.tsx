@@ -24,6 +24,24 @@ export default function UpdatePlanner() {
       <h1 className="text-4xl md:text-5xl font-black mb-2">Update Planner</h1>
       <p className="text-muted-foreground mb-8">See when we have updates planned</p>
 
+      <Card className="p-4 mb-8 bg-muted/30 border-muted">
+        <h3 className="font-semibold mb-3">Color Guide:</h3>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+              15
+            </div>
+            <span className="text-sm">Update Planned</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded border border-border text-foreground flex items-center justify-center text-sm font-bold">
+              15
+            </div>
+            <span className="text-sm">No Update</span>
+          </div>
+        </div>
+      </Card>
+
       <div className="grid gap-6">
         {months.map((month) => (
           <Card key={format(month, "yyyy-MM")} className="p-6">
