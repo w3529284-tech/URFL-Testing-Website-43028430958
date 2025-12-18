@@ -28,15 +28,11 @@ export default function UpdatePlanner() {
         <h3 className="font-semibold mb-3">Color Guide:</h3>
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
-              15
-            </div>
+            <div className="w-8 h-8 rounded bg-primary" />
             <span className="text-sm">Update Planned</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded border border-border text-foreground flex items-center justify-center text-sm font-bold">
-              15
-            </div>
+            <div className="w-8 h-8 rounded border border-border" />
             <span className="text-sm">No Update</span>
           </div>
         </div>
