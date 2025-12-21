@@ -22,16 +22,32 @@ const TOUR_STEPS: TourStep[] = [
     description: "Your home for the ultimate football league experience. Let's show you around.",
   },
   {
-    title: "Live Scores",
-    description: "Keep up with every game in real-time on our Live Scores page.",
+    title: "Live Scores & Real-time Updates",
+    description: "Catch every touchdown as it happens! Our live scoreboards update in real-time with drive details and scoring plays.",
   },
   {
-    title: "Pick'ems",
-    description: "Think you know football? Prove it in our weekly Pick'em challenges.",
+    title: "Interactive Game Chat",
+    description: "Talk trash or cheer with other fans! Each game has its own dedicated chat room for live discussion.",
   },
   {
-    title: "Standings & Playoffs",
-    description: "Track your favorite teams and see the road to the championship.",
+    title: "Weekly Pick'ems",
+    description: "Put your football knowledge to the test. Join our weekly prediction challenges and climb the leaderboard.",
+  },
+  {
+    title: "Dynamic Standings",
+    description: "Track the playoff race with our automatically updated division standings and point differentials.",
+  },
+  {
+    title: "Playoff Brackets",
+    description: "Visualize the road to the championship! Follow the bracket from the play-in games all the way to the Super Bowl.",
+  },
+  {
+    title: "Latest News & Analysis",
+    description: "Stay informed with breaking news, post-game analysis, and league-wide updates from our dedicated writers.",
+  },
+  {
+    title: "Personalized Settings",
+    description: "Make it yours! Customize your experience with dark mode, favorite teams, and notification preferences.",
   },
 ];
 
