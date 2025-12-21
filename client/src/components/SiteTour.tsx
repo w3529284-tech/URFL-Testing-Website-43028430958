@@ -91,6 +91,10 @@ export function SiteTour({ onComplete }: { onComplete: () => void }) {
     tourMutation.mutate(undefined, {
       onSuccess: () => {
         onComplete();
+      },
+      onError: (error) => {
+        console.error("Tour mutation failed:", error);
+        onComplete(); // Still call onComplete to close the tour and unblock the UI
       }
     });
   };
