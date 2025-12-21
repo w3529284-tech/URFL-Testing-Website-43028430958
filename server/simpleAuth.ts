@@ -164,7 +164,7 @@ export async function setupAuth(app: Express) {
 
     try {
       const hashedPassword = await bcrypt.hash(password, 12);
-      const user = await storage.createUserWithPassword(username, email, hashedPassword, "guest");
+      const user = await storage.createUserWithPassword(username, email, password, "guest");
       
       (req.session as any).authenticated = true;
       (req.session as any).userId = user.id;
