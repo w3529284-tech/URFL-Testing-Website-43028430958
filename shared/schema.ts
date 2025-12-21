@@ -55,6 +55,7 @@ export const games = pgTable("games", {
   isFinal: boolean("is_final").default(false),
   isLive: boolean("is_live").default(false),
   streamLink: text("stream_link"),
+  isPrimetime: boolean("is_primetime").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import type { Game } from "@shared/schema";
 import { isFuture, isPast } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
@@ -13,6 +14,7 @@ import { useState } from "react";
 
 export default function Schedule() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [primetimeFilter, setPrimetimeFilter] = useState<"all" | "primetime" | "regular">("all");
   const preferences = useUserPreferences();
   const showLogos = preferences.showTeamLogos !== false;
   
@@ -31,11 +33,16 @@ export default function Schedule() {
     );
   }
 
-  // Filter games by search query
-  const filteredGames = allGames ? allGames.filter(game =>
-    game.team1.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    game.team2.toLowerCase().includes(searchQuery.toLowerCase())
-  ) : [];
+  // Filter games by search query and primetime status
+  const filteredGames = allGames ? allGames.filter(game => {
+    const matchesSearch = game.team1.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      game.team2.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesPrimetime = 
+      primetimeFilter === "all" ||
+      (primetimeFilter === "primetime" && game.isPrimetime) ||
+      (primetimeFilter === "regular" && !game.isPrimetime);
+    return matchesSearch && matchesPrimetime;
+  }) : [];
 
   const gamesByWeek = filteredGames?.reduce((acc, game) => {
     if (game.week <= 10 && !acc[game.week]) {
@@ -58,15 +65,40 @@ export default function Schedule() {
         <p className="text-muted-foreground text-lg mb-4">
           Complete season schedule with dates, times, and locations
         </p>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search by team name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by team name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant={primetimeFilter === "all" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPrimetimeFilter("all")}
+            >
+              All Games
+            </Button>
+            <Button
+              variant={primetimeFilter === "primetime" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPrimetimeFilter("primetime")}
+            >
+              Primetime
+            </Button>
+            <Button
+              variant={primetimeFilter === "regular" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPrimetimeFilter("regular")}
+            >
+              Regular
+            </Button>
+          </div>
         </div>
       </div>
 

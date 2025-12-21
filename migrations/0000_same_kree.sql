@@ -38,6 +38,7 @@ CREATE TABLE "games" (
         "is_final" boolean DEFAULT false,
         "is_live" boolean DEFAULT false,
         "stream_link" text,
+        "is_primetime" boolean DEFAULT false,
         "created_at" timestamp DEFAULT now(),
         "updated_at" timestamp DEFAULT now()
 );

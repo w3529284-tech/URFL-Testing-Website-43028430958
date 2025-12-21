@@ -633,6 +633,16 @@ function ScoresManager() {
                       />
                       <Label>Final</Label>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={game.isPrimetime || false}
+                        onCheckedChange={(checked) => {
+                          updateMutation.mutate({ id: game.id, data: { isPrimetime: checked } });
+                        }}
+                        data-testid={`switch-primetime-${game.id}`}
+                      />
+                      <Label>Primetime</Label>
+                    </div>
                   </div>
                 </div>
               </div>
