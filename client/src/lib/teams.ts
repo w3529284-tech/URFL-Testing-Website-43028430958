@@ -3,7 +3,7 @@ export const TEAMS = {
   "Miami Gators": "/georgia-gators-logo.webp",
   "Alaska Ice Dragons": "/alaska-ice-dragons-logo.webp",
   "New York Cobras": "/new-york-cobras-logo.webp",
-  "Ironbacks": "/jacksonville-ironbacks-logo.webp",
+  "Jacksonville Ironbacks": "/jacksonville-ironbacks-logo.webp",
   "Tampa Bay Buccaneers": "https://a.espncdn.com/i/teamlogos/nfl/500/tb.png",
   "Seattle Seahawks": "https://a.espncdn.com/i/teamlogos/nfl/500/sea.png",
   "San Francisco 49ers": "https://a.espncdn.com/i/teamlogos/nfl/500/sf.png",
