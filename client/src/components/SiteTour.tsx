@@ -66,7 +66,8 @@ export function SiteTour({ onComplete }: { onComplete: () => void }) {
 
   const tourMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("PATCH", "/api/user/tour", { completed: true });
+      const res = await apiRequest("PATCH", "/api/user/tour", { completed: true });
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });

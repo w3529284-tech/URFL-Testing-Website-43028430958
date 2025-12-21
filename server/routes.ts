@@ -831,11 +831,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/user/tour", async (req, res) => {
-    if (!req.user) return res.sendStatus(401);
-    const { completed } = req.body;
+  app.patch("/api/user/tour", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.updateUserTourStatus((req.user as any).id, !!completed);
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const user = await storage.updateUserTourStatus(userId, true);
       res.json(user);
     } catch (error) {
       console.error("Error updating tour status:", error);
