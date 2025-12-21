@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GameCard } from "@/components/GameCard";
 import { ChristmasCountdown } from "@/components/ChristmasCountdown";
+import { NewYearCountdown } from "@/components/NewYearCountdown";
 import type { Game, News as NewsType } from "@shared/schema";
 import { useLocation, Link } from "wouter";
 import { ArrowRight, Trophy, Newspaper, Zap, Calendar, BarChart3, Target, Sparkles, Gift, Star, Snowflake, Wrench } from "lucide-react";
@@ -93,7 +94,10 @@ export default function Landing() {
           </div>
         </div>
       </div>
-      <ChristmasCountdown />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <ChristmasCountdown />
+        <NewYearCountdown />
+      </div>
       
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 mt-8">
         <Card className="xl:col-span-2 p-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 border-2 border-primary/20 overflow-hidden relative">
