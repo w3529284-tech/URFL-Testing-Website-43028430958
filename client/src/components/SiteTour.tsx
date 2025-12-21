@@ -18,36 +18,48 @@ interface TourStep {
 
 const TOUR_STEPS: TourStep[] = [
   {
-    title: "Welcome to BFFL!",
-    description: "Your home for the ultimate football league experience. Let's show you around.",
+    title: "Welcome to URFL Fan Hub",
+    description: "Welcome to the home of the ultimate football league experience. Let's take a quick look at the main pages.",
   },
   {
-    title: "Live Scores & Real-time Updates",
-    description: "Catch every touchdown as it happens! Our live scoreboards update in real-time with drive details and scoring plays.",
+    title: "Live Scores",
+    description: "Follow every game in real-time with drive details and scoring plays on the Live Scores page.",
   },
   {
-    title: "Interactive Game Chat",
-    description: "Talk trash or cheer with other fans! Each game has its own dedicated chat room for live discussion.",
+    title: "Schedule",
+    description: "Plan your season! View the complete league schedule and upcoming matchups.",
   },
   {
-    title: "Weekly Pick'ems",
-    description: "Put your football knowledge to the test. Join our weekly prediction challenges and climb the leaderboard.",
+    title: "Playoffs",
+    description: "Follow the road to the championship with our interactive playoff brackets.",
   },
   {
-    title: "Dynamic Standings",
-    description: "Track the playoff race with our automatically updated division standings and point differentials.",
+    title: "Standings",
+    description: "Check the current division rankings and see who's leading the pack.",
   },
   {
-    title: "Playoff Brackets",
-    description: "Visualize the road to the championship! Follow the bracket from the play-in games all the way to the Super Bowl.",
+    title: "Pick'ems",
+    description: "Join the weekly prediction challenges and compete with other fans.",
   },
   {
-    title: "Latest News & Analysis",
-    description: "Stay informed with breaking news, post-game analysis, and league-wide updates from our dedicated writers.",
+    title: "News",
+    description: "Stay up to date with the latest breaking news and analysis from across the league.",
   },
   {
-    title: "Personalized Settings",
-    description: "Make it yours! Customize your experience with dark mode, favorite teams, and notification preferences.",
+    title: "Partners",
+    description: "Learn about our sponsors and partners who make the URFL possible.",
+  },
+  {
+    title: "Social",
+    description: "Connect with the community and follow our official social media channels.",
+  },
+  {
+    title: "Changelogs",
+    description: "Keep track of all the latest features and updates we've added to the hub.",
+  },
+  {
+    title: "Settings",
+    description: "Customize your experience with dark mode and favorite team preferences.",
   },
 ];
 
