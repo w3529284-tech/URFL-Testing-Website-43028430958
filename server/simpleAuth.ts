@@ -76,7 +76,7 @@ export async function setupAuth(app: Express) {
     if (matchedEnvUser) {
       const userId = `user_${matchedEnvUser.username}`;
       
-      await storage.upsertUser({
+      const user = await storage.upsertUser({
         id: userId,
         username: matchedEnvUser.username,
         password: matchedEnvUser.password,
@@ -84,12 +84,14 @@ export async function setupAuth(app: Express) {
         firstName: matchedEnvUser.username,
         lastName: "",
         role: matchedEnvUser.role,
+        hasCompletedTour: true,
       });
       
       (req.session as any).authenticated = true;
       (req.session as any).userId = userId;
       (req.session as any).username = matchedEnvUser.username;
       (req.session as any).role = matchedEnvUser.role;
+      (req.session as any).hasCompletedTour = true;
       
       res.json({ success: true });
       return;
@@ -105,6 +107,7 @@ export async function setupAuth(app: Express) {
         (req.session as any).userId = dbUser.id;
         (req.session as any).username = dbUser.username;
         (req.session as any).role = dbUser.role || "guest";
+        (req.session as any).hasCompletedTour = dbUser.hasCompletedTour;
         
         res.json({ success: true });
         return;
@@ -208,7 +211,7 @@ export async function setupAuth(app: Express) {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role || role,
-        hasCompletedTour: user.hasCompletedTour,
+        hasCompletedTour: !!user.hasCompletedTour,
         authenticated: true 
       });
     } else {
