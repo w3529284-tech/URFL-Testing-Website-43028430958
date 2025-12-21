@@ -831,6 +831,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/user/tour", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const { completed } = req.body;
+    const user = await storage.updateUserTourStatus((req.user as any).id, !!completed);
+    res.json(user);
+  });
+
   const httpServer = createServer(app);
 
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });

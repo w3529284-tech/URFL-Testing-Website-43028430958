@@ -32,6 +32,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  hasCompletedTour: boolean("has_completed_tour").default(false),
   role: varchar("role", { length: 20 }).default("admin"), // "admin" = full access, "streamer" = stream links only
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

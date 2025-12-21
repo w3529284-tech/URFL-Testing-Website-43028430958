@@ -10,6 +10,7 @@ import { useLocation, Link } from "wouter";
 import { ArrowRight, Trophy, Newspaper, Zap, Calendar, BarChart3, Target, Sparkles, Gift, Star, Snowflake, Wrench } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
+import { SiteTour } from "@/components/SiteTour";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -32,6 +33,13 @@ export default function Landing() {
   const featuredNews = news?.slice(0, 2) || [];
   const liveGames = games?.filter(g => g.isLive) || [];
   const upcomingGames = games?.filter(g => !g.isLive && !g.isFinal)?.slice(0, 3) || [];
+  const [showTour, setShowTour] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isAuthenticated && user && !(user as any).hasCompletedTour) {
+      setShowTour(true);
+    }
+  }, [isAuthenticated, user]);
 
   if (maintenanceStatus?.enabled && !isAdmin) {
     return (
@@ -301,6 +309,7 @@ export default function Landing() {
           </a>
         </div>
       </Card>
+      {showTour && <SiteTour onComplete={() => setShowTour(false)} />}
     </div>
   );
 }
