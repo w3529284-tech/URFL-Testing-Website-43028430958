@@ -226,12 +226,30 @@ export default async function runApp(
         // Column might already exist - that's fine, ignore silently
       }
       
+      try {
+        await rawSql`
+          ALTER TABLE users ADD COLUMN has_completed_tour BOOLEAN DEFAULT false
+        `;
+        console.log('Added has_completed_tour column to users table');
+      } catch (err: any) {
+        // Column might already exist - that's fine, ignore silently
+      }
+      
       // Add missing columns to games table
       try {
         await rawSql`
           ALTER TABLE games ADD COLUMN stream_link TEXT
         `;
         console.log('Added stream_link column to games table');
+      } catch (err: any) {
+        // Column might already exist - that's fine, ignore silently
+      }
+      
+      try {
+        await rawSql`
+          ALTER TABLE games ADD COLUMN is_primetime BOOLEAN DEFAULT false
+        `;
+        console.log('Added is_primetime column to games table');
       } catch (err: any) {
         // Column might already exist - that's fine, ignore silently
       }
