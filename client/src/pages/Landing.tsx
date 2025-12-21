@@ -1,3 +1,4 @@
+import React, { useMemo, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -33,9 +34,9 @@ export default function Landing() {
   const featuredNews = news?.slice(0, 2) || [];
   const liveGames = games?.filter(g => g.isLive) || [];
   const upcomingGames = games?.filter(g => !g.isLive && !g.isFinal)?.slice(0, 3) || [];
-  const [showTour, setShowTour] = React.useState(false);
+  const [showTour, setShowTour] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated && user && !(user as any).hasCompletedTour) {
       setShowTour(true);
     }
