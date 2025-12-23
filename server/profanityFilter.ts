@@ -1,9 +1,19 @@
 // Profanity filter for chat messages
 const BANNED_WORDS = [
   // Racial slurs
-  'n-word', 'nword', 'n word',
-  // Generic profanity
-  'badword', 'damn', 'crap', 'bullshit', 'shit', 'piss', 'asshole', 'bitch', 'bastard', 'fuck', 'fuckhead', 'motherfucker',
+  'n-word', 'nword', 'n word', 'nigger', 'nigga', 'faggot', 'fag',
+  // Sexual terms and insults
+  'fuck', 'fucking', 'fuckhead', 'motherfucker', 'shit', 'shitty', 'piss', 'asshole', 'bitch', 'bitches', 'bastard', 'damn', 'dammit', 'crap', 'cock', 'pussy', 'dick', 'dickhead', 'slut', 'whore', 'ho',
+  // Derogatory terms
+  'retard', 'retarded', 'stupid', 'idiot', 'dumbass', 'moron', 'imbecile', 'jackass', 'douche', 'douchebag', 'asshat', 'scumbag', 'prick', 'jerk', 'dickwad',
+  // Offensive slurs
+  'chink', 'gook', 'spic', 'wetback', 'raghead', 'kike', 'honky', 'cracker',
+  // Religious/ethnic insults  
+  'jihadi', 'terrorist',
+  // Other offensive terms
+  'gay', 'lesbian', 'tranny', 'trap', 'homo', 'queer', 'dyke',
+  // Additional profanity variations
+  'bullshit', 'horseshit', 'cunthead', 'cocksucker', 'twat', 'wank', 'bollocks', 'arse',
 ];
 
 function escapeCensoredWord(word: string): string {
