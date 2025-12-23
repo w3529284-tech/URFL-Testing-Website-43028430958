@@ -195,12 +195,12 @@ export function Sidebar() {
 
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-primary/20 to-transparent pointer-events-none" />
       </aside>
-      <MobileNav navItems={navItems} isAuthenticated={isAuthenticated} />
+      <MobileNav navItems={navItems} isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
     </>
   );
 }
 
-function MobileNav({ navItems, isAuthenticated }: { navItems: Array<{ path: string; label: string; icon: any }>; isAuthenticated: boolean }) {
+function MobileNav({ navItems, isAuthenticated, isAdmin }: { navItems: Array<{ path: string; label: string; icon: any }>; isAuthenticated: boolean; isAdmin: boolean }) {
   const [location] = useLocation();
 
   return (
@@ -226,6 +226,21 @@ function MobileNav({ navItems, isAuthenticated }: { navItems: Array<{ path: stri
               </Link>
             );
           })}
+          {isAdmin && (
+            <Link href="/admin">
+              <button
+                className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 ${
+                  location === '/admin'
+                    ? 'bg-accent text-accent-foreground shadow-lg' 
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+                title="Admin Dashboard"
+              >
+                <Shield className="w-5 h-5" />
+                <span className="text-[10px] mt-1 font-medium">Admin</span>
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </nav>
