@@ -171,19 +171,16 @@ async function createTables() {
     `;
     console.log('✓ Predictions table created');
 
-    // Add user_id column if it doesn't exist (for existing deployments)
+    // Add user_id column to existing predictions tables
     try {
       await sql`
-        ALTER TABLE "predictions" 
-        ADD COLUMN IF NOT EXISTS "user_id" varchar NOT NULL DEFAULT 'unknown'
+        ALTER TABLE "predictions"
+        ADD COLUMN user_id varchar NOT NULL DEFAULT 'unknown'
       `;
-      console.log('✓ Predictions user_id column ensured');
-    } catch (err: any) {
-      if (err?.code === '42701') { // Column already exists error
-        console.log('✓ Predictions user_id column already exists');
-      } else {
-        throw err;
-      }
+      console.log('✓ Predictions user_id column added');
+    } catch (err) {
+      // Column already exists, continue
+      console.log('✓ Predictions user_id column already exists');
     }
 
     console.log('Creating bracket_images table...');

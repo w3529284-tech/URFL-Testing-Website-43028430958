@@ -293,10 +293,21 @@ export default async function runApp(
         CREATE TABLE IF NOT EXISTS predictions (
           id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
           game_id VARCHAR NOT NULL,
+          user_id VARCHAR NOT NULL,
           voted_for VARCHAR(100) NOT NULL,
           created_at TIMESTAMP DEFAULT NOW()
         )
       `;
+      
+      // Add user_id column to existing predictions tables (if table exists but column doesn't)
+      try {
+        await rawSql`
+          ALTER TABLE predictions
+          ADD COLUMN user_id VARCHAR NOT NULL DEFAULT 'unknown'
+        `;
+      } catch (err) {
+        // Column likely already exists, continue
+      }
       
       // Create bracket_images table
       await rawSql`
