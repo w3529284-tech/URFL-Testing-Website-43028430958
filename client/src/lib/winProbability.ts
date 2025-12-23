@@ -220,6 +220,47 @@ export function calculateWinProbability(
   }
 }
 
+export function getConferenceRanking(teamName: string, standings?: Standings[]): string {
+  if (!standings || standings.length === 0) {
+    return "N/A";
+  }
+
+  const teamStanding = standings.find(s => s.team === teamName);
+  if (!teamStanding) {
+    return "N/A";
+  }
+
+  const conference = teamStanding.division.startsWith("AFC") ? "AFC" : "NFC";
+  const conferenceTeams = standings.filter(s => s.division.startsWith(conference));
+
+  const sortedTeams = [...conferenceTeams].sort((a, b) => {
+    if (a.manualOrder !== null && b.manualOrder !== null && 
+        a.manualOrder !== undefined && b.manualOrder !== undefined) {
+      return a.manualOrder - b.manualOrder;
+    }
+
+    const aWins = a.wins || 0;
+    const bWins = b.wins || 0;
+    const aLosses = a.losses || 0;
+    const bLosses = b.losses || 0;
+
+    const aWinPct = aWins + aLosses > 0 ? aWins / (aWins + aLosses) : 0;
+    const bWinPct = bWins + bLosses > 0 ? bWins / (bWins + bLosses) : 0;
+
+    if (bWinPct !== aWinPct) return bWinPct - aWinPct;
+
+    const aPD = a.pointDifferential || 0;
+    const bPD = b.pointDifferential || 0;
+    return bPD - aPD;
+  });
+
+  const rank = sortedTeams.findIndex(s => s.team === teamName) + 1;
+  const ordinals = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
+  const ordinal = ordinals[rank - 1] || `${rank}th`;
+
+  return `${ordinal} in ${conference}`;
+}
+
 export function getWinProbabilityFactors(
   game: Game,
   standings?: Standings[],
@@ -228,7 +269,7 @@ export function getWinProbabilityFactors(
   team1: TeamAnalysis;
   team2: TeamAnalysis;
   factors: {
-    ranking: { team1Rank: number; team2Rank: number; advantage: string };
+    ranking: { team1Rank: string; team2Rank: string; advantage: string };
     record: { team1Record: string; team2Record: string; advantage: string };
     pointDiff: { team1PD: number; team2PD: number; advantage: string };
     schedule: { team1SOS: number; team2SOS: number; advantage: string };
@@ -252,8 +293,8 @@ export function getWinProbabilityFactors(
     team2: team2Analysis,
     factors: {
       ranking: {
-        team1Rank: team1Analysis.ranking,
-        team2Rank: team2Analysis.ranking,
+        team1Rank: getConferenceRanking(game.team1, standings),
+        team2Rank: getConferenceRanking(game.team2, standings),
         advantage: team1Analysis.ranking < team2Analysis.ranking ? game.team1 :
                    team2Analysis.ranking < team1Analysis.ranking ? game.team2 : "Even"
       },

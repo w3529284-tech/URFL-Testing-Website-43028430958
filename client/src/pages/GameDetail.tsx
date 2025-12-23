@@ -14,7 +14,7 @@ import { TEAMS } from "@/lib/teams";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { calculateWinProbability, getWinProbabilityFactors } from "@/lib/winProbability";
+import { calculateWinProbability, getWinProbabilityFactors, getConferenceRanking } from "@/lib/winProbability";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
@@ -547,30 +547,10 @@ export default function GameDetail() {
                   const team2Percent = calculateWinProbability(game, "team2", standings, allGames);
                   
                   // Get detailed factors for display
-                  const factors = standings ? (() => {
-                    const rankings = new Map<string, number>();
-                    const sortedStandings = [...standings].sort((a, b) => {
-                      if (a.manualOrder !== null && b.manualOrder !== null && 
-                          a.manualOrder !== undefined && b.manualOrder !== undefined) {
-                        return a.manualOrder - b.manualOrder;
-                      }
-                      const aWins = a.wins || 0;
-                      const bWins = b.wins || 0;
-                      const aLosses = a.losses || 0;
-                      const bLosses = b.losses || 0;
-                      const aWinPct = aWins + aLosses > 0 ? aWins / (aWins + aLosses) : 0;
-                      const bWinPct = bWins + bLosses > 0 ? bWins / (bWins + bLosses) : 0;
-                      if (bWinPct !== aWinPct) return bWinPct - aWinPct;
-                      return (b.pointDifferential || 0) - (a.pointDifferential || 0);
-                    });
-                    sortedStandings.forEach((standing, index) => {
-                      rankings.set(standing.team, index + 1);
-                    });
-                    return {
-                      team1Rank: rankings.get(game.team1) || standings.length,
-                      team2Rank: rankings.get(game.team2) || standings.length,
-                    };
-                  })() : { team1Rank: 0, team2Rank: 0 };
+                  const factors = standings ? {
+                    team1Rank: getConferenceRanking(game.team1, standings),
+                    team2Rank: getConferenceRanking(game.team2, standings),
+                  } : { team1Rank: "N/A", team2Rank: "N/A" };
                   
                   return (
                     <div className="mb-6 space-y-3">
@@ -587,7 +567,7 @@ export default function GameDetail() {
                           />
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          #{factors.team1Rank} • {team1Standing?.wins || 0}-{team1Standing?.losses || 0} • PD: {team1PD > 0 ? '+' : ''}{team1PD}
+                          {factors.team1Rank} • {team1Standing?.wins || 0}-{team1Standing?.losses || 0} • PD: {team1PD > 0 ? '+' : ''}{team1PD}
                         </p>
                       </div>
                       
@@ -604,7 +584,7 @@ export default function GameDetail() {
                           />
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          #{factors.team2Rank} • {team2Standing?.wins || 0}-{team2Standing?.losses || 0} • PD: {team2PD > 0 ? '+' : ''}{team2PD}
+                          {factors.team2Rank} • {team2Standing?.wins || 0}-{team2Standing?.losses || 0} • PD: {team2PD > 0 ? '+' : ''}{team2PD}
                         </p>
                       </div>
                       
@@ -627,10 +607,10 @@ export default function GameDetail() {
                               
                               <div className="text-left text-muted-foreground">Ranking</div>
                               <div className={`text-center ${factorData.factors.ranking.advantage === game.team1 ? 'text-primary font-semibold' : ''}`}>
-                                #{factorData.factors.ranking.team1Rank}
+                                {factorData.factors.ranking.team1Rank}
                               </div>
                               <div className={`text-center ${factorData.factors.ranking.advantage === game.team2 ? 'text-primary font-semibold' : ''}`}>
-                                #{factorData.factors.ranking.team2Rank}
+                                {factorData.factors.ranking.team2Rank}
                               </div>
                               
                               <div className="text-left text-muted-foreground">Record</div>
