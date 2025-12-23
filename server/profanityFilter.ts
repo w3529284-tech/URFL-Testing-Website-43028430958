@@ -13,7 +13,7 @@ const BANNED_WORDS = [
   // Other offensive terms
   'gay', 'lesbian', 'tranny', 'trap', 'homo', 'queer', 'dyke',
   // Additional profanity variations
-  'bullshit', 'horseshit', 'cocksucker', 'twat', 'wank', 'bollocks', 'arse',
+  'bullshit', 'horseshit', 'cunt', 'cunthead', 'cocksucker', 'twat', 'wank', 'bollocks', 'arse',
 ];
 
 function escapeCensoredWord(word: string): string {
