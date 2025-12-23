@@ -164,6 +164,7 @@ async function createTables() {
       CREATE TABLE IF NOT EXISTS "predictions" (
         "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
         "game_id" varchar NOT NULL,
+        "user_id" varchar NOT NULL,
         "voted_for" varchar(100) NOT NULL,
         "created_at" timestamp DEFAULT now()
       )
