@@ -9,7 +9,8 @@ import { ExternalLink, FileText, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Pickems() {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin" || user?.role === "streamer";
 
   const { data: pickems, isLoading: pickemsLoading } = useQuery<Pickem[]>({
     queryKey: ["/api/pickems"],
@@ -36,7 +37,7 @@ export default function Pickems() {
             Make your predictions and compete with other fans
           </p>
         </div>
-        {isAuthenticated && (
+        {isAdmin && (
           <Link href="/admin">
             <Button variant="outline" data-testid="button-manage-pickems">
               Manage Pick'ems

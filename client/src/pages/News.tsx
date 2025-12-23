@@ -10,8 +10,9 @@ import { Link } from "wouter";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 export default function News() {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const preferences = useUserPreferences();
+  const isAdmin = user?.role === "admin" || user?.role === "streamer";
 
   const { data: news, isLoading, error } = useQuery<NewsType[]>({
     queryKey: ["/api/news"],
@@ -50,7 +51,7 @@ export default function News() {
             Stay updated with the latest announcements and updates
           </p>
         </div>
-        {isAuthenticated && (
+        {isAdmin && (
           <Link href="/admin">
             <Button className="gap-2" data-testid="button-add-news">
               <Plus className="w-4 h-4" />
