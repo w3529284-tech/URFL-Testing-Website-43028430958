@@ -411,9 +411,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/predictions", async (req, res) => {
+  app.post("/api/predictions", isAuthenticated, async (req: any, res) => {
     try {
-      const predictionData = insertPredictionSchema.parse(req.body);
+      const userId = req.session?.userId;
+      const predictionData = insertPredictionSchema.parse({ ...req.body, userId });
+      
+      // Check if user already has a prediction for this game
+      const existing = await storage.getUserPredictionForGame(userId, req.body.gameId);
+      if (existing) {
+        return res.status(400).json({ message: "You can only make one prediction per game" });
+      }
+      
       const prediction = await storage.createPrediction(predictionData);
       res.json(prediction);
     } catch (error) {

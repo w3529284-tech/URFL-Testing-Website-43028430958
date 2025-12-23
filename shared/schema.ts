@@ -212,6 +212,7 @@ export type Changelog = typeof changelogs.$inferSelect;
 export const predictions = pgTable("predictions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   gameId: varchar("game_id").notNull(),
+  userId: varchar("user_id").notNull(),
   votedFor: varchar("voted_for", { length: 100 }).notNull(), // team name
   createdAt: timestamp("created_at").defaultNow(),
 });

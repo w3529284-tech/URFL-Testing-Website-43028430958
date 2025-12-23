@@ -94,6 +94,7 @@ export interface IStorage {
   deleteChangelog(id: string): Promise<void>;
   
   getPredictionsByGameId(gameId: string): Promise<Prediction[]>;
+  getUserPredictionForGame(userId: string, gameId: string): Promise<Prediction | undefined>;
   createPrediction(prediction: InsertPrediction): Promise<Prediction>;
   
   getBracketImage(): Promise<BracketImage | undefined>;
@@ -386,6 +387,11 @@ export class DatabaseStorage implements IStorage {
 
   async getPredictionsByGameId(gameId: string): Promise<Prediction[]> {
     return await db.select().from(predictions).where(eq(predictions.gameId, gameId));
+  }
+
+  async getUserPredictionForGame(userId: string, gameId: string): Promise<Prediction | undefined> {
+    const [prediction] = await db.select().from(predictions).where(and(eq(predictions.userId, userId), eq(predictions.gameId, gameId)));
+    return prediction;
   }
 
   async createPrediction(predictionData: InsertPrediction): Promise<Prediction> {

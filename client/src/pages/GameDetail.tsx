@@ -648,32 +648,41 @@ export default function GameDetail() {
                   );
                 })()}
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    className="gap-2 flex-col md:flex-row h-auto md:h-auto py-3 md:py-2"
-                    onClick={() => voteMutation.mutate(game.team2)}
-                    disabled={voteMutation.isPending}
-                    data-testid={`button-predict-${game.team2}`}
-                  >
-                    <span className="flex-1 break-words">{game.team2}</span>
-                    <Badge variant="secondary" className="mt-2 md:mt-0 md:ml-auto flex-shrink-0">
-                      {predictions?.filter(p => p.votedFor === game.team2).length || 0}
-                    </Badge>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="gap-2 flex-col md:flex-row h-auto md:h-auto py-3 md:py-2"
-                    onClick={() => voteMutation.mutate(game.team1)}
-                    disabled={voteMutation.isPending}
-                    data-testid={`button-predict-${game.team1}`}
-                  >
-                    <span className="flex-1 break-words">{game.team1}</span>
-                    <Badge variant="secondary" className="mt-2 md:mt-0 md:ml-auto flex-shrink-0">
-                      {predictions?.filter(p => p.votedFor === game.team1).length || 0}
-                    </Badge>
-                  </Button>
-                </div>
+                {!user ? (
+                  <div className="p-4 rounded-lg bg-muted border border-muted-foreground/20 text-center">
+                    <p className="text-sm text-muted-foreground mb-3">You must log in to make a prediction</p>
+                    <a href="/login">
+                      <Button size="sm" className="w-full">Login to Predict</Button>
+                    </a>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      className="gap-2 flex-col md:flex-row h-auto md:h-auto py-3 md:py-2"
+                      onClick={() => voteMutation.mutate(game.team2)}
+                      disabled={voteMutation.isPending || predictions?.some(p => p.votedFor === game.team2 && (p as any).userId === user.id) || predictions?.some(p => (p as any).userId === user.id)}
+                      data-testid={`button-predict-${game.team2}`}
+                    >
+                      <span className="flex-1 break-words">{game.team2}</span>
+                      <Badge variant="secondary" className="mt-2 md:mt-0 md:ml-auto flex-shrink-0">
+                        {predictions?.filter(p => p.votedFor === game.team2).length || 0}
+                      </Badge>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="gap-2 flex-col md:flex-row h-auto md:h-auto py-3 md:py-2"
+                      onClick={() => voteMutation.mutate(game.team1)}
+                      disabled={voteMutation.isPending || predictions?.some(p => p.votedFor === game.team1 && (p as any).userId === user.id) || predictions?.some(p => (p as any).userId === user.id)}
+                      data-testid={`button-predict-${game.team1}`}
+                    >
+                      <span className="flex-1 break-words">{game.team1}</span>
+                      <Badge variant="secondary" className="mt-2 md:mt-0 md:ml-auto flex-shrink-0">
+                        {predictions?.filter(p => p.votedFor === game.team1).length || 0}
+                      </Badge>
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
