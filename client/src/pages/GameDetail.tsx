@@ -705,6 +705,8 @@ export default function GameDetail() {
             gameId={gameId}
             messages={chatMessages}
             onSendMessage={handleSendMessage}
+            username={currentUser?.username}
+            isAuthenticated={!!user}
           />
         </Card>
       </div>

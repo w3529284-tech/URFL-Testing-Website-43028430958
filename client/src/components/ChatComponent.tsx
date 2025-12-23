@@ -10,21 +10,13 @@ interface ChatComponentProps {
   gameId?: string;
   messages: ChatMessage[];
   onSendMessage: (username: string, message: string) => void;
+  username?: string;
+  isAuthenticated?: boolean;
 }
 
-export function ChatComponent({ messages, onSendMessage }: ChatComponentProps) {
-  const [username, setUsername] = useState("");
+export function ChatComponent({ messages, onSendMessage, username, isAuthenticated }: ChatComponentProps) {
   const [message, setMessage] = useState("");
-  const [usernameSet, setUsernameSet] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const savedUsername = localStorage.getItem("nfl-chat-username");
-    if (savedUsername) {
-      setUsername(savedUsername);
-      setUsernameSet(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -32,42 +24,21 @@ export function ChatComponent({ messages, onSendMessage }: ChatComponentProps) {
     }
   }, [messages]);
 
-  const handleSetUsername = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username.trim()) {
-      localStorage.setItem("nfl-chat-username", username.trim());
-      setUsernameSet(true);
-    }
-  };
-
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim() && username.trim()) {
+    if (message.trim() && username?.trim()) {
       onSendMessage(username.trim(), message.trim());
       setMessage("");
     }
   };
 
-  if (!usernameSet) {
+  if (!isAuthenticated || !username) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-6 gap-4">
-        <h3 className="text-lg font-semibold">Join the Chat</h3>
+        <h3 className="text-lg font-semibold">Chat Requires Login</h3>
         <p className="text-sm text-muted-foreground text-center">
-          Enter a username to start chatting with other fans
+          You must be logged in to participate in the live chat
         </p>
-        <form onSubmit={handleSetUsername} className="w-full max-w-sm space-y-3">
-          <Input
-            type="text"
-            placeholder="Your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            maxLength={100}
-            data-testid="input-username"
-          />
-          <Button type="submit" className="w-full" data-testid="button-set-username">
-            Continue
-          </Button>
-        </form>
       </div>
     );
   }
