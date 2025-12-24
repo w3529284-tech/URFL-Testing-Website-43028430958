@@ -13,9 +13,6 @@ export function ChristmasCountdown() {
   const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    // Check if popup was already dismissed
-    const isDismissed = localStorage.getItem("christmasPopupDismissed") === "true";
-    
     const calculateTimeLeft = () => {
       const now = new Date();
       let christmasDate = new Date(now.getFullYear(), 11, 25); // December 25
@@ -44,7 +41,8 @@ export function ChristmasCountdown() {
           seconds: 0,
         });
         setIsChristmas(true);
-        // Only show popup if it hasn't been dismissed
+        // Check if popup was already dismissed (read fresh from localStorage each time)
+        const isDismissed = localStorage.getItem("christmasPopupDismissed") === "true";
         setShowPopup(!isDismissed);
       }
     };

@@ -13,9 +13,6 @@ export function NewYearCountdown() {
   const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    // Check if popup was already dismissed
-    const isDismissed = localStorage.getItem("newYearPopupDismissed") === "true";
-    
     const calculateTimeLeft = () => {
       const now = new Date();
       const newYearDate = new Date(now.getFullYear() + 1, 0, 1); // January 1, next year
@@ -39,7 +36,8 @@ export function NewYearCountdown() {
           seconds: 0,
         });
         setIsNewYear(true);
-        // Only show popup if it hasn't been dismissed
+        // Check if popup was already dismissed (read fresh from localStorage each time)
+        const isDismissed = localStorage.getItem("newYearPopupDismissed") === "true";
         setShowPopup(!isDismissed);
       }
     };
