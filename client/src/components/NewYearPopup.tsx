@@ -1,17 +1,30 @@
 import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NewYearPopupProps {
   onClose: () => void;
 }
 
 export function NewYearPopup({ onClose }: NewYearPopupProps) {
+  const { user } = useAuth();
+
   useEffect(() => {
     const audio = new Audio("data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==");
     audio.play().catch(() => {});
   }, []);
 
-  const handleClose = () => {
-    localStorage.setItem("newYearPopupDismissed", "true");
+  const handleClose = async () => {
+    if (user?.id) {
+      try {
+        await fetch("/api/user/popup-status", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ popupType: "newYear", seen: true }),
+        });
+      } catch (err) {
+        console.error("Failed to update popup status:", err);
+      }
+    }
     onClose();
   };
 

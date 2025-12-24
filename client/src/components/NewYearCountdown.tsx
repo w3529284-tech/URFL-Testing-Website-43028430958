@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { NewYearPopup } from "./NewYearPopup";
+import { useAuth } from "@/hooks/useAuth";
 
 export function NewYearCountdown() {
+  const { user } = useAuth();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -11,6 +13,13 @@ export function NewYearCountdown() {
   });
   const [isNewYear, setIsNewYear] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [hasSeenPopup, setHasSeenPopup] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setHasSeenPopup((user as any).hasSeenNewYearPopup || false);
+    }
+  }, [user]);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -40,9 +49,7 @@ export function NewYearCountdown() {
           seconds: 0,
         });
         setIsNewYear(true);
-        // Check if popup was already dismissed (read fresh from localStorage each time)
-        const isDismissed = localStorage.getItem("newYearPopupDismissed") === "true";
-        setShowPopup(!isDismissed);
+        setShowPopup(!hasSeenPopup);
       }
     };
 
@@ -50,7 +57,7 @@ export function NewYearCountdown() {
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [hasSeenPopup]);
 
   const handleClosePopup = () => {
     setShowPopup(false);

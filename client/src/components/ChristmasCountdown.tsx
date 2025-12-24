@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ChristmasPopup } from "./ChristmasPopup";
+import { useAuth } from "@/hooks/useAuth";
 
 export function ChristmasCountdown() {
+  const { user } = useAuth();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -11,6 +13,13 @@ export function ChristmasCountdown() {
   });
   const [isChristmas, setIsChristmas] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [hasSeenPopup, setHasSeenPopup] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setHasSeenPopup((user as any).hasSeenChristmasPopup || false);
+    }
+  }, [user]);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -36,9 +45,7 @@ export function ChristmasCountdown() {
           seconds: 0,
         });
         setIsChristmas(true);
-        // Check if popup was already dismissed (read fresh from localStorage each time)
-        const isDismissed = localStorage.getItem("christmasPopupDismissed") === "true";
-        setShowPopup(!isDismissed);
+        setShowPopup(!hasSeenPopup);
       }
     };
 
@@ -46,7 +53,7 @@ export function ChristmasCountdown() {
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [hasSeenPopup]);
 
   const handleClosePopup = () => {
     setShowPopup(false);
