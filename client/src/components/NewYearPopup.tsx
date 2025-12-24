@@ -16,7 +16,7 @@ export function NewYearPopup({ onClose }: NewYearPopupProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn pt-20">
       <div className="bg-gradient-to-b from-blue-600 via-purple-600 to-pink-600 p-12 rounded-2xl shadow-2xl text-center space-y-8 max-w-2xl animate-popupBounce relative">
         <button
           onClick={handleClose}
