@@ -10,8 +10,12 @@ export function NewYearCountdown() {
     seconds: 0,
   });
   const [isNewYear, setIsNewYear] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
+    // Check if popup was already dismissed
+    const isDismissed = localStorage.getItem("newYearPopupDismissed") === "true";
+    
     const calculateTimeLeft = () => {
       const now = new Date();
       const newYearDate = new Date(now.getFullYear() + 1, 0, 1); // January 1, next year
@@ -26,6 +30,7 @@ export function NewYearCountdown() {
           seconds: Math.floor((difference / 1000) % 60),
         });
         setIsNewYear(false);
+        setShowPopup(false);
       } else {
         setTimeLeft({
           days: 0,
@@ -34,6 +39,8 @@ export function NewYearCountdown() {
           seconds: 0,
         });
         setIsNewYear(true);
+        // Only show popup if it hasn't been dismissed
+        setShowPopup(!isDismissed);
       }
     };
 
@@ -43,9 +50,13 @@ export function NewYearCountdown() {
     return () => clearInterval(timer);
   }, []);
 
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
+
   return (
     <>
-      {isNewYear && <NewYearPopup />}
+      {showPopup && <NewYearPopup onClose={handleClosePopup} />
       <Card className="p-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/30">
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-2">

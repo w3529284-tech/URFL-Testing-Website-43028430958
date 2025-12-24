@@ -10,8 +10,12 @@ export function ChristmasCountdown() {
     seconds: 0,
   });
   const [isChristmas, setIsChristmas] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
+    // Check if popup was already dismissed
+    const isDismissed = localStorage.getItem("christmasPopupDismissed") === "true";
+    
     const calculateTimeLeft = () => {
       const now = new Date();
       let christmasDate = new Date(now.getFullYear(), 11, 25); // December 25
@@ -31,6 +35,7 @@ export function ChristmasCountdown() {
           seconds: Math.floor((difference / 1000) % 60),
         });
         setIsChristmas(false);
+        setShowPopup(false);
       } else {
         setTimeLeft({
           days: 0,
@@ -39,6 +44,8 @@ export function ChristmasCountdown() {
           seconds: 0,
         });
         setIsChristmas(true);
+        // Only show popup if it hasn't been dismissed
+        setShowPopup(!isDismissed);
       }
     };
 
@@ -48,9 +55,13 @@ export function ChristmasCountdown() {
     return () => clearInterval(timer);
   }, []);
 
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
+
   return (
     <>
-      {isChristmas && <ChristmasPopup />}
+      {showPopup && <ChristmasPopup onClose={handleClosePopup} />
       <Card className="p-6 bg-gradient-to-r from-red-500/10 to-green-500/10 border-red-500/30">
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-2">
