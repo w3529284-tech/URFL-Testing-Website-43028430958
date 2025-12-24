@@ -20,10 +20,10 @@ export function NewYearPopup({ onClose }: NewYearPopupProps) {
       <div className="bg-gradient-to-b from-blue-600 via-purple-600 to-pink-600 p-12 rounded-2xl shadow-2xl text-center space-y-8 max-w-2xl animate-popupBounce relative">
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 text-white hover:text-blue-100 transition-colors drop-shadow-lg"
+          className="absolute top-3 right-3 text-white hover:text-blue-100 transition-colors drop-shadow-lg bg-black/20 rounded-full p-1"
           aria-label="Close popup"
         >
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
