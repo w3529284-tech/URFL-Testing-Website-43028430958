@@ -18,6 +18,9 @@ export function ChristmasCountdown() {
   useEffect(() => {
     if (user) {
       setHasSeenPopup((user as any).hasSeenChristmasPopup || false);
+    } else {
+      // If not logged in, always show the popup (unless dismissed in this session)
+      setHasSeenPopup(false);
     }
   }, [user]);
 

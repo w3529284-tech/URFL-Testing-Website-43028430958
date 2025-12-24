@@ -18,6 +18,9 @@ export function NewYearCountdown() {
   useEffect(() => {
     if (user) {
       setHasSeenPopup((user as any).hasSeenNewYearPopup || false);
+    } else {
+      // If not logged in, always show the popup (unless dismissed in this session)
+      setHasSeenPopup(false);
     }
   }, [user]);
 
