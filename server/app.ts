@@ -235,6 +235,24 @@ export default async function runApp(
         // Column might already exist - that's fine, ignore silently
       }
       
+      try {
+        await rawSql`
+          ALTER TABLE users ADD COLUMN has_seen_christmas_popup BOOLEAN DEFAULT false
+        `;
+        console.log('Added has_seen_christmas_popup column to users table');
+      } catch (err: any) {
+        // Column might already exist - that's fine, ignore silently
+      }
+      
+      try {
+        await rawSql`
+          ALTER TABLE users ADD COLUMN has_seen_new_year_popup BOOLEAN DEFAULT false
+        `;
+        console.log('Added has_seen_new_year_popup column to users table');
+      } catch (err: any) {
+        // Column might already exist - that's fine, ignore silently
+      }
+      
       // Add missing columns to games table
       try {
         await rawSql`
