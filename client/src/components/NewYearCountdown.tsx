@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { NewYearPopup } from "./NewYearPopup";
 
 export function NewYearCountdown() {
   const [timeLeft, setTimeLeft] = useState({
@@ -43,45 +44,35 @@ export function NewYearCountdown() {
   }, []);
 
   return (
-    <Card className={`p-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/30 transition-all ${isNewYear ? "animate-fireworks-glow" : ""}`}>
-      <div className="text-center space-y-4">
-        <div className={`flex items-center justify-center gap-2 ${isNewYear ? "animate-bounce" : ""}`}>
-          <span className={`text-3xl ${isNewYear ? "animate-fireworks" : ""}`}>🎆</span>
-          <h3 className="text-2xl font-bold">New Year Countdown</h3>
-          <span className={`text-3xl ${isNewYear ? "animate-fireworks" : ""}`}>✨</span>
-        </div>
-        {isNewYear && (
-          <div className="space-y-3">
-            <div className="text-4xl font-bold animate-pulse text-yellow-500">
-              🎉
+    <>
+      {isNewYear && <NewYearPopup />}
+      <Card className="p-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/30">
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-3xl">🎆</span>
+            <h3 className="text-2xl font-bold">New Year Countdown</h3>
+            <span className="text-3xl">✨</span>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            <div className="space-y-1">
+              <div className="text-3xl font-black text-blue-600">{timeLeft.days}</div>
+              <div className="text-xs font-semibold text-muted-foreground">Days</div>
             </div>
-            <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse">
-              Happy New Year! 2026!
+            <div className="space-y-1">
+              <div className="text-3xl font-black text-purple-600">{timeLeft.hours}</div>
+              <div className="text-xs font-semibold text-muted-foreground">Hours</div>
             </div>
-            <div className="text-4xl font-bold animate-pulse text-yellow-500">
-              🎊
+            <div className="space-y-1">
+              <div className="text-3xl font-black text-blue-600">{timeLeft.minutes}</div>
+              <div className="text-xs font-semibold text-muted-foreground">Minutes</div>
             </div>
-          </div>
-        )}
-        <div className="grid grid-cols-4 gap-3">
-          <div className="space-y-1">
-            <div className="text-3xl font-black text-blue-600">{timeLeft.days}</div>
-            <div className="text-xs font-semibold text-muted-foreground">Days</div>
-          </div>
-          <div className="space-y-1">
-            <div className="text-3xl font-black text-purple-600">{timeLeft.hours}</div>
-            <div className="text-xs font-semibold text-muted-foreground">Hours</div>
-          </div>
-          <div className="space-y-1">
-            <div className="text-3xl font-black text-blue-600">{timeLeft.minutes}</div>
-            <div className="text-xs font-semibold text-muted-foreground">Minutes</div>
-          </div>
-          <div className="space-y-1">
-            <div className="text-3xl font-black text-purple-600">{timeLeft.seconds}</div>
-            <div className="text-xs font-semibold text-muted-foreground">Seconds</div>
+            <div className="space-y-1">
+              <div className="text-3xl font-black text-purple-600">{timeLeft.seconds}</div>
+              <div className="text-xs font-semibold text-muted-foreground">Seconds</div>
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </>
   );
 }

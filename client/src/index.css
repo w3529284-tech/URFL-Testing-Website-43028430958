@@ -581,3 +581,35 @@
 .animate-fireworks-glow {
   animation: fireworks-glow 0.6s ease-in-out infinite;
 }
+
+/* Popup Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes popupBounce {
+  0% {
+    transform: scale(0.5) translateY(-50px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-popupBounce {
+  animation: popupBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
