@@ -139,11 +139,10 @@ function GamesManager() {
           isPrimetime: game.isPrimetime,
         };
         if (game.date && game.time) {
-          const gameTime = new Date(`${game.date}T${game.time}`);
-          // Adjust for timezone offset to preserve local time
-          const offset = gameTime.getTimezoneOffset() * 60000;
-          const adjustedTime = new Date(gameTime.getTime() + offset);
-          payload.gameTime = adjustedTime.toISOString();
+          const [year, month, day] = game.date.split('-');
+          const [hours, minutes] = game.time.split(':');
+          const gameTime = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), 0));
+          payload.gameTime = gameTime.toISOString();
         }
         return apiRequest("POST", "/api/games", payload);
       }));
@@ -199,11 +198,10 @@ function GamesManager() {
   const updateTimeMutation = useMutation({
     mutationFn: async ({ id, date, time }: { id: string; date: string; time: string }) => {
       if (date && time) {
-        const gameTime = new Date(`${date}T${time}`);
-        // Adjust for timezone offset to preserve local time
-        const offset = gameTime.getTimezoneOffset() * 60000;
-        const adjustedTime = new Date(gameTime.getTime() + offset);
-        await apiRequest("PATCH", `/api/games/${id}`, { gameTime: adjustedTime.toISOString() });
+        const [year, month, day] = date.split('-');
+        const [hours, minutes] = time.split(':');
+        const gameTime = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), 0));
+        await apiRequest("PATCH", `/api/games/${id}`, { gameTime: gameTime.toISOString() });
       } else {
         await apiRequest("PATCH", `/api/games/${id}`, { gameTime: null });
       }
