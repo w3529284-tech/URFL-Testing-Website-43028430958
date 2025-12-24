@@ -42,10 +42,16 @@ export function ChristmasPopup() {
           </div>
         </div>
 
-        <div className="pt-6 border-t-2 border-white/30 space-y-3">
+        <div className="pt-6 border-t-2 border-white/30 space-y-4">
           <p className="text-xl text-white font-semibold drop-shadow-lg">Enjoy the festivities! 🎉</p>
-          <p className="text-sm text-white/90 italic drop-shadow-lg">"For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."</p>
-          <p className="text-xs text-white/80 drop-shadow-lg">— John 3:16</p>
+          <div className="space-y-2">
+            <p className="text-sm text-white/90 italic drop-shadow-lg">"For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."</p>
+            <p className="text-xs text-white/80 drop-shadow-lg">— John 3:16</p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm text-white/90 italic drop-shadow-lg">"For to us a child is born, to us a son is given, and the government will be on his shoulders. And he will be called Wonderful Counselor, Mighty God, Everlasting Father, Prince of Peace."</p>
+            <p className="text-xs text-white/80 drop-shadow-lg">— Isaiah 9:6</p>
+          </div>
         </div>
       </div>
     </div>
