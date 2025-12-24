@@ -64,6 +64,7 @@ export function NewYearCountdown() {
 
   const handleClosePopup = () => {
     setShowPopup(false);
+    setHasSeenPopup(true);
   };
 
   return (

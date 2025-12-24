@@ -60,6 +60,7 @@ export function ChristmasCountdown() {
 
   const handleClosePopup = () => {
     setShowPopup(false);
+    setHasSeenPopup(true);
   };
 
   return (
