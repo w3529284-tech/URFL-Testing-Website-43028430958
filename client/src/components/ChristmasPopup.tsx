@@ -42,7 +42,12 @@ export function ChristmasPopup() {
           </div>
         </div>
 
-        <div className="pt-6 border-t-2 border-white/30 space-y-4">
+        <div className="pt-6 border-t-2 border-white/30 space-y-5">
+          <div className="bg-white/10 p-4 rounded-lg backdrop-blur space-y-2">
+            <p className="text-lg text-white font-bold drop-shadow-lg">Remember the True Meaning</p>
+            <p className="text-sm text-white/90 drop-shadow-lg">Christmas isn't about the presents under the tree, the cookies we bake, or any of the material things. It's about celebrating the birth of Jesus Christ—God's greatest gift to humanity. In the midst of all the festivities, let us not forget that this holy day is fundamentally about Jesus and His love for us.</p>
+          </div>
+          
           <p className="text-xl text-white font-semibold drop-shadow-lg">Enjoy the festivities! 🎉</p>
           <div className="space-y-2">
             <p className="text-sm text-white/90 italic drop-shadow-lg">"For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."</p>
