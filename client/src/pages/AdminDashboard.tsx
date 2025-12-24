@@ -140,12 +140,8 @@ function GamesManager() {
           isPrimetime: game.isPrimetime,
         };
         if (game.date && game.time) {
-          const [year, month, day] = game.date.split('-');
-          const [hours, minutes] = game.time.split(':');
-          // Convert CST (UTC-6) to UTC by adding 6 hours
-          const cstDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), 0);
-          const utcTime = new Date(cstDate.getTime() + 6 * 60 * 60 * 1000);
-          payload.gameTime = utcTime.toISOString();
+          const gameTime = new Date(`${game.date}T${game.time}`);
+          payload.gameTime = gameTime.toISOString();
         }
         return apiRequest("POST", "/api/games", payload);
       }));
@@ -201,12 +197,8 @@ function GamesManager() {
   const updateTimeMutation = useMutation({
     mutationFn: async ({ id, date, time }: { id: string; date: string; time: string }) => {
       if (date && time) {
-        const [year, month, day] = date.split('-');
-        const [hours, minutes] = time.split(':');
-        // Convert CST (UTC-6) to UTC by adding 6 hours
-        const cstDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), 0);
-        const utcTime = new Date(cstDate.getTime() + 6 * 60 * 60 * 1000);
-        await apiRequest("PATCH", `/api/games/${id}`, { gameTime: utcTime.toISOString() });
+        const gameTime = new Date(`${date}T${time}`);
+        await apiRequest("PATCH", `/api/games/${id}`, { gameTime: gameTime.toISOString() });
       } else {
         await apiRequest("PATCH", `/api/games/${id}`, { gameTime: null });
       }
