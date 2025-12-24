@@ -8,7 +8,6 @@ export function ChristmasCountdown() {
     minutes: 0,
     seconds: 0,
   });
-  const [isChristmas, setIsChristmas] = useState(false);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -24,7 +23,6 @@ export function ChristmasCountdown() {
           minutes: Math.floor((difference / 1000 / 60) % 60),
           seconds: Math.floor((difference / 1000) % 60),
         });
-        setIsChristmas(false);
       } else {
         setTimeLeft({
           days: 0,
@@ -32,7 +30,6 @@ export function ChristmasCountdown() {
           minutes: 0,
           seconds: 0,
         });
-        setIsChristmas(true);
       }
     };
 
@@ -45,37 +42,29 @@ export function ChristmasCountdown() {
   return (
     <Card className="p-6 bg-gradient-to-r from-red-500/10 to-green-500/10 border-red-500/30">
       <div className="text-center space-y-4">
-        {isChristmas ? (
-          <div className="space-y-4">
-            <div className="text-6xl font-black text-red-600">🎄 Merry Christmas! 🎅</div>
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-3xl">🎄</span>
+          <h3 className="text-2xl font-bold">Christmas Countdown</h3>
+          <span className="text-3xl">🎅</span>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          <div className="space-y-1">
+            <div className="text-3xl font-black text-red-600">{timeLeft.days}</div>
+            <div className="text-xs font-semibold text-muted-foreground">Days</div>
           </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-3xl">🎄</span>
-              <h3 className="text-2xl font-bold">Christmas Countdown</h3>
-              <span className="text-3xl">🎅</span>
-            </div>
-            <div className="grid grid-cols-4 gap-3">
-              <div className="space-y-1">
-                <div className="text-3xl font-black text-red-600">{timeLeft.days}</div>
-                <div className="text-xs font-semibold text-muted-foreground">Days</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-3xl font-black text-green-600">{timeLeft.hours}</div>
-                <div className="text-xs font-semibold text-muted-foreground">Hours</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-3xl font-black text-red-600">{timeLeft.minutes}</div>
-                <div className="text-xs font-semibold text-muted-foreground">Minutes</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-3xl font-black text-green-600">{timeLeft.seconds}</div>
-                <div className="text-xs font-semibold text-muted-foreground">Seconds</div>
-              </div>
-            </div>
-          </>
-        )}
+          <div className="space-y-1">
+            <div className="text-3xl font-black text-green-600">{timeLeft.hours}</div>
+            <div className="text-xs font-semibold text-muted-foreground">Hours</div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-3xl font-black text-red-600">{timeLeft.minutes}</div>
+            <div className="text-xs font-semibold text-muted-foreground">Minutes</div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-3xl font-black text-green-600">{timeLeft.seconds}</div>
+            <div className="text-xs font-semibold text-muted-foreground">Seconds</div>
+          </div>
+        </div>
       </div>
     </Card>
   );
