@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ChristmasPopupProps {
   onClose: () => void;
@@ -7,6 +8,7 @@ interface ChristmasPopupProps {
 
 export function ChristmasPopup({ onClose }: ChristmasPopupProps) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const audio = new Audio("data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==");
@@ -21,6 +23,8 @@ export function ChristmasPopup({ onClose }: ChristmasPopupProps) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ popupType: "christmas", seen: true }),
         });
+        // Invalidate the user query to force a refetch with updated popup status
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       } catch (err) {
         console.error("Failed to update popup status:", err);
       }
