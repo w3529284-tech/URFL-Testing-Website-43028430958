@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { ChristmasPopup } from "./ChristmasPopup";
-import { useAuth } from "@/hooks/useAuth";
 
 export function ChristmasCountdown() {
-  const { user } = useAuth();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -12,17 +9,6 @@ export function ChristmasCountdown() {
     seconds: 0,
   });
   const [isChristmas, setIsChristmas] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [hasSeenPopup, setHasSeenPopup] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      setHasSeenPopup((user as any).hasSeenChristmasPopup || false);
-    } else {
-      // If not logged in, always show the popup (unless dismissed in this session)
-      setHasSeenPopup(false);
-    }
-  }, [user]);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -39,7 +25,6 @@ export function ChristmasCountdown() {
           seconds: Math.floor((difference / 1000) % 60),
         });
         setIsChristmas(false);
-        setShowPopup(false);
       } else {
         setTimeLeft({
           days: 0,
@@ -48,7 +33,6 @@ export function ChristmasCountdown() {
           seconds: 0,
         });
         setIsChristmas(true);
-        setShowPopup(!hasSeenPopup);
       }
     };
 
@@ -56,43 +40,43 @@ export function ChristmasCountdown() {
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, [hasSeenPopup]);
-
-  const handleClosePopup = () => {
-    setShowPopup(false);
-    setHasSeenPopup(true);
-  };
+  }, []);
 
   return (
-    <>
-      {showPopup && <ChristmasPopup onClose={handleClosePopup} />}
-      <Card className="p-6 bg-gradient-to-r from-red-500/10 to-green-500/10 border-red-500/30">
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-3xl">🎄</span>
-            <h3 className="text-2xl font-bold">Christmas Countdown</h3>
-            <span className="text-3xl">🎅</span>
+    <Card className="p-6 bg-gradient-to-r from-red-500/10 to-green-500/10 border-red-500/30">
+      <div className="text-center space-y-4">
+        {isChristmas ? (
+          <div className="space-y-4">
+            <div className="text-6xl font-black text-red-600">🎄 Merry Christmas! 🎅</div>
           </div>
-          <div className="grid grid-cols-4 gap-3">
-            <div className="space-y-1">
-              <div className="text-3xl font-black text-red-600">{timeLeft.days}</div>
-              <div className="text-xs font-semibold text-muted-foreground">Days</div>
+        ) : (
+          <>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-3xl">🎄</span>
+              <h3 className="text-2xl font-bold">Christmas Countdown</h3>
+              <span className="text-3xl">🎅</span>
             </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-black text-green-600">{timeLeft.hours}</div>
-              <div className="text-xs font-semibold text-muted-foreground">Hours</div>
+            <div className="grid grid-cols-4 gap-3">
+              <div className="space-y-1">
+                <div className="text-3xl font-black text-red-600">{timeLeft.days}</div>
+                <div className="text-xs font-semibold text-muted-foreground">Days</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl font-black text-green-600">{timeLeft.hours}</div>
+                <div className="text-xs font-semibold text-muted-foreground">Hours</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl font-black text-red-600">{timeLeft.minutes}</div>
+                <div className="text-xs font-semibold text-muted-foreground">Minutes</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl font-black text-green-600">{timeLeft.seconds}</div>
+                <div className="text-xs font-semibold text-muted-foreground">Seconds</div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-black text-red-600">{timeLeft.minutes}</div>
-              <div className="text-xs font-semibold text-muted-foreground">Minutes</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-black text-green-600">{timeLeft.seconds}</div>
-              <div className="text-xs font-semibold text-muted-foreground">Seconds</div>
-            </div>
-          </div>
-        </div>
-      </Card>
-    </>
+          </>
+        )}
+      </div>
+    </Card>
   );
 }

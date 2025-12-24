@@ -110,7 +110,6 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   updateUserRole(id: string, role: string): Promise<User>;
   updateUserTourStatus(id: string, completed: boolean): Promise<User>;
-  updateUserPopupStatus(id: string, popupType: "christmas" | "newYear", seen: boolean): Promise<User>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUserWithPassword(username: string, password: string, role: string): Promise<User>;
   deleteUser(id: string): Promise<void>;
@@ -468,18 +467,6 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set({ hasCompletedTour: completed })
-      .where(eq(users.id, id))
-      .returning();
-    return user;
-  }
-
-  async updateUserPopupStatus(id: string, popupType: "christmas" | "newYear", seen: boolean): Promise<User> {
-    const updateData = popupType === "christmas" 
-      ? { hasSeenChristmasPopup: seen }
-      : { hasSeenNewYearPopup: seen };
-    const [user] = await db
-      .update(users)
-      .set(updateData)
       .where(eq(users.id, id))
       .returning();
     return user;

@@ -198,8 +198,6 @@ export async function setupAuth(app: Express) {
         lastName: user.lastName,
         role: user.role || role,
         hasCompletedTour: Boolean(user.hasCompletedTour),
-        hasSeenChristmasPopup: Boolean(user.hasSeenChristmasPopup),
-        hasSeenNewYearPopup: Boolean(user.hasSeenNewYearPopup),
         authenticated: true 
       });
     } else {
@@ -207,30 +205,6 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  app.put("/api/user/popup-status", async (req, res) => {
-    if (!(req.session as any).authenticated) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const userId = (req.session as any).userId;
-    const { popupType, seen } = req.body;
-
-    if (!popupType || typeof seen !== "boolean") {
-      return res.status(400).json({ message: "Invalid request" });
-    }
-
-    try {
-      const user = await storage.updateUserPopupStatus(userId, popupType, seen);
-      res.json({ 
-        success: true,
-        hasSeenChristmasPopup: Boolean(user.hasSeenChristmasPopup),
-        hasSeenNewYearPopup: Boolean(user.hasSeenNewYearPopup)
-      });
-    } catch (error) {
-      console.error("Failed to update popup status:", error);
-      res.status(500).json({ message: "Failed to update popup status" });
-    }
-  });
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
