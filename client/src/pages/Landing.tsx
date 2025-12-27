@@ -1,15 +1,13 @@
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GameCard } from "@/components/GameCard";
-import { ChristmasCountdown } from "@/components/ChristmasCountdown";
-import { NewYearCountdown } from "@/components/NewYearCountdown";
 import type { Game, News as NewsType } from "@shared/schema";
 import { useLocation, Link } from "wouter";
-import { ArrowRight, Trophy, Newspaper, Zap, Calendar, BarChart3, Target, Sparkles, Gift, Star, Snowflake, Wrench } from "lucide-react";
+import { ArrowRight, Trophy, Newspaper, Zap, Calendar, BarChart3, Target, Sparkles, Wrench } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { SiteTour } from "@/components/SiteTour";
@@ -85,26 +83,17 @@ export default function Landing() {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-3xl">🎄</span>
-            <Gift className="w-6 h-6 text-primary animate-bounce" style={{ animationDuration: '2s' }} />
+            <span className="text-3xl">⚡</span>
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-black">Welcome to URFL Fan Hub</h1>
-            <p className="text-muted-foreground text-sm">Your festive destination for all things URFL</p>
+            <p className="text-muted-foreground text-sm">Your destination for all things URFL</p>
           </div>
         </div>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <ChristmasCountdown />
-        <NewYearCountdown />
       </div>
       
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 mt-8">
         <Card className="xl:col-span-2 p-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 border-2 border-primary/20 overflow-hidden relative">
-          <div className="absolute top-4 right-4 flex gap-2">
-            <Snowflake className="w-8 h-8 text-primary/20 animate-pulse" />
-            <Star className="w-6 h-6 text-accent/30 animate-pulse" style={{ animationDelay: '0.5s' }} fill="currentColor" />
-          </div>
           
           <div className="relative z-10">
             <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
@@ -236,7 +225,7 @@ export default function Landing() {
                 <Link key={post.id} href={`/news/${post.id}`}>
                   <Card className="p-5 cursor-pointer hover:border-secondary/30 hover:shadow-lg transition-all group">
                     <div className="flex items-start gap-3">
-                      <div className="text-2xl">{index === 0 ? '🎄' : '🎁'}</div>
+                      <div className="text-2xl">{index === 0 ? '📰' : '✨'}</div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-muted-foreground mb-1">
                           {format(new Date(post.createdAt!), "MMM d, yyyy")}
@@ -264,7 +253,7 @@ export default function Landing() {
       </div>
       <div className="mb-8">
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Gift className="w-5 h-5 text-primary" />
+          <Sparkles className="w-5 h-5 text-primary" />
           Quick Access
         </h2>
         

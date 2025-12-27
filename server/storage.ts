@@ -608,8 +608,7 @@ export class DatabaseStorage implements IStorage {
       pickedTeam: betData.pickedTeam,
       multiplier: betData.multiplier,
       status: betData.status || 'pending',
-      parlayId: betData.parlayId,
-      won: betData.won
+      parlayId: betData.parlayId
     }).returning();
     
     const user = await this.getUser(betData.userId);

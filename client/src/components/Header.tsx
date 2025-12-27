@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, X, Shield, Moon, Sun, Zap, Calendar, Trophy, BarChart3, Newspaper, Target, Users, BookOpen, Snowflake, Gift } from "lucide-react";
+import { Menu, X, Shield, Moon, Sun, Zap, Calendar, Trophy, BarChart3, Newspaper, Target, Users, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -26,33 +26,14 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-primary/20 bg-background/95 backdrop-blur-md">
-      <div className="christmas-lights absolute top-0 left-0 right-0 h-1 overflow-hidden">
-        <div className="flex gap-8 animate-marquee">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{
-                animation: `light-pulse ${1.5 + (i % 3) * 0.5}s ease-in-out infinite`,
-                animationDelay: `${(i % 4) * 0.3}s`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           <Link href="/" data-testid="link-home" className="flex-shrink-0 group">
             <div className="flex items-center gap-2">
-              <div className="relative">
-                <span className="text-2xl">🎄</span>
-                <Snowflake className="absolute -top-1 -right-1 w-3 h-3 text-blue-300 animate-pulse" />
-              </div>
+              <span className="text-2xl font-bold">⚡</span>
               <h1 className="text-xl md:text-2xl font-black text-foreground group-hover:text-primary transition-colors px-2 py-1 rounded-lg whitespace-nowrap">
                 URFL Fan Hub
               </h1>
-              <Gift className="w-5 h-5 text-primary hidden md:block animate-bounce" style={{ animationDuration: '2s' }} />
             </div>
           </Link>
 
@@ -108,7 +89,6 @@ export function Header() {
             ) : (
               <a href="/login" data-testid="link-login">
                 <Button size="sm" className="hidden md:flex gap-2 shadow-lg shadow-primary/25">
-                  <span>🎅</span>
                   Login
                 </Button>
               </a>
@@ -176,10 +156,9 @@ export function Header() {
                 <a href="/login" data-testid="link-mobile-login" className="block">
                   <Button
                     size="default"
-                    className="w-full justify-start h-12 gap-2"
+                    className="w-full justify-start h-12"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <span>🎅</span>
                     Login to your account
                   </Button>
                 </a>

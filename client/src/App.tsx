@@ -25,49 +25,10 @@ import Changelogs from "@/pages/Changelogs";
 import UpdatePlanner from "@/pages/UpdatePlanner";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useNotifications } from "@/hooks/useNotifications";
-
-function ChristmasDecorations({ particleEffects = 100, reduceAnimations = false }: { particleEffects?: number; reduceAnimations?: boolean }) {
-  const snowflakes = useMemo(() => {
-    // If reduce animations is on, don't create any snowflakes
-    if (reduceAnimations) {
-      return [];
-    }
-    
-    const count = Math.round((25 * particleEffects) / 100);
-    return Array.from({ length: count }).map((_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      size: Math.random() * 10 + 8,
-      duration: Math.random() * 20 + 15,
-      delay: Math.random() * 15,
-      opacity: Math.random() * 0.3 + 0.2,
-    }));
-  }, [particleEffects, reduceAnimations]);
-
-  return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-[1]">
-      {snowflakes.map((flake) => (
-        <div
-          key={flake.id}
-          className="snowflake"
-          style={{
-            left: `${flake.left}%`,
-            fontSize: `${flake.size}px`,
-            animationDuration: `${flake.duration}s`,
-            animationDelay: `${flake.delay}s`,
-            opacity: flake.opacity,
-          }}
-        >
-          ❄
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function MainContent() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -99,7 +60,7 @@ function MainContent() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-bounce">🎄</div>
+          <div className="text-6xl mb-4 animate-bounce">⚡</div>
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -111,7 +72,6 @@ function MainContent() {
   return (
     <div className={`min-h-screen bg-background ${preferences.reduceAnimations ? 'reduce-motion' : ''}`}>
       <BreakingNewsBanner />
-      <ChristmasDecorations particleEffects={preferences.particleEffects} reduceAnimations={preferences.reduceAnimations} />
       {showSidebar && <Sidebar />}
       
       <main className={`min-h-screen pb-20 md:pb-0 ${preferences.reduceAnimations ? '' : 'transition-all duration-300'} ${
