@@ -272,6 +272,24 @@ export default async function runApp(
         // Column might already exist - that's fine, ignore silently
       }
       
+      try {
+        await rawSql`
+          ALTER TABLE games ADD COLUMN team1_odds INTEGER DEFAULT 150
+        `;
+        console.log('Added team1_odds column to games table');
+      } catch (err: any) {
+        // Column might already exist - that's fine, ignore silently
+      }
+      
+      try {
+        await rawSql`
+          ALTER TABLE games ADD COLUMN team2_odds INTEGER DEFAULT 150
+        `;
+        console.log('Added team2_odds column to games table');
+      } catch (err: any) {
+        // Column might already exist - that's fine, ignore silently
+      }
+      
       // Create playoff_matches table
       await rawSql`
         CREATE TABLE IF NOT EXISTS playoff_matches (
