@@ -16,7 +16,7 @@ import Playoffs from "@/pages/Playoffs";
 import Standings from "@/pages/Standings";
 import News from "@/pages/News";
 import NewsDetail from "@/pages/NewsDetail";
-import Pickems from "@/pages/Pickems";
+import Betting from "@/pages/Betting";
 import Partners from "@/pages/Partners";
 import UserSettings from "@/pages/UserSettings";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -130,7 +130,7 @@ function MainContent() {
               <Route path="/standings" component={Standings} />
               <Route path="/news" component={News} />
               <Route path="/news/:id" component={NewsDetail} />
-              <Route path="/pickems" component={Pickems} />
+              <Route path="/betting" component={Betting} />
               <Route path="/partners" component={Partners} />
               <Route path="/settings" component={UserSettings} />
               <Route path="/social" component={SocialLinks} />

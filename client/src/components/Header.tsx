@@ -18,7 +18,7 @@ export function Header() {
     { path: "/standings", label: "Standings", icon: BarChart3 },
     { path: "/previous-weeks", label: "Archives", icon: Calendar },
     { path: "/news", label: "News", icon: Newspaper },
-    { path: "/pickems", label: "Pick'ems", icon: Target },
+    { path: "/betting", label: "Betting", icon: Target },
     { path: "/partners", label: "Partners", icon: Users },
     { path: "/social", label: "Social", icon: Users },
     { path: "/changelogs", label: "Updates", icon: BookOpen },

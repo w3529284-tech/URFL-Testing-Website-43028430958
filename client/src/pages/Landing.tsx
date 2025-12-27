@@ -274,7 +274,7 @@ export default function Landing() {
             { icon: Calendar, label: "Schedule", path: "/schedule", color: "secondary" },
             { icon: Trophy, label: "Playoffs", path: "/playoffs", color: "accent" },
             { icon: BarChart3, label: "Standings", path: "/standings", color: "primary" },
-            { icon: Target, label: "Pick'ems", path: "/pickems", color: "secondary" },
+            { icon: Target, label: "Betting", path: "/betting", color: "secondary" },
             { icon: Newspaper, label: "News", path: "/news", color: "accent" },
           ].map((item, index) => {
             const Icon = item.icon;

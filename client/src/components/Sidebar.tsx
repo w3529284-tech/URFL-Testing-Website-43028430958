@@ -48,7 +48,7 @@ export function Sidebar() {
     { path: "/standings", label: "Standings", icon: BarChart3 },
     { path: "/previous-weeks", label: "Archives", icon: Calendar },
     { path: "/news", label: "News", icon: Newspaper },
-    { path: "/pickems", label: "Pick'ems", icon: Target },
+    { path: "/betting", label: "Betting", icon: Target },
     { path: "/update-planner", label: "Update Planner", icon: Clock },
     { path: "/partners", label: "Partners", icon: Users },
     { path: "/social", label: "Social", icon: Users },
