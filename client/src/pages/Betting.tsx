@@ -120,10 +120,6 @@ export default function Betting() {
     queryKey: ["/api/standings"],
   });
 
-  const { data: allGames = [] } = useQuery<Game[]>({
-    queryKey: ["/api/games/all"],
-  });
-
   const getOdds = (game: Game, team: string) => {
     const prob = calculateWinProbability(
       game,
