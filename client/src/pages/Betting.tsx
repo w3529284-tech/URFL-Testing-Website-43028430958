@@ -620,11 +620,10 @@ export default function Betting() {
                     bet.pickedTeam.toLowerCase().includes(myBetsSearchQuery.toLowerCase());
 
                   // Status filter (live vs past)
-                  const isGameLive = game.isLive || game.isFinal;
                   const matchesStatus = 
                     myBetsStatusFilter === "all" ||
-                    (myBetsStatusFilter === "live" && isGameLive) ||
-                    (myBetsStatusFilter === "past" && !isGameLive);
+                    (myBetsStatusFilter === "live" && !game.isFinal) ||
+                    (myBetsStatusFilter === "past" && game.isFinal);
 
                   // Primetime filter
                   const matchesPrimetime = 
