@@ -33,6 +33,7 @@ export default function Betting() {
 
   const placeBetMutation = useMutation({
     mutationFn: async ({ gameId, team, amount, odds }: { gameId: string; team: string; amount: number; odds: number }) => {
+      console.log("Placing bet:", { gameId, pickedTeam: team, amount, odds });
       return apiRequest("POST", "/api/bets", { gameId, pickedTeam: team, amount, odds });
     },
     onSuccess: () => {
@@ -74,7 +75,10 @@ export default function Betting() {
 
   const handlePlaceBet = (gameId: string) => {
     const game = games.find(g => g.id === gameId);
-    if (!game) return;
+    if (!game) {
+      console.error("Game not found:", gameId);
+      return;
+    }
     
     const bet = bets[gameId];
     if (!bet || bet.amount <= 0) {
@@ -86,6 +90,7 @@ export default function Betting() {
       return;
     }
     const odds = getOdds(game, bet.team);
+    console.log("Placing bet from UI:", { gameId, team: bet.team, amount: bet.amount, odds });
     placeBetMutation.mutate({ gameId, team: bet.team, amount: bet.amount, odds });
   };
 

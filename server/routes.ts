@@ -473,15 +473,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Insufficient balance" });
       }
 
-      // Store the odds at the time of placing the bet
-      // Use the odds from the request body
-      const finalOdds = Math.round(odds * 100); // Store as integer (1.50 -> 150)
+      const finalOdds = Math.round(odds * 100);
       const bet = await storage.placeBet({ 
         gameId, 
         pickedTeam, 
         amount, 
         userId: req.session.userId,
-        multiplier: finalOdds
+        multiplier: finalOdds,
+        status: 'pending'
       }); 
       
       res.json(bet);

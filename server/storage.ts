@@ -600,14 +600,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async placeBet(betData: InsertBet): Promise<Bet> {
-    const [bet] = await db.insert(bets).values(betData).returning();
+    console.log("[STORAGE] Placing bet:", betData);
+    const [bet] = await db.insert(bets).values({
+      userId: betData.userId,
+      gameId: betData.gameId,
+      amount: betData.amount,
+      pickedTeam: betData.pickedTeam,
+      multiplier: betData.multiplier,
+      status: betData.status || 'pending',
+      parlayId: betData.parlayId,
+      won: betData.won
+    }).returning();
     
-    // If a multiplier was provided in the bet data itself, resolution will use it.
-    // The previous implementation was updating the game odds, which is also valid but
-    // storing it on the bet is more robust for individual bets.
-
     const user = await this.getUser(betData.userId);
     if (user) {
+      console.log("[STORAGE] Updating balance for user:", betData.userId);
       await this.updateUserBalance(betData.userId, (user.coins || 1000) - betData.amount);
     }
     return bet;
@@ -619,7 +626,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserBalance(userId: string, amount: number): Promise<User> {
-    const [user] = await db.update(users).set({ coins: amount }).where(eq(users.id, userId)).returning();
+    console.log(`[STORAGE] Setting balance for user ${userId} to ${amount}`);
+    const [user] = await db.update(users).set({ coins: Math.max(0, amount) }).where(eq(users.id, userId)).returning();
     return user;
   }
 
@@ -661,13 +669,7 @@ export class DatabaseStorage implements IStorage {
         const isWinningBet = bet.pickedTeam === winner;
         
         if (isWinningBet) {
-          // Since we want dynamic odds based on win probability, 
-          // we should update the game's odds in the DB based on the win probability logic
-          // before resolving, or use the stored game odds.
-          // The user requested they be based off win percentage in game card.
-          
-          // Use the multiplier stored on the bet if available, 
-          // otherwise fallback to the game's final odds
+          // Use the multiplier stored on the bet if available
           const multiplier = bet.multiplier ? (bet.multiplier / 100) : 
                              (winner === game.team1 ? (game.team1Odds || 150) : (game.team2Odds || 150)) / 100;
           

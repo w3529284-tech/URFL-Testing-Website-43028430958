@@ -8,6 +8,7 @@ import {
   boolean,
   jsonb,
   index,
+  serial,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -343,7 +344,7 @@ export type UpdatePlan = typeof updatePlans.$inferSelect;
 
 // Bets table
 export const bets = pgTable("bets", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull(),
   gameId: varchar("game_id").notNull(),
   amount: integer("amount").notNull(),
