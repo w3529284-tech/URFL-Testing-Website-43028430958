@@ -92,6 +92,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/games/:id", isAuthenticated, async (req, res) => {
     try {
       const game = await storage.updateGame(req.params.id, req.body);
+      
+      // If game is being marked as final, resolve bets
+      if (req.body.isFinal && !game.isFinal) {
+        await storage.resolveBetsForGame(req.params.id);
+      }
+      
       res.json(game);
     } catch (error) {
       console.error("Error updating game:", error);
