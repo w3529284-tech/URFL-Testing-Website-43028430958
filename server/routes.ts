@@ -16,6 +16,7 @@ import {
   insertPredictionSchema,
   insertBracketImageSchema,
   insertStreamRequestSchema,
+  insertBetSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -437,6 +438,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating prediction:", error);
       res.status(400).json({ message: "Failed to create prediction" });
+    }
+  });
+
+  // Betting endpoints
+  app.get("/api/bets", isAuthenticated, async (req: any, res) => {
+    try {
+      const bets = await storage.getUserBets(req.session.userId);
+      res.json(bets);
+    } catch (error) {
+      console.error("Error fetching bets:", error);
+      res.status(500).json({ message: "Failed to fetch bets" });
+    }
+  });
+
+  app.post("/api/bets", isAuthenticated, async (req: any, res) => {
+    try {
+      const betData = insertBetSchema.parse({ ...req.body, userId: req.session.userId });
+      const balance = await storage.getUserBalance(req.session.userId);
+      if (balance < betData.amount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+      const bet = await storage.placeBet(betData);
+      res.json(bet);
+    } catch (error) {
+      console.error("Error placing bet:", error);
+      res.status(400).json({ message: "Failed to place bet" });
+    }
+  });
+
+  app.get("/api/balance", isAuthenticated, async (req: any, res) => {
+    try {
+      const balance = await storage.getUserBalance(req.session.userId);
+      res.json({ balance });
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+      res.status(500).json({ message: "Failed to fetch balance" });
     }
   });
 

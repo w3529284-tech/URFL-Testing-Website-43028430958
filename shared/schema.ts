@@ -33,6 +33,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   hasCompletedTour: boolean("has_completed_tour").default(false),
   role: varchar("role", { length: 20 }).default("admin"), // "admin" = full access, "streamer" = stream links only
+  coins: integer("coins").default(1000),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -337,3 +338,49 @@ export const insertUpdatePlanSchema = createInsertSchema(updatePlans).omit({
 
 export type InsertUpdatePlan = z.infer<typeof insertUpdatePlanSchema>;
 export type UpdatePlan = typeof updatePlans.$inferSelect;
+
+// Bets table
+export const bets = pgTable("bets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  gameId: varchar("game_id").notNull(),
+  amount: integer("amount").notNull(),
+  pickedTeam: varchar("picked_team", { length: 100 }).notNull(),
+  parlayId: varchar("parlay_id"),
+  won: boolean("won"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertBetSchema = createInsertSchema(bets).omit({
+  id: true,
+  won: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertBet = z.infer<typeof insertBetSchema>;
+export type Bet = typeof bets.$inferSelect;
+
+// Parlays table (grouped bets)
+export const parlays = pgTable("parlays", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  totalAmount: integer("total_amount").notNull(),
+  totalOdds: integer("total_odds").default(1),
+  potentialWinnings: integer("potential_winnings").notNull(),
+  won: boolean("won"),
+  status: varchar("status", { length: 20 }).default("active"), // "active", "won", "lost"
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertParlaySchema = createInsertSchema(parlays).omit({
+  id: true,
+  won: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertParlay = z.infer<typeof insertParlaySchema>;
+export type Parlay = typeof parlays.$inferSelect;

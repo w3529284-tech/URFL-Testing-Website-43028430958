@@ -15,6 +15,8 @@ import {
   partners,
   userPreferences,
   updatePlans,
+  bets,
+  parlays,
   type User,
   type UpsertUser,
   type Game,
@@ -47,6 +49,10 @@ import {
   type InsertUserPreferences,
   type UpdatePlan,
   type InsertUpdatePlan,
+  type Bet,
+  type InsertBet,
+  type Parlay,
+  type InsertParlay,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -129,6 +135,11 @@ export interface IStorage {
   getUpdatePlans(year: number): Promise<UpdatePlan[]>;
   upsertUpdatePlan(plan: InsertUpdatePlan): Promise<UpdatePlan>;
   deleteUpdatePlan(id: string): Promise<void>;
+
+  getUserBets(userId: string): Promise<Bet[]>;
+  placeBet(bet: InsertBet): Promise<Bet>;
+  getUserBalance(userId: string): Promise<number>;
+  updateUserBalance(userId: string, amount: number): Promise<User>;
 }
 
 // Helper function to convert undefined to null (postgres requires explicit null, not undefined)
@@ -582,6 +593,29 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUpdatePlan(date: string): Promise<void> {
     await db.delete(updatePlans).where(eq(updatePlans.updateDate, date));
+  }
+
+  async getUserBets(userId: string): Promise<Bet[]> {
+    return await db.select().from(bets).where(eq(bets.userId, userId)).orderBy(desc(bets.createdAt));
+  }
+
+  async placeBet(betData: InsertBet): Promise<Bet> {
+    const [bet] = await db.insert(bets).values(betData).returning();
+    const user = await this.getUser(betData.userId);
+    if (user) {
+      await this.updateUserBalance(betData.userId, (user.coins || 1000) - betData.amount);
+    }
+    return bet;
+  }
+
+  async getUserBalance(userId: string): Promise<number> {
+    const user = await this.getUser(userId);
+    return user?.coins || 1000;
+  }
+
+  async updateUserBalance(userId: string, amount: number): Promise<User> {
+    const [user] = await db.update(users).set({ coins: amount }).where(eq(users.id, userId)).returning();
+    return user;
   }
 }
 
