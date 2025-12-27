@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import type { Game } from "@shared/schema";
+import { calculateWinProbability, calculateOdds } from "@/lib/winProbability";
+import type { Game, Standings } from "@shared/schema";
 import { AlertCircle, TrendingUp, Clock, Coins, X, Zap } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -31,8 +32,8 @@ export default function Betting() {
   });
 
   const placeBetMutation = useMutation({
-    mutationFn: async ({ gameId, team, amount }: { gameId: string; team: string; amount: number }) => {
-      return apiRequest("POST", "/api/bets", { gameId, pickedTeam: team, amount });
+    mutationFn: async ({ gameId, team, amount, odds }: { gameId: string; team: string; amount: number; odds: number }) => {
+      return apiRequest("POST", "/api/bets", { gameId, pickedTeam: team, amount, odds });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/bets`] });
@@ -72,6 +73,9 @@ export default function Betting() {
   };
 
   const handlePlaceBet = (gameId: string) => {
+    const game = games.find(g => g.id === gameId);
+    if (!game) return;
+    
     const bet = bets[gameId];
     if (!bet || bet.amount <= 0) {
       alert("Enter a valid bet amount");
@@ -81,7 +85,8 @@ export default function Betting() {
       alert("Insufficient balance");
       return;
     }
-    placeBetMutation.mutate({ gameId, team: bet.team, amount: bet.amount });
+    const odds = getOdds(game, bet.team);
+    placeBetMutation.mutate({ gameId, team: bet.team, amount: bet.amount, odds });
   };
 
   const handleRemoveBet = (gameId: string) => {
@@ -90,9 +95,22 @@ export default function Betting() {
     setBets(newBets);
   };
 
+  const { data: standings = [] } = useQuery<Standings[]>({
+    queryKey: ["/api/standings"],
+  });
+
+  const { data: allGames = [] } = useQuery<Game[]>({
+    queryKey: ["/api/games/all"],
+  });
+
   const getOdds = (game: Game, team: string) => {
-    const odds = team === game.team1 ? game.team1Odds : game.team2Odds;
-    return (odds || 150) / 100; // Convert from 150 -> 1.50
+    const prob = calculateWinProbability(
+      game,
+      team === game.team1 ? "team1" : "team2",
+      standings,
+      allGames
+    );
+    return calculateOdds(prob);
   };
 
   const getPotentialWinnings = (game: Game, team: string, amount: number) => {
@@ -220,7 +238,7 @@ export default function Betting() {
                                 <span className="font-semibold">{game.team1}</span>
                                 <Badge variant={gameBet?.team === game.team1 ? "default" : "secondary"} className="gap-1">
                                   <Zap className="w-3 h-3" />
-                                  {((game.team1Odds || 150) / 100).toFixed(2)}x
+                                  {getOdds(game, game.team1).toFixed(2)}x
                                 </Badge>
                               </div>
                               {gameBet?.team === game.team1 && <TrendingUp className="w-4 h-4" />}
@@ -303,7 +321,7 @@ export default function Betting() {
                                 <span className="font-semibold">{game.team2}</span>
                                 <Badge variant={gameBet?.team === game.team2 ? "default" : "secondary"} className="gap-1">
                                   <Zap className="w-3 h-3" />
-                                  {((game.team2Odds || 150) / 100).toFixed(2)}x
+                                  {getOdds(game, game.team2).toFixed(2)}x
                                 </Badge>
                               </div>
                               {gameBet?.team === game.team2 && <TrendingUp className="w-4 h-4" />}

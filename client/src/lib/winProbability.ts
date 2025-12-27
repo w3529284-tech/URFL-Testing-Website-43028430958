@@ -213,12 +213,24 @@ export function calculateWinProbability(
     probability = Math.max(1, Math.min(99, Math.round(probability)));
   }
 
+  // If we are in the browser, update the server's view of the odds via an internal API call if needed
+  // However, we'll just return the value and let the UI handle the display.
+  // The backend resolution will need to recalculate this.
+
   if (team === "team1") {
     return probability;
   } else {
     return 100 - probability;
   }
 }
+
+export function calculateOdds(probability: number): number {
+  // Formula: 100 / probability
+  // Capped between 1.1x and 10x
+  const rawOdds = 100 / Math.max(probability, 1);
+  return Math.max(1.1, Math.min(10, rawOdds));
+}
+
 
 export function getConferenceRanking(teamName: string, standings?: Standings[]): string {
   if (!standings || standings.length === 0) {
