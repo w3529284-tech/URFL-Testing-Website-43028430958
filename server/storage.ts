@@ -668,29 +668,25 @@ export class DatabaseStorage implements IStorage {
             .update(bets)
             .set({ won: true })
             .where(eq(bets.id, bet.id));
-          
-          // Award the total payout (includes original bet)
+            
+          // Add payout to user's balance
           const user = await this.getUser(bet.userId);
           if (user) {
-            const currentBalance = user.coins || 0;
-            const newBalance = currentBalance + totalPayout;
-            console.log(`[BET RESOLUTION] User ${bet.userId}: balance ${currentBalance} + ${totalPayout} = ${newBalance}`);
+            const newBalance = (user.coins || 0) + totalPayout;
             await this.updateUserBalance(bet.userId, newBalance);
+            console.log(`[BET RESOLUTION] User ${bet.userId} balance updated: ${user.coins} -> ${newBalance}`);
           }
         } else {
-          console.log(`[BET RESOLUTION] Bet ${bet.id}: LOSS - picked ${bet.pickedTeam} but winner is ${winner}`);
-          
-          // Mark bet as lost (user already paid the bet amount when placing it)
+          console.log(`[BET RESOLUTION] Bet ${bet.id}: LOSS - ${bet.pickedTeam}`);
+          // Mark bet as lost
           await db
             .update(bets)
             .set({ won: false })
             .where(eq(bets.id, bet.id));
         }
       }
-      
-      console.log(`[BET RESOLUTION] Completed resolving bets for game ${gameId}`);
     } catch (error) {
-      console.error("Error resolving bets for game:", error);
+      console.error("[BET RESOLUTION] Error resolving bets:", error);
     }
   }
 }
