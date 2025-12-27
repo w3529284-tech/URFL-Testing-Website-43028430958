@@ -205,13 +205,8 @@ export function calculateWinProbability(
     probability = (probability * preGameWeight) + (50 + scoreImpact) * adjustedQuarterWeight;
   }
 
-  // Keep probabilities between 30-70% for pre-game to avoid extreme predictions
-  if (!game.quarter || game.quarter === "Scheduled") {
-    probability = Math.max(30, Math.min(70, Math.round(probability)));
-  } else {
-    // Allow more extreme probabilities during live games
-    probability = Math.max(1, Math.min(99, Math.round(probability)));
-  }
+  // Keep probabilities between 1-99% to avoid absolute certainties
+  probability = Math.max(1, Math.min(99, Math.round(probability)));
 
   // If we are in the browser, update the server's view of the odds via an internal API call if needed
   // However, we'll just return the value and let the UI handle the display.
