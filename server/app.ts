@@ -253,6 +253,15 @@ export default async function runApp(
         // Column might already exist - that's fine, ignore silently
       }
       
+      try {
+        await rawSql`
+          ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 1000
+        `;
+        console.log('Added coins column to users table');
+      } catch (err: any) {
+        // Column might already exist - that's fine, ignore silently
+      }
+      
       // Add missing columns to games table
       try {
         await rawSql`

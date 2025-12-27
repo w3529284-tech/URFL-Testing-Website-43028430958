@@ -50,3 +50,5 @@ expertMode = true
 [userenv.shared]
 VITE_HMR_HOST = ""
 VITE_HMR_PROTOCOL = "wss"
+ADMIN_USERNAME = "popfork1"
+ADMIN_PASSWORD = "dairyqueen12"
