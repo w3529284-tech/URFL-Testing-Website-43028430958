@@ -18,6 +18,9 @@ export default function Betting() {
   const [bets, setBets] = useState<Record<string, { team: string; amount: number }>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [primetimeFilter, setPrimetimeFilter] = useState<"all" | "primetime" | "regular">("all");
+  const [myBetsSearchQuery, setMyBetsSearchQuery] = useState("");
+  const [myBetsPrimetimeFilter, setMyBetsPrimetimeFilter] = useState<"all" | "primetime" | "regular">("all");
+  const [myBetsStatusFilter, setMyBetsStatusFilter] = useState<"all" | "live" | "past">("all");
 
   const { data: games = [], isLoading: gamesLoading } = useQuery<Game[]>({
     queryKey: ["/api/games/current"],
@@ -543,80 +546,181 @@ export default function Betting() {
               </div>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sortedUserBets.map((bet: any) => {
-                const game = games.find(g => g.id === bet.gameId);
-                if (!game) return null;
+            <>
+              {/* Search and Filters */}
+              <div className="space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search by team name..."
+                    value={myBetsSearchQuery}
+                    onChange={(e) => setMyBetsSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={myBetsStatusFilter === "all" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMyBetsStatusFilter("all")}
+                  >
+                    All Bets
+                  </Button>
+                  <Button
+                    variant={myBetsStatusFilter === "live" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMyBetsStatusFilter("live")}
+                  >
+                    Live Bets
+                  </Button>
+                  <Button
+                    variant={myBetsStatusFilter === "past" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMyBetsStatusFilter("past")}
+                  >
+                    Past Bets
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={myBetsPrimetimeFilter === "all" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMyBetsPrimetimeFilter("all")}
+                  >
+                    All Games
+                  </Button>
+                  <Button
+                    variant={myBetsPrimetimeFilter === "primetime" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMyBetsPrimetimeFilter("primetime")}
+                  >
+                    Primetime
+                  </Button>
+                  <Button
+                    variant={myBetsPrimetimeFilter === "regular" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMyBetsPrimetimeFilter("regular")}
+                  >
+                    Regular
+                  </Button>
+                </div>
+              </div>
 
-                const odds = bet.odds || getOdds(game, bet.pickedTeam);
-                const potentialWinnings = Math.floor(bet.amount * odds);
-                const isLiveOrFinal = game.isLive || game.isFinal;
+              {/* Filtered Bets */}
+              {(() => {
+                const filteredBets = sortedUserBets.filter((bet: any) => {
+                  const game = games.find(g => g.id === bet.gameId);
+                  if (!game) return false;
 
-                return (
-                  <Card key={bet.id} className="p-4 hover:shadow-lg transition-shadow">
-                    <div className="space-y-3">
-                      {/* Game Info */}
-                      <div className="flex items-center justify-between">
-                        <Badge 
-                          variant={isLiveOrFinal ? (game.isFinal ? "default" : "secondary") : "outline"}
-                        >
-                          {isLiveOrFinal ? (game.isFinal ? "Final" : "Live") : "Upcoming"}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          Week {game.week}
-                        </span>
-                      </div>
+                  // Search filter
+                  const matchesSearch = 
+                    game.team1.toLowerCase().includes(myBetsSearchQuery.toLowerCase()) ||
+                    game.team2.toLowerCase().includes(myBetsSearchQuery.toLowerCase()) ||
+                    bet.pickedTeam.toLowerCase().includes(myBetsSearchQuery.toLowerCase());
 
-                      {/* Matchup */}
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Game</p>
-                        <p className="font-semibold text-sm">
-                          {game.team1} vs {game.team2}
-                        </p>
-                      </div>
+                  // Status filter (live vs past)
+                  const isGameLive = game.isLive || game.isFinal;
+                  const matchesStatus = 
+                    myBetsStatusFilter === "all" ||
+                    (myBetsStatusFilter === "live" && isGameLive) ||
+                    (myBetsStatusFilter === "past" && !isGameLive);
 
-                      {/* Your Bet */}
-                      <div className="bg-primary/10 p-3 rounded-lg border border-primary/30">
-                        <p className="text-xs text-muted-foreground mb-1">Your Pick</p>
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-sm">{bet.pickedTeam}</span>
-                          <Badge variant="secondary" className="gap-1">
-                            <Zap className="w-3 h-3" />
-                            {odds.toFixed(2)}x
-                          </Badge>
-                        </div>
-                      </div>
+                  // Primetime filter
+                  const matchesPrimetime = 
+                    myBetsPrimetimeFilter === "all" ||
+                    (myBetsPrimetimeFilter === "primetime" && game.isPrimetime) ||
+                    (myBetsPrimetimeFilter === "regular" && !game.isPrimetime);
 
-                      {/* Bet Amount and Potential Winnings */}
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <p className="text-muted-foreground mb-1">Bet Amount</p>
-                          <div className="flex items-center gap-1 font-semibold">
-                            <Coins className="w-3 h-3" />
-                            {bet.amount}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground mb-1">Potential Win</p>
-                          <div className="flex items-center gap-1 font-semibold text-accent">
-                            <Coins className="w-3 h-3" />
-                            {potentialWinnings}
-                          </div>
-                        </div>
-                      </div>
+                  return matchesSearch && matchesStatus && matchesPrimetime;
+                });
 
-                      {/* Game Time */}
-                      {game.gameTime && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock className="w-3 h-3" />
-                          {formatDistanceToNow(new Date(game.gameTime), { addSuffix: true })}
-                        </div>
-                      )}
+                return filteredBets.length === 0 ? (
+                  <Card className="p-6">
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        No bets match your filters
+                      </p>
                     </div>
                   </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredBets.map((bet: any) => {
+                      const game = games.find(g => g.id === bet.gameId);
+                      if (!game) return null;
+
+                      const odds = bet.odds || getOdds(game, bet.pickedTeam);
+                      const potentialWinnings = Math.floor(bet.amount * odds);
+                      const isLiveOrFinal = game.isLive || game.isFinal;
+
+                      return (
+                        <Card key={bet.id} className="p-4 hover:shadow-lg transition-shadow">
+                          <div className="space-y-3">
+                            {/* Game Info */}
+                            <div className="flex items-center justify-between">
+                              <Badge 
+                                variant={isLiveOrFinal ? (game.isFinal ? "default" : "secondary") : "outline"}
+                              >
+                                {isLiveOrFinal ? (game.isFinal ? "Final" : "Live") : "Upcoming"}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                Week {game.week}
+                              </span>
+                            </div>
+
+                            {/* Matchup */}
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-1">Game</p>
+                              <p className="font-semibold text-sm">
+                                {game.team1} vs {game.team2}
+                              </p>
+                            </div>
+
+                            {/* Your Bet */}
+                            <div className="bg-primary/10 p-3 rounded-lg border border-primary/30">
+                              <p className="text-xs text-muted-foreground mb-1">Your Pick</p>
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-sm">{bet.pickedTeam}</span>
+                                <Badge variant="secondary" className="gap-1">
+                                  <Zap className="w-3 h-3" />
+                                  {odds.toFixed(2)}x
+                                </Badge>
+                              </div>
+                            </div>
+
+                            {/* Bet Amount and Potential Winnings */}
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <p className="text-muted-foreground mb-1">Bet Amount</p>
+                                <div className="flex items-center gap-1 font-semibold">
+                                  <Coins className="w-3 h-3" />
+                                  {bet.amount}
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground mb-1">Potential Win</p>
+                                <div className="flex items-center gap-1 font-semibold text-accent">
+                                  <Coins className="w-3 h-3" />
+                                  {potentialWinnings}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Game Time */}
+                            {game.gameTime && (
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Clock className="w-3 h-3" />
+                                {formatDistanceToNow(new Date(game.gameTime), { addSuffix: true })}
+                              </div>
+                            )}
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
                 );
-              })}
-            </div>
+              })()}
+            </>
           )}
 
           {/* Bet Stats Summary */}
