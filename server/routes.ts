@@ -23,6 +23,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Note: /api/auth/user is handled in simpleAuth.ts
 
+  app.get("/api/games", async (req, res) => {
+    try {
+      const games = await storage.getAllGames();
+      res.json(games);
+    } catch (error) {
+      console.error("Error fetching all games:", error);
+      res.status(500).json({ message: "Failed to fetch games" });
+    }
+  });
+
   app.get("/api/games/all", async (req, res) => {
     try {
       const games = await storage.getAllGames();

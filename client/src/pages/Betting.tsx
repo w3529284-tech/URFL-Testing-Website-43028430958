@@ -14,8 +14,8 @@ export default function Betting() {
   const { user, isAuthenticated } = useAuth();
   const [selectedBets, setSelectedBets] = useState<Record<string, string>>({});
 
-  const { data: games, isLoading: gamesLoading } = useQuery<Game[]>({
-    queryKey: ["/api/games"],
+  const { data: games = [], isLoading: gamesLoading } = useQuery<Game[]>({
+    queryKey: ["/api/games/current"],
   });
 
   const { data: userPredictions = [] } = useQuery<any[]>({
@@ -41,11 +41,11 @@ export default function Betting() {
     setSelectedBets({ ...selectedBets, [gameId]: team });
   };
 
-  const currentWeek = games && games.length > 0
+  const currentWeek = games.length > 0
     ? Math.max(...games.map(g => g.week))
     : 1;
 
-  const currentWeekGames = games?.filter(g => g.week === currentWeek) || [];
+  const currentWeekGames = games.filter(g => g.week === currentWeek);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -109,16 +109,16 @@ export default function Betting() {
                         </span>
                       </div>
                       <Badge 
-                        variant={game.isFinal ? "default" : game.isLive ? "secondary" : "outline"}
+                        variant={(game.isFinal ?? false) ? "default" : (game.isLive ?? false) ? "secondary" : "outline"}
                         data-testid={`badge-status-${game.id}`}
                       >
-                        {game.isFinal ? "Final" : game.isLive ? "Live" : "Upcoming"}
+                        {(game.isFinal ?? false) ? "Final" : (game.isLive ?? false) ? "Live" : "Upcoming"}
                       </Badge>
                     </div>
 
                     {/* Score or Teams */}
                     <div className="space-y-3">
-                      {game.isLive || game.isFinal ? (
+                      {(game.isLive ?? false) || (game.isFinal ?? false) ? (
                         <>
                           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/20">
                             <span className="font-semibold">{game.team1}</span>
@@ -138,7 +138,7 @@ export default function Betting() {
                             variant={betTeam === game.team1 ? "default" : "outline"}
                             className="w-full justify-between h-auto py-3"
                             onClick={() => handlePlaceBet(game.id, game.team1)}
-                            disabled={!isAuthenticated || game.isLive === true || game.isFinal === true}
+                            disabled={!isAuthenticated || (game.isLive ?? false) || (game.isFinal ?? false)}
                             data-testid={`button-bet-${game.id}-${game.team1}`}
                           >
                             <span>{game.team1}</span>
@@ -148,7 +148,7 @@ export default function Betting() {
                             variant={betTeam === game.team2 ? "default" : "outline"}
                             className="w-full justify-between h-auto py-3"
                             onClick={() => handlePlaceBet(game.id, game.team2)}
-                            disabled={!isAuthenticated || game.isLive === true || game.isFinal === true}
+                            disabled={!isAuthenticated || (game.isLive ?? false) || (game.isFinal ?? false)}
                             data-testid={`button-bet-${game.id}-${game.team2}`}
                           >
                             <span>{game.team2}</span>
