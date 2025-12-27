@@ -426,6 +426,38 @@ export default async function runApp(
           updated_at TIMESTAMP DEFAULT NOW()
         )
       `;
+      
+      // Create bets table
+      await rawSql`
+        CREATE TABLE IF NOT EXISTS bets (
+          id SERIAL PRIMARY KEY,
+          user_id VARCHAR NOT NULL,
+          game_id VARCHAR NOT NULL,
+          amount INTEGER NOT NULL,
+          picked_team VARCHAR(100) NOT NULL,
+          multiplier INTEGER,
+          parlay_id VARCHAR,
+          won BOOLEAN,
+          status TEXT DEFAULT 'pending',
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        )
+      `;
+      
+      // Create parlays table
+      await rawSql`
+        CREATE TABLE IF NOT EXISTS parlays (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL,
+          total_amount INTEGER NOT NULL,
+          total_odds INTEGER DEFAULT 1,
+          potential_winnings INTEGER NOT NULL,
+          won BOOLEAN,
+          status VARCHAR(20) DEFAULT 'active',
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        )
+      `;
     
     console.log('Database schema initialized successfully');
   } catch (error: any) {
