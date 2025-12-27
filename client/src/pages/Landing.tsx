@@ -11,6 +11,8 @@ import { ArrowRight, Trophy, Newspaper, Zap, Calendar, BarChart3, Target, Sparkl
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { SiteTour } from "@/components/SiteTour";
+import { NewYearCountdown } from "@/components/NewYearCountdown";
+import { NewYearPopup } from "@/components/NewYearPopup";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -93,38 +95,41 @@ export default function Landing() {
       </div>
       
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 mt-8">
-        <Card className="xl:col-span-2 p-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 border-2 border-primary/20 overflow-hidden relative">
-          
-          <div className="relative z-10">
-            <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Season 1 Highlights
-            </Badge>
+        <div className="xl:col-span-2 space-y-6">
+          <NewYearCountdown />
+          <Card className="p-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 border-2 border-primary/20 overflow-hidden relative">
             
-            <h2 className="text-3xl md:text-4xl font-black mb-4 leading-tight">
-              Week {currentWeek} is <span className="text-primary">Here!</span>
-            </h2>
-            
-            <p className="text-muted-foreground mb-6 max-w-lg">
-              Catch all the action with live scores, real-time chat, and complete coverage of every matchup this week.
-            </p>
-            
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={() => setLocation("/scores")} className="gap-2 shadow-lg shadow-primary/20">
-                <Zap className="w-4 h-4" />
-                View Live Scores
-              </Button>
-              <Button variant="outline" onClick={() => setLocation("/schedule")} className="gap-2">
-                <Calendar className="w-4 h-4" />
-                Full Schedule
-              </Button>
+            <div className="relative z-10">
+              <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Season 1 Highlights
+              </Badge>
+              
+              <h2 className="text-3xl md:text-4xl font-black mb-4 leading-tight">
+                Week {currentWeek} is <span className="text-primary">Here!</span>
+              </h2>
+              
+              <p className="text-muted-foreground mb-6 max-w-lg">
+                Catch all the action with live scores, real-time chat, and complete coverage of every matchup this week.
+              </p>
+              
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => setLocation("/scores")} className="gap-2 shadow-lg shadow-primary/20">
+                  <Zap className="w-4 h-4" />
+                  View Live Scores
+                </Button>
+                <Button variant="outline" onClick={() => setLocation("/schedule")} className="gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Full Schedule
+                </Button>
+              </div>
             </div>
-          </div>
-          
-          <div className="absolute -bottom-8 -right-8 text-[150px] opacity-5 select-none">
-            🏈
-          </div>
-        </Card>
+            
+            <div className="absolute -bottom-8 -right-8 text-[150px] opacity-5 select-none">
+              🏈
+            </div>
+          </Card>
+        </div>
 
         <Card className="p-5 border-2 border-accent/20 bg-gradient-to-b from-accent/5 to-background">
           <div className="flex items-center justify-between mb-4">
@@ -307,6 +312,7 @@ export default function Landing() {
         </div>
       </Card>
       {showTour && <SiteTour onComplete={() => setShowTour(false)} />}
+      <NewYearPopup onClose={() => {}} />
     </div>
   );
 }
