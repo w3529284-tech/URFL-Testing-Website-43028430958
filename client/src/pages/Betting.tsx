@@ -220,7 +220,7 @@ export default function Betting() {
                                 <span className="font-semibold">{game.team1}</span>
                                 <Badge variant={gameBet?.team === game.team1 ? "default" : "secondary"} className="gap-1">
                                   <Zap className="w-3 h-3" />
-                                  {(game.team1Odds / 100).toFixed(2)}x
+                                  {((game.team1Odds || 150) / 100).toFixed(2)}x
                                 </Badge>
                               </div>
                               {gameBet?.team === game.team1 && <TrendingUp className="w-4 h-4" />}
@@ -303,7 +303,7 @@ export default function Betting() {
                                 <span className="font-semibold">{game.team2}</span>
                                 <Badge variant={gameBet?.team === game.team2 ? "default" : "secondary"} className="gap-1">
                                   <Zap className="w-3 h-3" />
-                                  {(game.team2Odds / 100).toFixed(2)}x
+                                  {((game.team2Odds || 150) / 100).toFixed(2)}x
                                 </Badge>
                               </div>
                               {gameBet?.team === game.team2 && <TrendingUp className="w-4 h-4" />}
