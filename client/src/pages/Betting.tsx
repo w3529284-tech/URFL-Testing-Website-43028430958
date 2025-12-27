@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateWinProbability, calculateOdds } from "@/lib/winProbability";
 import type { Game, Standings } from "@shared/schema";
-import { AlertCircle, TrendingUp, Clock, Coins, X, Zap, Search } from "lucide-react";
+import { AlertCircle, TrendingUp, Clock, Coins, X, Zap, Search, Trophy } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
