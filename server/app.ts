@@ -94,7 +94,11 @@ export default async function runApp(
           first_name VARCHAR,
           last_name VARCHAR,
           profile_image_url VARCHAR,
+          has_completed_tour BOOLEAN DEFAULT false,
+          has_seen_christmas_popup BOOLEAN DEFAULT false,
+          has_seen_new_year_popup BOOLEAN DEFAULT false,
           role VARCHAR(20) DEFAULT 'admin',
+          coins INTEGER DEFAULT 1000,
           created_at TIMESTAMP DEFAULT NOW(),
           updated_at TIMESTAMP DEFAULT NOW()
         )
@@ -115,6 +119,9 @@ export default async function runApp(
           is_final BOOLEAN DEFAULT false,
           is_live BOOLEAN DEFAULT false,
           stream_link TEXT,
+          is_primetime BOOLEAN DEFAULT false,
+          team1_odds INTEGER DEFAULT 150,
+          team2_odds INTEGER DEFAULT 150,
           created_at TIMESTAMP DEFAULT NOW(),
           updated_at TIMESTAMP DEFAULT NOW()
         )
@@ -194,107 +201,6 @@ export default async function runApp(
           ALTER TABLE standings ADD COLUMN manual_order INTEGER
         `;
         console.log('Added manual_order column to standings table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      // Add missing columns to users table
-      try {
-        await rawSql`
-          ALTER TABLE users ADD COLUMN username VARCHAR(100) UNIQUE
-        `;
-        console.log('Added username column to users table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      try {
-        await rawSql`
-          ALTER TABLE users ADD COLUMN password VARCHAR(255)
-        `;
-        console.log('Added password column to users table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      try {
-        await rawSql`
-          ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'admin'
-        `;
-        console.log('Added role column to users table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      try {
-        await rawSql`
-          ALTER TABLE users ADD COLUMN has_completed_tour BOOLEAN DEFAULT false
-        `;
-        console.log('Added has_completed_tour column to users table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      try {
-        await rawSql`
-          ALTER TABLE users ADD COLUMN has_seen_christmas_popup BOOLEAN DEFAULT false
-        `;
-        console.log('Added has_seen_christmas_popup column to users table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      try {
-        await rawSql`
-          ALTER TABLE users ADD COLUMN has_seen_new_year_popup BOOLEAN DEFAULT false
-        `;
-        console.log('Added has_seen_new_year_popup column to users table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      try {
-        await rawSql`
-          ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 1000
-        `;
-        console.log('Added coins column to users table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      // Add missing columns to games table
-      try {
-        await rawSql`
-          ALTER TABLE games ADD COLUMN stream_link TEXT
-        `;
-        console.log('Added stream_link column to games table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      try {
-        await rawSql`
-          ALTER TABLE games ADD COLUMN is_primetime BOOLEAN DEFAULT false
-        `;
-        console.log('Added is_primetime column to games table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      try {
-        await rawSql`
-          ALTER TABLE games ADD COLUMN team1_odds INTEGER DEFAULT 150
-        `;
-        console.log('Added team1_odds column to games table');
-      } catch (err: any) {
-        // Column might already exist - that's fine, ignore silently
-      }
-      
-      try {
-        await rawSql`
-          ALTER TABLE games ADD COLUMN team2_odds INTEGER DEFAULT 150
-        `;
-        console.log('Added team2_odds column to games table');
       } catch (err: any) {
         // Column might already exist - that's fine, ignore silently
       }
