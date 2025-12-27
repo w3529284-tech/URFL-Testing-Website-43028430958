@@ -621,11 +621,22 @@ export class DatabaseStorage implements IStorage {
   async resolveBetsForGame(gameId: string): Promise<void> {
     try {
       const game = await this.getGame(gameId);
-      if (!game || !game.isFinal) return;
+      if (!game) {
+        console.log(`[BET RESOLUTION] Game ${gameId} not found`);
+        return;
+      }
 
-      // Get all bets on this game
+      if (!game.isFinal) {
+        console.log(`[BET RESOLUTION] Game ${gameId} is not final yet`);
+        return;
+      }
+
+      // Get all bets on this game that haven't been resolved yet
       const gameBets = await db.select().from(bets).where(eq(bets.gameId, gameId));
+      const unresolvedBets = gameBets.filter(b => b.won === null);
       
+      console.log(`[BET RESOLUTION] Found ${gameBets.length} total bets, ${unresolvedBets.length} unresolved`);
+
       // Determine winner
       const winner = game.team1Score != null && game.team2Score != null
         ? game.team1Score > game.team2Score
@@ -633,40 +644,51 @@ export class DatabaseStorage implements IStorage {
           : game.team2
         : null;
 
-      if (!winner) return;
+      if (!winner) {
+        console.log(`[BET RESOLUTION] Could not determine winner (scores: ${game.team1Score} vs ${game.team2Score})`);
+        return;
+      }
 
-      // Resolve each bet
-      for (const bet of gameBets) {
-        if (bet.won) continue; // Already resolved
-        
+      console.log(`[BET RESOLUTION] Winner determined: ${winner}`);
+
+      // Resolve each unresolved bet
+      for (const bet of unresolvedBets) {
         const isWinningBet = bet.pickedTeam === winner;
         
         if (isWinningBet) {
-          // Calculate winnings: amount * (odds / 100)
-          const teamOdds = winner === game.team1 ? game.team1Odds : game.team2Odds;
-          const multiplier = (teamOdds || 150) / 100; // Default to 1.5x if no odds
-          const winnings = Math.floor(bet.amount * multiplier);
+          // Get the team odds for the winning team
+          const teamOdds = winner === game.team1 ? (game.team1Odds || 150) : (game.team2Odds || 150);
+          const multiplier = teamOdds / 100;
+          const totalPayout = Math.floor(bet.amount * multiplier);
           
-          // Mark bet as won and update
+          console.log(`[BET RESOLUTION] Bet ${bet.id}: WIN - ${bet.pickedTeam} at ${multiplier}x odds. Payout: ${totalPayout}`);
+          
+          // Mark bet as won
           await db
             .update(bets)
             .set({ won: true })
             .where(eq(bets.id, bet.id));
           
-          // Award winnings to user
+          // Award the total payout (includes original bet)
           const user = await this.getUser(bet.userId);
           if (user) {
-            const newBalance = (user.coins || 0) + winnings;
+            const currentBalance = user.coins || 0;
+            const newBalance = currentBalance + totalPayout;
+            console.log(`[BET RESOLUTION] User ${bet.userId}: balance ${currentBalance} + ${totalPayout} = ${newBalance}`);
             await this.updateUserBalance(bet.userId, newBalance);
           }
         } else {
-          // Mark bet as lost
+          console.log(`[BET RESOLUTION] Bet ${bet.id}: LOSS - picked ${bet.pickedTeam} but winner is ${winner}`);
+          
+          // Mark bet as lost (user already paid the bet amount when placing it)
           await db
             .update(bets)
             .set({ won: false })
             .where(eq(bets.id, bet.id));
         }
       }
+      
+      console.log(`[BET RESOLUTION] Completed resolving bets for game ${gameId}`);
     } catch (error) {
       console.error("Error resolving bets for game:", error);
     }
