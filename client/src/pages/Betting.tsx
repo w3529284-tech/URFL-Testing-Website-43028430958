@@ -46,6 +46,8 @@ export default function Betting() {
   });
 
   const activeUserBets = userBets.filter(bet => allGames.some(game => game.id === bet.gameId));
+
+  const placeBetMutation = useMutation({
     mutationFn: async ({ gameId, team, amount, odds }: { gameId: string; team: string; amount: number; odds: number }) => {
       console.log("Placing bet:", { gameId, pickedTeam: team, amount, odds });
       return apiRequest("POST", "/api/bets", { gameId, pickedTeam: team, amount, odds });
