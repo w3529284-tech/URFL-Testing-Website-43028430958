@@ -6,15 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateWinProbability, calculateOdds } from "@/lib/winProbability";
 import type { Game, Standings } from "@shared/schema";
-import { AlertCircle, TrendingUp, Clock, Coins, X, Zap } from "lucide-react";
+import { AlertCircle, TrendingUp, Clock, Coins, X, Zap, Search } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Betting() {
   const { user, isAuthenticated } = useAuth();
   const [bets, setBets] = useState<Record<string, { team: string; amount: number }>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [primetimeFilter, setPrimetimeFilter] = useState<"all" | "primetime" | "regular">("all");
 
   const { data: games = [], isLoading: gamesLoading } = useQuery<Game[]>({
     queryKey: ["/api/games/current"],
@@ -120,8 +123,6 @@ export default function Betting() {
 
   const getPotentialWinnings = (game: Game, team: string, amount: number) => {
     const odds = getOdds(game, team);
-    // Use floating point for potential winnings display to avoid floor precision issues
-    // The user saw 4,166 instead of 4,170 because of intermediate floors
     return amount * odds;
   };
 
@@ -130,15 +131,36 @@ export default function Betting() {
     : 1;
 
   const currentWeekGames = games.filter(g => g.week === currentWeek);
+
+  // Filter games by search query and primetime status
+  const filteredGames = currentWeekGames.filter(game => {
+    const matchesSearch = game.team1.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      game.team2.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesPrimetime = 
+      primetimeFilter === "all" ||
+      (primetimeFilter === "primetime" && game.isPrimetime) ||
+      (primetimeFilter === "regular" && !game.isPrimetime);
+    return matchesSearch && matchesPrimetime;
+  });
+
   const totalBetAmount = Object.values(bets).reduce((sum, b) => sum + b.amount, 0);
   const remainingBalance = userBalance - totalBetAmount;
+
+  // Sort bets by game time (most recent first)
+  const sortedUserBets = [...userBets].sort((a, b) => {
+    const gameA = games.find(g => g.id === a.gameId);
+    const gameB = games.find(g => g.id === b.gameId);
+    const timeA = gameA?.gameTime ? new Date(gameA.gameTime).getTime() : 0;
+    const timeB = gameB?.gameTime ? new Date(gameB.gameTime).getTime() : 0;
+    return timeB - timeA;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
-            Weekly Betting
+            Betting
           </h1>
           <p className="text-muted-foreground text-lg">
             Place your bets on each game and compete with other fans
@@ -169,254 +191,425 @@ export default function Betting() {
         </Card>
       )}
 
-      <div>
-        <h2 className="text-2xl font-bold mb-4">This Week's Games</h2>
-        
-        {gamesLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-96" />
-            ))}
-          </div>
-        ) : currentWeekGames.length === 0 ? (
-          <Card className="p-6">
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">
-                No games scheduled for this week yet
-              </p>
+      <Tabs defaultValue="this-week" className="w-full">
+        <TabsList className="grid w-full max-w-xs grid-cols-2 mb-8">
+          <TabsTrigger value="this-week">This Week's Games</TabsTrigger>
+          <TabsTrigger value="my-bets">My Bets {userBets.length > 0 && <Badge className="ml-2">{userBets.length}</Badge>}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="this-week" className="space-y-6">
+          {/* Search and Filters */}
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by team name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
-          </Card>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {currentWeekGames.map((game) => {
-                const gameBet = bets[game.id];
-                const userGameBets = userBets?.filter((b: any) => b.gameId === game.id) || [];
-                const maxBet = Math.min(1000, remainingBalance); // Max 1000 per bet
+            <div className="flex gap-2">
+              <Button
+                variant={primetimeFilter === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setPrimetimeFilter("all")}
+              >
+                All Games
+              </Button>
+              <Button
+                variant={primetimeFilter === "primetime" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setPrimetimeFilter("primetime")}
+              >
+                Primetime
+              </Button>
+              <Button
+                variant={primetimeFilter === "regular" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setPrimetimeFilter("regular")}
+              >
+                Regular
+              </Button>
+            </div>
+          </div>
 
-                return (
-                  <Card key={game.id} className="p-6 hover:shadow-lg transition-shadow" data-testid={`card-game-${game.id}`}>
-                    <div className="space-y-4">
-                      {/* Game Header */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
-                            {game.gameTime 
-                              ? formatDistanceToNow(new Date(game.gameTime), { addSuffix: true })
-                              : "TBA"}
-                          </span>
+          {/* Games Grid */}
+          {gamesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-96" />
+              ))}
+            </div>
+          ) : filteredGames.length === 0 ? (
+            <Card className="p-6">
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  {currentWeekGames.length === 0 
+                    ? "No games scheduled for this week yet"
+                    : "No games match your filters"}
+                </p>
+              </div>
+            </Card>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                {filteredGames.map((game) => {
+                  const gameBet = bets[game.id];
+                  const userGameBets = userBets?.filter((b: any) => b.gameId === game.id) || [];
+                  const maxBet = Math.min(1000, remainingBalance);
+
+                  return (
+                    <Card key={game.id} className="p-6 hover:shadow-lg transition-shadow" data-testid={`card-game-${game.id}`}>
+                      <div className="space-y-4">
+                        {/* Game Header */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">
+                              {game.gameTime 
+                                ? formatDistanceToNow(new Date(game.gameTime), { addSuffix: true })
+                                : "TBA"}
+                            </span>
+                          </div>
+                          <Badge 
+                            variant={(game.isFinal ?? false) ? "default" : (game.isLive ?? false) ? "secondary" : "outline"}
+                            data-testid={`badge-status-${game.id}`}
+                          >
+                            {(game.isFinal ?? false) ? "Final" : (game.isLive ?? false) ? "Live" : "Upcoming"}
+                          </Badge>
                         </div>
-                        <Badge 
-                          variant={(game.isFinal ?? false) ? "default" : (game.isLive ?? false) ? "secondary" : "outline"}
-                          data-testid={`badge-status-${game.id}`}
-                        >
-                          {(game.isFinal ?? false) ? "Final" : (game.isLive ?? false) ? "Live" : "Upcoming"}
-                        </Badge>
-                      </div>
 
-                      {/* Game Status or Betting Interface */}
-                      <div className="space-y-3">
-                        {(game.isLive ?? false) || (game.isFinal ?? false) ? (
-                          <>
-                            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/20">
-                              <span className="font-semibold">{game.team1}</span>
-                              <span className="text-2xl font-black">{game.team1Score}</span>
-                            </div>
-                            <div className="text-center text-sm text-muted-foreground font-semibold">
-                              {game.quarter}
-                            </div>
-                            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/20">
-                              <span className="font-semibold">{game.team2}</span>
-                              <span className="text-2xl font-black">{game.team2Score}</span>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            {/* Team 1 Betting Button */}
-                            <Button
-                              variant={gameBet?.team === game.team1 ? "default" : "outline"}
-                              className="w-full justify-between h-auto py-3"
-                              onClick={() => handleSelectTeam(game.id, game.team1)}
-                              disabled={!isAuthenticated}
-                              data-testid={`button-bet-${game.id}-${game.team1}`}
-                            >
-                              <div className="flex items-center gap-2 flex-1 text-left">
+                        {/* Game Status or Betting Interface */}
+                        <div className="space-y-3">
+                          {(game.isLive ?? false) || (game.isFinal ?? false) ? (
+                            <>
+                              <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/20">
                                 <span className="font-semibold">{game.team1}</span>
-                                <Badge variant={gameBet?.team === game.team1 ? "default" : "secondary"} className="gap-1">
-                                  <Zap className="w-3 h-3" />
-                                  {getOdds(game, game.team1).toFixed(2)}x
-                                </Badge>
+                                <span className="text-2xl font-black">{game.team1Score}</span>
                               </div>
-                              {gameBet?.team === game.team1 && <TrendingUp className="w-4 h-4" />}
-                            </Button>
-
-                            {/* Team 1 Bet Amount Input */}
-                            {gameBet?.team === game.team1 && (
-                              <div className="space-y-2 p-3 rounded-lg bg-primary/10 border border-primary/30">
-                                <div className="flex items-center justify-between">
-                                  <label className="text-sm font-medium">Bet Amount</label>
-                                  <span className="text-xs text-muted-foreground">
-                                    Max: <span className="font-semibold">{maxBet}</span>
-                                  </span>
-                                </div>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  max={maxBet}
-                                  value={gameBet.amount}
-                                  onChange={(e) => handleAmountChange(game.id, e.target.value)}
-                                  placeholder="Enter bet amount"
-                                  className="text-base font-semibold"
-                                />
-                                
-                                {/* Potential Winnings Display */}
-                                {gameBet.amount > 0 && (
-                                  <div className="bg-accent/20 p-2 rounded text-center">
-                                    <p className="text-xs text-muted-foreground">Potential Winnings</p>
-                                    <div className="flex items-center justify-center gap-1 text-lg font-bold text-accent">
-                                      <Coins className="w-4 h-4" />
-                                      {Math.floor(getPotentialWinnings(game, game.team1, gameBet.amount)).toLocaleString()}
-                                    </div>
-                                  </div>
-                                )}
-
-                                <div className="flex gap-2">
-                                  {[10, 50, 100, 500].map((amt) => (
-                                    <Button
-                                      key={amt}
-                                      size="sm"
-                                      variant="ghost"
-                                      className="flex-1 text-xs"
-                                      onClick={() => handleQuickBet(game.id, amt)}
-                                      disabled={amt > maxBet}
-                                    >
-                                      {amt}
-                                    </Button>
-                                  ))}
-                                </div>
-                                <div className="flex gap-2 mt-2">
-                                  <Button
-                                    className="flex-1 gap-2"
-                                    size="sm"
-                                    onClick={() => handlePlaceBet(game.id)}
-                                    disabled={gameBet.amount <= 0 || placeBetMutation.isPending}
-                                  >
-                                    <Coins className="w-3 h-3" />
-                                    Place Bet
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleRemoveBet(game.id)}
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </Button>
-                                </div>
+                              <div className="text-center text-sm text-muted-foreground font-semibold">
+                                {game.quarter}
                               </div>
-                            )}
-
-                            {/* Team 2 Betting Button */}
-                            <Button
-                              variant={gameBet?.team === game.team2 ? "default" : "outline"}
-                              className="w-full justify-between h-auto py-3"
-                              onClick={() => handleSelectTeam(game.id, game.team2)}
-                              disabled={!isAuthenticated}
-                              data-testid={`button-bet-${game.id}-${game.team2}`}
-                            >
-                              <div className="flex items-center gap-2 flex-1 text-left">
+                              <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/20">
                                 <span className="font-semibold">{game.team2}</span>
-                                <Badge variant={gameBet?.team === game.team2 ? "default" : "secondary"} className="gap-1">
-                                  <Zap className="w-3 h-3" />
-                                  {getOdds(game, game.team2).toFixed(2)}x
-                                </Badge>
+                                <span className="text-2xl font-black">{game.team2Score}</span>
                               </div>
-                              {gameBet?.team === game.team2 && <TrendingUp className="w-4 h-4" />}
-                            </Button>
-
-                            {/* Team 2 Bet Amount Input */}
-                            {gameBet?.team === game.team2 && (
-                              <div className="space-y-2 p-3 rounded-lg bg-primary/10 border border-primary/30">
-                                <div className="flex items-center justify-between">
-                                  <label className="text-sm font-medium">Bet Amount</label>
-                                  <span className="text-xs text-muted-foreground">
-                                    Max: <span className="font-semibold">{maxBet}</span>
-                                  </span>
+                            </>
+                          ) : (
+                            <>
+                              {/* Team 1 Betting Button */}
+                              <Button
+                                variant={gameBet?.team === game.team1 ? "default" : "outline"}
+                                className="w-full justify-between h-auto py-3"
+                                onClick={() => handleSelectTeam(game.id, game.team1)}
+                                disabled={!isAuthenticated}
+                                data-testid={`button-bet-${game.id}-${game.team1}`}
+                              >
+                                <div className="flex items-center gap-2 flex-1 text-left">
+                                  <span className="font-semibold">{game.team1}</span>
+                                  <Badge variant={gameBet?.team === game.team1 ? "default" : "secondary"} className="gap-1">
+                                    <Zap className="w-3 h-3" />
+                                    {getOdds(game, game.team1).toFixed(2)}x
+                                  </Badge>
                                 </div>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  max={maxBet}
-                                  value={gameBet.amount}
-                                  onChange={(e) => handleAmountChange(game.id, e.target.value)}
-                                  placeholder="Enter bet amount"
-                                  className="text-base font-semibold"
-                                />
+                                {gameBet?.team === game.team1 && <TrendingUp className="w-4 h-4" />}
+                              </Button>
 
-                                {/* Potential Winnings Display */}
-                                {gameBet.amount > 0 && (
-                                  <div className="bg-accent/20 p-2 rounded text-center">
-                                    <p className="text-xs text-muted-foreground">Potential Winnings</p>
-                                    <div className="flex items-center justify-center gap-1 text-lg font-bold text-accent">
-                                      <Coins className="w-4 h-4" />
-                                      {Math.floor(getPotentialWinnings(game, game.team2, gameBet.amount)).toLocaleString()}
-                                    </div>
+                              {/* Team 1 Bet Amount Input */}
+                              {gameBet?.team === game.team1 && (
+                                <div className="space-y-2 p-3 rounded-lg bg-primary/10 border border-primary/30">
+                                  <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium">Bet Amount</label>
+                                    <span className="text-xs text-muted-foreground">
+                                      Max: <span className="font-semibold">{maxBet}</span>
+                                    </span>
                                   </div>
-                                )}
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    max={maxBet}
+                                    value={gameBet.amount}
+                                    onChange={(e) => handleAmountChange(game.id, e.target.value)}
+                                    placeholder="Enter bet amount"
+                                    className="text-base font-semibold"
+                                  />
+                                  
+                                  {/* Potential Winnings Display */}
+                                  {gameBet.amount > 0 && (
+                                    <div className="bg-accent/20 p-2 rounded text-center">
+                                      <p className="text-xs text-muted-foreground">Potential Winnings</p>
+                                      <div className="flex items-center justify-center gap-1 text-lg font-bold text-accent">
+                                        <Coins className="w-4 h-4" />
+                                        {Math.floor(getPotentialWinnings(game, game.team1, gameBet.amount)).toLocaleString()}
+                                      </div>
+                                    </div>
+                                  )}
 
-                                <div className="flex gap-2">
-                                  {[10, 50, 100, 500].map((amt) => (
+                                  <div className="flex gap-2">
+                                    {[10, 50, 100, 500].map((amt) => (
+                                      <Button
+                                        key={amt}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="flex-1 text-xs"
+                                        onClick={() => handleQuickBet(game.id, amt)}
+                                        disabled={amt > maxBet}
+                                      >
+                                        {amt}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                  <div className="flex gap-2 mt-2">
                                     <Button
-                                      key={amt}
+                                      className="flex-1 gap-2"
                                       size="sm"
-                                      variant="ghost"
-                                      className="flex-1 text-xs"
-                                      onClick={() => handleQuickBet(game.id, amt)}
-                                      disabled={amt > maxBet}
+                                      onClick={() => handlePlaceBet(game.id)}
+                                      disabled={gameBet.amount <= 0 || placeBetMutation.isPending}
                                     >
-                                      {amt}
+                                      <Coins className="w-3 h-3" />
+                                      Place Bet
                                     </Button>
-                                  ))}
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleRemoveBet(game.id)}
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  </div>
                                 </div>
-                                <div className="flex gap-2 mt-2">
-                                  <Button
-                                    className="flex-1 gap-2"
-                                    size="sm"
-                                    onClick={() => handlePlaceBet(game.id)}
-                                    disabled={gameBet.amount <= 0 || placeBetMutation.isPending}
-                                  >
+                              )}
+
+                              {/* Team 2 Betting Button */}
+                              <Button
+                                variant={gameBet?.team === game.team2 ? "default" : "outline"}
+                                className="w-full justify-between h-auto py-3"
+                                onClick={() => handleSelectTeam(game.id, game.team2)}
+                                disabled={!isAuthenticated}
+                                data-testid={`button-bet-${game.id}-${game.team2}`}
+                              >
+                                <div className="flex items-center gap-2 flex-1 text-left">
+                                  <span className="font-semibold">{game.team2}</span>
+                                  <Badge variant={gameBet?.team === game.team2 ? "default" : "secondary"} className="gap-1">
+                                    <Zap className="w-3 h-3" />
+                                    {getOdds(game, game.team2).toFixed(2)}x
+                                  </Badge>
+                                </div>
+                                {gameBet?.team === game.team2 && <TrendingUp className="w-4 h-4" />}
+                              </Button>
+
+                              {/* Team 2 Bet Amount Input */}
+                              {gameBet?.team === game.team2 && (
+                                <div className="space-y-2 p-3 rounded-lg bg-primary/10 border border-primary/30">
+                                  <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium">Bet Amount</label>
+                                    <span className="text-xs text-muted-foreground">
+                                      Max: <span className="font-semibold">{maxBet}</span>
+                                    </span>
+                                  </div>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    max={maxBet}
+                                    value={gameBet.amount}
+                                    onChange={(e) => handleAmountChange(game.id, e.target.value)}
+                                    placeholder="Enter bet amount"
+                                    className="text-base font-semibold"
+                                  />
+
+                                  {/* Potential Winnings Display */}
+                                  {gameBet.amount > 0 && (
+                                    <div className="bg-accent/20 p-2 rounded text-center">
+                                      <p className="text-xs text-muted-foreground">Potential Winnings</p>
+                                      <div className="flex items-center justify-center gap-1 text-lg font-bold text-accent">
+                                        <Coins className="w-4 h-4" />
+                                        {Math.floor(getPotentialWinnings(game, game.team2, gameBet.amount)).toLocaleString()}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  <div className="flex gap-2">
+                                    {[10, 50, 100, 500].map((amt) => (
+                                      <Button
+                                        key={amt}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="flex-1 text-xs"
+                                        onClick={() => handleQuickBet(game.id, amt)}
+                                        disabled={amt > maxBet}
+                                      >
+                                        {amt}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                  <div className="flex gap-2 mt-2">
+                                    <Button
+                                      className="flex-1 gap-2"
+                                      size="sm"
+                                      onClick={() => handlePlaceBet(game.id)}
+                                      disabled={gameBet.amount <= 0 || placeBetMutation.isPending}
+                                    >
+                                      <Coins className="w-3 h-3" />
+                                      Place Bet
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleRemoveBet(game.id)}
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+
+                        {/* Confirmed Bets Display */}
+                        {userGameBets.length > 0 && (
+                          <div className="pt-2 border-t border-border/50">
+                            <p className="text-sm font-semibold mb-2 text-muted-foreground">Confirmed Bets:</p>
+                            <div className="space-y-1">
+                              {userGameBets.map((bet: any) => (
+                                <div key={bet.id} className="flex items-center justify-between p-2 rounded bg-secondary/30">
+                                  <span className="text-sm">{bet.pickedTeam}</span>
+                                  <Badge variant="secondary" className="gap-1">
                                     <Coins className="w-3 h-3" />
-                                    Place Bet
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleRemoveBet(game.id)}
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </Button>
+                                    {bet.amount}
+                                  </Badge>
                                 </div>
-                              </div>
-                            )}
-                          </>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </div>
+                    </Card>
+                  );
+                })}
+              </div>
 
-                      {/* Confirmed Bets Display */}
-                      {userGameBets.length > 0 && (
-                        <div className="pt-2 border-t border-border/50">
-                          <p className="text-sm font-semibold mb-2 text-muted-foreground">Confirmed Bets:</p>
-                          <div className="space-y-1">
-                            {userGameBets.map((bet: any) => (
-                              <div key={bet.id} className="flex items-center justify-between p-2 rounded bg-secondary/30">
-                                <span className="text-sm">{bet.pickedTeam}</span>
-                                <Badge variant="secondary" className="gap-1">
-                                  <Coins className="w-3 h-3" />
-                                  {bet.amount}
-                                </Badge>
-                              </div>
-                            ))}
+              {/* Bet Summary */}
+              {totalBetAmount > 0 && (
+                <Card className="p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-primary/30">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold">Bet Summary</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Total Betting</p>
+                        <div className="flex items-center gap-2 text-2xl font-bold">
+                          <Coins className="w-6 h-6 text-yellow-500" />
+                          {totalBetAmount}
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Remaining Balance</p>
+                        <div className="flex items-center gap-2 text-2xl font-bold text-green-600 dark:text-green-400">
+                          <Coins className="w-6 h-6" />
+                          {remainingBalance}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-border/50">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        You have {Object.keys(bets).length} bet(s) pending confirmation
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              )}
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="my-bets" className="space-y-6">
+          {!isAuthenticated ? (
+            <Card className="p-6">
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">Sign in to view your bets</p>
+                <Button onClick={() => window.location.href = "/login"}>
+                  Sign In
+                </Button>
+              </div>
+            </Card>
+          ) : sortedUserBets.length === 0 ? (
+            <Card className="p-6">
+              <div className="text-center py-8">
+                <Coins className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <p className="text-muted-foreground text-lg">No bets placed yet</p>
+                <p className="text-muted-foreground text-sm mt-2">Start betting on this week's games to see them here</p>
+              </div>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {sortedUserBets.map((bet: any) => {
+                const game = games.find(g => g.id === bet.gameId);
+                if (!game) return null;
+
+                const odds = bet.odds || getOdds(game, bet.pickedTeam);
+                const potentialWinnings = Math.floor(bet.amount * odds);
+                const isLiveOrFinal = game.isLive || game.isFinal;
+
+                return (
+                  <Card key={bet.id} className="p-4 hover:shadow-lg transition-shadow">
+                    <div className="space-y-3">
+                      {/* Game Info */}
+                      <div className="flex items-center justify-between">
+                        <Badge 
+                          variant={isLiveOrFinal ? (game.isFinal ? "default" : "secondary") : "outline"}
+                        >
+                          {isLiveOrFinal ? (game.isFinal ? "Final" : "Live") : "Upcoming"}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          Week {game.week}
+                        </span>
+                      </div>
+
+                      {/* Matchup */}
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Game</p>
+                        <p className="font-semibold text-sm">
+                          {game.team1} vs {game.team2}
+                        </p>
+                      </div>
+
+                      {/* Your Bet */}
+                      <div className="bg-primary/10 p-3 rounded-lg border border-primary/30">
+                        <p className="text-xs text-muted-foreground mb-1">Your Pick</p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-sm">{bet.pickedTeam}</span>
+                          <Badge variant="secondary" className="gap-1">
+                            <Zap className="w-3 h-3" />
+                            {odds.toFixed(2)}x
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Bet Amount and Potential Winnings */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <p className="text-muted-foreground mb-1">Bet Amount</p>
+                          <div className="flex items-center gap-1 font-semibold">
+                            <Coins className="w-3 h-3" />
+                            {bet.amount}
                           </div>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground mb-1">Potential Win</p>
+                          <div className="flex items-center gap-1 font-semibold text-accent">
+                            <Coins className="w-3 h-3" />
+                            {potentialWinnings}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Game Time */}
+                      {game.gameTime && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          {formatDistanceToNow(new Date(game.gameTime), { addSuffix: true })}
                         </div>
                       )}
                     </div>
@@ -424,39 +617,38 @@ export default function Betting() {
                 );
               })}
             </div>
+          )}
 
-            {/* Bet Summary */}
-            {totalBetAmount > 0 && (
-              <Card className="p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-primary/30">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold">Bet Summary</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Total Betting</p>
-                      <div className="flex items-center gap-2 text-2xl font-bold">
-                        <Coins className="w-6 h-6 text-yellow-500" />
-                        {totalBetAmount}
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Remaining Balance</p>
-                      <div className="flex items-center gap-2 text-2xl font-bold text-green-600 dark:text-green-400">
-                        <Coins className="w-6 h-6" />
-                        {remainingBalance}
-                      </div>
+          {/* Bet Stats Summary */}
+          {sortedUserBets.length > 0 && (
+            <Card className="p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-primary/30">
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold">Betting Summary</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Total Bets</p>
+                    <div className="text-2xl font-bold">{sortedUserBets.length}</div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Total Wagered</p>
+                    <div className="flex items-center gap-2 text-2xl font-bold">
+                      <Coins className="w-5 h-5 text-yellow-500" />
+                      {Math.floor(sortedUserBets.reduce((sum, b) => sum + b.amount, 0))}
                     </div>
                   </div>
-                  <div className="pt-2 border-t border-border/50">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      You have {Object.keys(bets).length} bet(s) pending confirmation
-                    </p>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Potential Winnings</p>
+                    <div className="flex items-center gap-2 text-2xl font-bold text-accent">
+                      <Coins className="w-5 h-5" />
+                      {Math.floor(sortedUserBets.reduce((sum, b) => sum + (b.amount * (b.odds || 1.5)), 0))}
+                    </div>
                   </div>
                 </div>
-              </Card>
-            )}
-          </>
-        )}
-      </div>
+              </div>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
