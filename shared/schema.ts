@@ -348,8 +348,10 @@ export const bets = pgTable("bets", {
   gameId: varchar("game_id").notNull(),
   amount: integer("amount").notNull(),
   pickedTeam: varchar("picked_team", { length: 100 }).notNull(),
+  multiplier: integer("multiplier"), // Store odds as integer (e.g. 150 for 1.50x)
   parlayId: varchar("parlay_id"),
   won: boolean("won"),
+  status: text("status").default("pending"), // pending, won, lost
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

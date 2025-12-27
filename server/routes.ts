@@ -467,19 +467,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/bets", isAuthenticated, async (req: any, res) => {
     try {
       const { gameId, pickedTeam, amount, odds } = req.body;
-      const betData = insertBetSchema.parse({ gameId, pickedTeam, amount, userId: req.session.userId });
       
       const balance = await storage.getUserBalance(req.session.userId);
-      if (balance < betData.amount) {
+      if (balance < amount) {
         return res.status(400).json({ message: "Insufficient balance" });
       }
 
       // Store the odds at the time of placing the bet
       // Use the odds from the request body
       const finalOdds = Math.round(odds * 100); // Store as integer (1.50 -> 150)
-      const bet = await storage.placeBet({ ...betData, amount: betData.amount }); 
-      // Note: We should ideally have an odds column in the bets table, but for now we'll 
-      // rely on the game's odds being updated.
+      const bet = await storage.placeBet({ 
+        gameId, 
+        pickedTeam, 
+        amount, 
+        userId: req.session.userId,
+        multiplier: finalOdds
+      }); 
       
       res.json(bet);
     } catch (error) {

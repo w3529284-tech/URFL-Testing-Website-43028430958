@@ -599,22 +599,12 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(bets).where(eq(bets.userId, userId)).orderBy(desc(bets.createdAt));
   }
 
-  async placeBet(betData: InsertBet & { odds?: number }): Promise<Bet> {
-    const [bet] = await db.insert(bets).values(betData as any).returning();
+  async placeBet(betData: InsertBet): Promise<Bet> {
+    const [bet] = await db.insert(bets).values(betData).returning();
     
-    // If odds were provided, update the game's odds for this team
-    // This ensures resolution uses the odds at the time of the bet
-    if (betData.odds) {
-      const game = await this.getGame(betData.gameId);
-      if (game) {
-        const oddsInt = Math.round(betData.odds * 100);
-        if (betData.pickedTeam === game.team1) {
-          await this.updateGame(game.id, { team1Odds: oddsInt });
-        } else {
-          await this.updateGame(game.id, { team2Odds: oddsInt });
-        }
-      }
-    }
+    // If a multiplier was provided in the bet data itself, resolution will use it.
+    // The previous implementation was updating the game odds, which is also valid but
+    // storing it on the bet is more robust for individual bets.
 
     const user = await this.getUser(betData.userId);
     if (user) {
@@ -676,14 +666,11 @@ export class DatabaseStorage implements IStorage {
           // before resolving, or use the stored game odds.
           // The user requested they be based off win percentage in game card.
           
-          // Re-calculate probability on the server for resolution
-          // Note: This matches the frontend calculateWinProbability logic
-          // We'll use the game's stored team1Odds/team2Odds which should be updated
-          // when the game is updated or via a periodic job.
-          // For now, let's assume the game record has the "final" odds.
+          // Use the multiplier stored on the bet if available, 
+          // otherwise fallback to the game's final odds
+          const multiplier = bet.multiplier ? (bet.multiplier / 100) : 
+                             (winner === game.team1 ? (game.team1Odds || 150) : (game.team2Odds || 150)) / 100;
           
-          const teamOdds = winner === game.team1 ? (game.team1Odds || 150) : (game.team2Odds || 150);
-          const multiplier = teamOdds / 100;
           const totalPayout = Math.floor(bet.amount * multiplier);
           
           console.log(`[BET RESOLUTION] Bet ${bet.id}: WIN - ${bet.pickedTeam} at ${multiplier}x odds. Payout: ${totalPayout}`);
