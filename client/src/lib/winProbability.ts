@@ -228,7 +228,8 @@ export function calculateOdds(probability: number): number {
   // Formula: 100 / probability
   // Capped between 1.1x and 10x
   const rawOdds = 100 / Math.max(probability, 1);
-  return Math.max(1.1, Math.min(10, rawOdds));
+  // Ensure we round to 2 decimal places to match display and user expectations
+  return Math.max(1.1, Math.min(10, Math.round(rawOdds * 100) / 100));
 }
 
 

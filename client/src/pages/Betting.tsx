@@ -115,10 +115,9 @@ export default function Betting() {
 
   const getPotentialWinnings = (game: Game, team: string, amount: number) => {
     const odds = getOdds(game, team);
-    // Potential winnings is (amount * odds) - amount if we want net profit, 
-    // but usually in betting it's total payout (amount * odds)
-    // The user said they aren't being multiplied right, let's ensure we use the dynamic odds.
-    return Math.floor(amount * odds);
+    // Use floating point for potential winnings display to avoid floor precision issues
+    // The user saw 4,166 instead of 4,170 because of intermediate floors
+    return amount * odds;
   };
 
   const currentWeek = games.length > 0
@@ -272,7 +271,7 @@ export default function Betting() {
                                     <p className="text-xs text-muted-foreground">Potential Winnings</p>
                                     <div className="flex items-center justify-center gap-1 text-lg font-bold text-accent">
                                       <Coins className="w-4 h-4" />
-                                      {getPotentialWinnings(game, game.team1, gameBet.amount).toLocaleString()}
+                                      {Math.floor(getPotentialWinnings(game, game.team1, gameBet.amount)).toLocaleString()}
                                     </div>
                                   </div>
                                 )}
@@ -355,7 +354,7 @@ export default function Betting() {
                                     <p className="text-xs text-muted-foreground">Potential Winnings</p>
                                     <div className="flex items-center justify-center gap-1 text-lg font-bold text-accent">
                                       <Coins className="w-4 h-4" />
-                                      {getPotentialWinnings(game, game.team2, gameBet.amount).toLocaleString()}
+                                      {Math.floor(getPotentialWinnings(game, game.team2, gameBet.amount)).toLocaleString()}
                                     </div>
                                   </div>
                                 )}
