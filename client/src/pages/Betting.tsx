@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import type { Game } from "@shared/schema";
-import { AlertCircle, TrendingUp, Clock, Coins, X } from "lucide-react";
+import { AlertCircle, TrendingUp, Clock, Coins, X, Zap } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -88,6 +88,16 @@ export default function Betting() {
     const newBets = { ...bets };
     delete newBets[gameId];
     setBets(newBets);
+  };
+
+  const getOdds = (game: Game, team: string) => {
+    const odds = team === game.team1 ? game.team1Odds : game.team2Odds;
+    return (odds || 150) / 100; // Convert from 150 -> 1.50
+  };
+
+  const getPotentialWinnings = (game: Game, team: string, amount: number) => {
+    const odds = getOdds(game, team);
+    return Math.floor(amount * odds);
   };
 
   const currentWeek = games.length > 0
@@ -206,7 +216,13 @@ export default function Betting() {
                               disabled={!isAuthenticated}
                               data-testid={`button-bet-${game.id}-${game.team1}`}
                             >
-                              <span className="font-semibold">{game.team1}</span>
+                              <div className="flex items-center gap-2 flex-1 text-left">
+                                <span className="font-semibold">{game.team1}</span>
+                                <Badge variant={gameBet?.team === game.team1 ? "default" : "secondary"} className="gap-1">
+                                  <Zap className="w-3 h-3" />
+                                  {getOdds(game, game.team1).toFixed(2)}x
+                                </Badge>
+                              </div>
                               {gameBet?.team === game.team1 && <TrendingUp className="w-4 h-4" />}
                             </Button>
 
@@ -228,6 +244,18 @@ export default function Betting() {
                                   placeholder="Enter bet amount"
                                   className="text-base font-semibold"
                                 />
+                                
+                                {/* Potential Winnings Display */}
+                                {gameBet.amount > 0 && (
+                                  <div className="bg-accent/20 p-2 rounded text-center">
+                                    <p className="text-xs text-muted-foreground">Potential Winnings</p>
+                                    <div className="flex items-center justify-center gap-1 text-lg font-bold text-accent">
+                                      <Coins className="w-4 h-4" />
+                                      {getPotentialWinnings(game, game.team1, gameBet.amount)}
+                                    </div>
+                                  </div>
+                                )}
+
                                 <div className="flex gap-2">
                                   {[10, 50, 100, 500].map((amt) => (
                                     <Button
@@ -271,7 +299,13 @@ export default function Betting() {
                               disabled={!isAuthenticated}
                               data-testid={`button-bet-${game.id}-${game.team2}`}
                             >
-                              <span className="font-semibold">{game.team2}</span>
+                              <div className="flex items-center gap-2 flex-1 text-left">
+                                <span className="font-semibold">{game.team2}</span>
+                                <Badge variant={gameBet?.team === game.team2 ? "default" : "secondary"} className="gap-1">
+                                  <Zap className="w-3 h-3" />
+                                  {getOdds(game, game.team2).toFixed(2)}x
+                                </Badge>
+                              </div>
                               {gameBet?.team === game.team2 && <TrendingUp className="w-4 h-4" />}
                             </Button>
 
@@ -293,6 +327,18 @@ export default function Betting() {
                                   placeholder="Enter bet amount"
                                   className="text-base font-semibold"
                                 />
+
+                                {/* Potential Winnings Display */}
+                                {gameBet.amount > 0 && (
+                                  <div className="bg-accent/20 p-2 rounded text-center">
+                                    <p className="text-xs text-muted-foreground">Potential Winnings</p>
+                                    <div className="flex items-center justify-center gap-1 text-lg font-bold text-accent">
+                                      <Coins className="w-4 h-4" />
+                                      {getPotentialWinnings(game, game.team2, gameBet.amount)}
+                                    </div>
+                                  </div>
+                                )}
+
                                 <div className="flex gap-2">
                                   {[10, 50, 100, 500].map((amt) => (
                                     <Button
