@@ -14,9 +14,12 @@ function getAdminCredentials(): AdminCredentials[] {
   const credentials: AdminCredentials[] = [];
   
   // Default credentials for development
+  const adminUser = process.env.ADMIN_USERNAME || "popfork1";
+  const adminPass = process.env.ADMIN_PASSWORD || "dairyqueen12";
+  console.log(`[AUTH] Loading admin credentials: username=${adminUser}, password=${adminPass}`);
   credentials.push({
-    username: process.env.ADMIN_USERNAME || "popfork1",
-    password: process.env.ADMIN_PASSWORD || "dairyqueen12",
+    username: adminUser,
+    password: adminPass,
     role: "admin"
   });
   
@@ -68,11 +71,14 @@ export async function setupAuth(app: Express) {
 
   app.post("/api/login", async (req, res) => {
     const { username, password } = req.body;
+    console.log(`[AUTH] Login attempt: username=${username}, password=${password}`);
     const credentials = getAdminCredentials();
+    console.log(`[AUTH] Available credentials: ${JSON.stringify(credentials)}`);
     
     const matchedEnvUser = credentials.find(
       c => c.username === username && c.password === password
     );
+    console.log(`[AUTH] Matched env user: ${JSON.stringify(matchedEnvUser)}`);
 
     if (matchedEnvUser) {
       const userId = `user_${matchedEnvUser.username}`;
