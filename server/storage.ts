@@ -702,6 +702,51 @@ export class DatabaseStorage implements IStorage {
       console.error("[BET RESOLUTION] Error resolving bets:", error);
     }
   }
+
+  async unresolveBeetsForGame(gameId: string): Promise<void> {
+    try {
+      const game = await this.getGame(gameId);
+      if (!game) {
+        console.log(`[BET UNRESOLVE] Game ${gameId} not found`);
+        return;
+      }
+
+      // Get all resolved bets on this game
+      const gameBets = await db.select().from(bets).where(eq(bets.gameId, gameId));
+      const resolvedBets = gameBets.filter(b => b.won !== null);
+      
+      console.log(`[BET UNRESOLVE] Found ${gameBets.length} total bets, ${resolvedBets.length} resolved`);
+
+      // Unresolve each resolved bet
+      for (const bet of resolvedBets) {
+        if (bet.won === true) {
+          // This was a winning bet - we need to refund the payout
+          const multiplier = bet.multiplier ? (bet.multiplier / 100) : 1.5;
+          const totalPayout = Math.floor(bet.amount * multiplier);
+          
+          console.log(`[BET UNRESOLVE] Bet ${bet.id}: Was winning - refunding ${totalPayout}`);
+          
+          // Subtract payout from user's balance
+          const user = await this.getUser(bet.userId);
+          if (user) {
+            const newBalance = (user.coins || 0) - totalPayout;
+            await this.updateUserBalance(bet.userId, Math.max(0, newBalance));
+            console.log(`[BET UNRESOLVE] User ${bet.userId} balance updated: ${user.coins} -> ${newBalance}`);
+          }
+        } else {
+          console.log(`[BET UNRESOLVE] Bet ${bet.id}: Was losing - no refund needed`);
+        }
+        
+        // Mark bet as unresolved
+        await db
+          .update(bets)
+          .set({ won: null })
+          .where(eq(bets.id, bet.id));
+      }
+    } catch (error) {
+      console.error("[BET UNRESOLVE] Error unresolvling bets:", error);
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

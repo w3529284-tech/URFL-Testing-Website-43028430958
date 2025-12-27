@@ -93,7 +93,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get the current game state BEFORE updating
       const previousGame = await storage.getGame(req.params.id);
-      const wasNotFinal = previousGame && !previousGame.isFinal;
+      const wasFinal = previousGame && previousGame.isFinal;
+      const wasNotFinal = !wasFinal;
       
       // Update the game
       const game = await storage.updateGame(req.params.id, req.body);
@@ -102,6 +103,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.body.isFinal === true && wasNotFinal) {
         console.log(`[BET RESOLUTION] Game ${req.params.id} marked as final. Resolving bets...`);
         await storage.resolveBetsForGame(req.params.id);
+      }
+      
+      // If game is being marked as not final (transition from final to not final), unresolve bets
+      if (req.body.isFinal === false && wasFinal) {
+        console.log(`[BET UNRESOLVE] Game ${req.params.id} unmarked as final. Unresolvling bets...`);
+        await storage.unresolveBeetsForGame(req.params.id);
       }
       
       res.json(game);
