@@ -37,7 +37,15 @@ export default function Betting() {
     enabled: isAuthenticated,
   });
 
-  const placeBetMutation = useMutation({
+  const { data: allGames = [] } = useQuery<Game[]>({
+    queryKey: ["/api/games/all"],
+  });
+
+  const { data: leaderboard = [] } = useQuery<any[]>({
+    queryKey: ["/api/leaderboard"],
+  });
+
+  const activeUserBets = userBets.filter(bet => allGames.some(game => game.id === bet.gameId));
     mutationFn: async ({ gameId, team, amount, odds }: { gameId: string; team: string; amount: number; odds: number }) => {
       console.log("Placing bet:", { gameId, pickedTeam: team, amount, odds });
       return apiRequest("POST", "/api/bets", { gameId, pickedTeam: team, amount, odds });
@@ -150,7 +158,7 @@ export default function Betting() {
   const remainingBalance = userBalance - totalBetAmount;
 
   // Sort bets by game time (most recent first)
-  const sortedUserBets = [...userBets].sort((a, b) => {
+  const sortedUserBets = [...activeUserBets].sort((a, b) => {
     const gameA = games.find(g => g.id === a.gameId);
     const gameB = games.find(g => g.id === b.gameId);
     const timeA = gameA?.gameTime ? new Date(gameA.gameTime).getTime() : 0;
@@ -195,10 +203,34 @@ export default function Betting() {
       )}
 
       <Tabs defaultValue="this-week" className="w-full">
-        <TabsList className="grid w-full max-w-xs grid-cols-2 mb-8">
+        <TabsList className="grid w-full max-w-md grid-cols-3 mb-8">
           <TabsTrigger value="this-week">This Week's Games</TabsTrigger>
-          <TabsTrigger value="my-bets">My Bets {userBets.length > 0 && <Badge className="ml-2">{userBets.length}</Badge>}</TabsTrigger>
+          <TabsTrigger value="my-bets">My Bets {activeUserBets.length > 0 && <Badge className="ml-2">{activeUserBets.length}</Badge>}</TabsTrigger>
+          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="leaderboard" className="space-y-6">
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <Trophy className="w-6 h-6 text-yellow-500" />
+              Leaderboard
+            </h2>
+            <div className="space-y-4">
+              {leaderboard.map((u, i) => (
+                <div key={u.id} className="flex items-center justify-between p-4 rounded-lg bg-secondary/20">
+                  <div className="flex items-center gap-4">
+                    <span className="text-xl font-black text-muted-foreground w-8">#{i + 1}</span>
+                    <span className="font-bold">{u.username || 'Anonymous'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 font-black text-xl text-yellow-500">
+                    <Coins className="w-5 h-5" />
+                    {u.coins.toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="this-week" className="space-y-6">
           {/* Search and Filters */}

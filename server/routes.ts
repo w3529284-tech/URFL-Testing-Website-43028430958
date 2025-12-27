@@ -507,6 +507,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/leaderboard", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const sorted = users.sort((a, b) => (b.coins || 0) - (a.coins || 0)).slice(0, 10);
+      res.json(sorted);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
   // Stream requests endpoints
   app.get("/api/stream-requests", isAuthenticated, async (req: any, res) => {
     try {
