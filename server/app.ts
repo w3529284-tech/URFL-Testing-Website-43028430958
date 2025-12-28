@@ -260,6 +260,38 @@ export default async function runApp(
         // Column likely already exists, continue
       }
       
+      // Add coins column to users table if it doesn't exist
+      try {
+        await rawSql`
+          ALTER TABLE users
+          ADD COLUMN coins INTEGER DEFAULT 1000
+        `;
+        console.log('Added coins column to users table');
+      } catch (err) {
+        // Column likely already exists, continue
+      }
+      
+      // Add team1_odds and team2_odds columns to games table if they don't exist
+      try {
+        await rawSql`
+          ALTER TABLE games
+          ADD COLUMN team1_odds INTEGER DEFAULT 150
+        `;
+        console.log('Added team1_odds column to games table');
+      } catch (err) {
+        // Column likely already exists, continue
+      }
+      
+      try {
+        await rawSql`
+          ALTER TABLE games
+          ADD COLUMN team2_odds INTEGER DEFAULT 150
+        `;
+        console.log('Added team2_odds column to games table');
+      } catch (err) {
+        // Column likely already exists, continue
+      }
+      
       // Create bracket_images table
       await rawSql`
         CREATE TABLE IF NOT EXISTS bracket_images (
