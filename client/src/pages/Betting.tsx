@@ -21,6 +21,7 @@ export default function Betting() {
   const [myBetsSearchQuery, setMyBetsSearchQuery] = useState("");
   const [myBetsPrimetimeFilter, setMyBetsPrimetimeFilter] = useState<"all" | "primetime" | "regular">("all");
   const [myBetsStatusFilter, setMyBetsStatusFilter] = useState<"all" | "live" | "past">("all");
+  const [myBetsResultFilter, setMyBetsResultFilter] = useState<"all" | "won" | "lost">("all");
 
   const { data: games = [], isLoading: gamesLoading } = useQuery<Game[]>({
     queryKey: ["/api/games/current"],
@@ -635,6 +636,29 @@ export default function Betting() {
                     Regular
                   </Button>
                 </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={myBetsResultFilter === "all" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMyBetsResultFilter("all")}
+                  >
+                    All Results
+                  </Button>
+                  <Button
+                    variant={myBetsResultFilter === "won" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMyBetsResultFilter("won")}
+                  >
+                    Won Bets
+                  </Button>
+                  <Button
+                    variant={myBetsResultFilter === "lost" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMyBetsResultFilter("lost")}
+                  >
+                    Lost Bets
+                  </Button>
+                </div>
               </div>
 
               {/* Filtered Bets */}
@@ -661,7 +685,24 @@ export default function Betting() {
                     (myBetsPrimetimeFilter === "primetime" && game.isPrimetime) ||
                     (myBetsPrimetimeFilter === "regular" && !game.isPrimetime);
 
-                  return matchesSearch && matchesStatus && matchesPrimetime;
+                  // Result filter (won/lost)
+                  let matchesResult = true;
+                  if (myBetsResultFilter !== "all" && game.isFinal && game.team1Score !== null && game.team2Score !== null) {
+                    const didBetWin = 
+                      (bet.pickedTeam === game.team1 && game.team1Score > game.team2Score) ||
+                      (bet.pickedTeam === game.team2 && game.team2Score > game.team1Score);
+                    
+                    if (myBetsResultFilter === "won") {
+                      matchesResult = didBetWin;
+                    } else if (myBetsResultFilter === "lost") {
+                      matchesResult = !didBetWin;
+                    }
+                  } else if (myBetsResultFilter !== "all" && (!game.isFinal || game.team1Score === null || game.team2Score === null)) {
+                    // If game is not final or scores are null, don't show these bets when filtering for won/lost
+                    matchesResult = false;
+                  }
+
+                  return matchesSearch && matchesStatus && matchesPrimetime && matchesResult;
                 });
 
                 return filteredBets.length === 0 ? (
