@@ -51,12 +51,11 @@ export default function AdminDashboard() {
 
       <Tabs defaultValue="games" className="space-y-6">
         <div className="w-full overflow-x-auto">
-          <TabsList className="grid grid-cols-11 w-max">
+          <TabsList className="grid grid-cols-10 w-max">
             <TabsTrigger value="games" data-testid="tab-games">Games</TabsTrigger>
             <TabsTrigger value="scores" data-testid="tab-scores">Scores</TabsTrigger>
             <TabsTrigger value="news" data-testid="tab-news">News</TabsTrigger>
-            <TabsTrigger value="pickems" data-testid="tab-pickems">Pick'ems</TabsTrigger>
-            <TabsTrigger value="rules" data-testid="tab-rules">Rules</TabsTrigger>
+            <TabsTrigger value="coins" data-testid="tab-coins">Coins</TabsTrigger>
             <TabsTrigger value="bracket" data-testid="tab-bracket">Bracket</TabsTrigger>
             <TabsTrigger value="changelogs" data-testid="tab-changelogs">Changelogs</TabsTrigger>
             <TabsTrigger value="streams" data-testid="tab-streams">Streams</TabsTrigger>
@@ -78,12 +77,8 @@ export default function AdminDashboard() {
           <NewsManager />
         </TabsContent>
 
-        <TabsContent value="pickems">
-          <PickemsManager />
-        </TabsContent>
-
-        <TabsContent value="rules">
-          <RulesManager />
+        <TabsContent value="coins">
+          <CoinsManager />
         </TabsContent>
 
         <TabsContent value="bracket">
@@ -796,25 +791,24 @@ function NewsManager() {
   );
 }
 
-function PickemsManager() {
+function CoinsManager() {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    week: 1,
-    pickemUrl: "",
+  const [userId, setUserId] = useState("");
+  const [amount, setAmount] = useState("");
+
+  const { data: users = [] } = useQuery<User[]>({
+    queryKey: ["/api/users"],
   });
 
-  const { data: pickems } = useQuery<Pickem[]>({
-    queryKey: ["/api/pickems"],
-  });
-
-  const createMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      await apiRequest("POST", "/api/pickems", data);
+  const addCoinsMutation = useMutation({
+    mutationFn: async (data: { userId: string; amount: number }) => {
+      await apiRequest("POST", "/api/admin/add-coins", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pickems"] });
-      toast({ title: "Success", description: "Pick'em added successfully" });
-      setFormData({ week: 1, pickemUrl: "" });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      toast({ title: "Success", description: "Coins added successfully" });
+      setUserId("");
+      setAmount("");
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
@@ -826,165 +820,66 @@ function PickemsManager() {
         setTimeout(() => window.location.href = "/api/login", 500);
         return;
       }
-      toast({ title: "Error", description: "Failed to add pick'em", variant: "destructive" });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/pickems/${id}`, undefined);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pickems"] });
-      toast({ title: "Success", description: "Pick'em deleted successfully" });
-    },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => window.location.href = "/api/login", 500);
-        return;
-      }
-      toast({ title: "Error", description: "Failed to delete pick'em", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to add coins", variant: "destructive" });
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate(formData);
+    if (!userId || !amount) {
+      toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
+      return;
+    }
+    const coinsAmount = parseInt(amount);
+    if (coinsAmount <= 0) {
+      toast({ title: "Error", description: "Amount must be greater than 0", variant: "destructive" });
+      return;
+    }
+    addCoinsMutation.mutate({ userId, amount: coinsAmount });
   };
 
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Add Pick'em Link</h2>
+        <h2 className="text-2xl font-bold mb-4">Add Coins to Account</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="pickem-week">Week</Label>
-            <Input
-              id="pickem-week"
-              type="number"
-              min="1"
-              max="18"
-              value={formData.week}
-              onChange={(e) => setFormData({ ...formData, week: parseInt(e.target.value) })}
-              required
-              data-testid="input-pickem-week"
-            />
+            <Label htmlFor="user-select">Select User</Label>
+            <Select value={userId} onValueChange={setUserId}>
+              <SelectTrigger id="user-select" data-testid="select-user-coins">
+                <SelectValue placeholder="Choose a user..." />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.username} (ID: {user.id.substring(0, 8)}...)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
-            <Label htmlFor="pickemUrl">Pick'em URL</Label>
+            <Label htmlFor="coins-amount">Amount of Coins</Label>
             <Input
-              id="pickemUrl"
-              type="url"
-              value={formData.pickemUrl}
-              onChange={(e) => setFormData({ ...formData, pickemUrl: e.target.value })}
-              placeholder="https://..."
+              id="coins-amount"
+              type="number"
+              min="1"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount"
               required
-              data-testid="input-pickem-url"
+              data-testid="input-coins-amount"
             />
           </div>
 
-          <Button type="submit" className="gap-2" disabled={createMutation.isPending} data-testid="button-add-pickem">
+          <Button type="submit" className="gap-2" disabled={addCoinsMutation.isPending} data-testid="button-add-coins">
             <Plus className="w-4 h-4" />
-            {createMutation.isPending ? "Adding..." : "Add Pick'em"}
+            {addCoinsMutation.isPending ? "Adding..." : "Add Coins"}
           </Button>
         </form>
       </Card>
-
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">All Pick'ems</h2>
-        <div className="space-y-3">
-          {pickems?.map((pickem) => (
-            <div key={pickem.id} className="flex items-center justify-between p-4 border rounded-md" data-testid={`pickem-item-${pickem.id}`}>
-              <div className="flex-1">
-                <p className="font-semibold">Week {pickem.week}</p>
-                <p className="text-sm text-muted-foreground truncate">{pickem.pickemUrl}</p>
-              </div>
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => deleteMutation.mutate(pickem.id)}
-                disabled={deleteMutation.isPending}
-                data-testid={`button-delete-pickem-${pickem.id}`}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      </Card>
     </div>
-  );
-}
-
-function RulesManager() {
-  const { toast } = useToast();
-  const [content, setContent] = useState("");
-
-  const { data: rules } = useQuery<PickemRules>({
-    queryKey: ["/api/pickems/rules"],
-  });
-
-  useEffect(() => {
-    if (rules) {
-      setContent(rules.content);
-    }
-  }, [rules]);
-
-  const updateMutation = useMutation({
-    mutationFn: async (data: { content: string }) => {
-      await apiRequest("POST", "/api/pickems/rules", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pickems/rules"] });
-      toast({ title: "Success", description: "Rules updated successfully" });
-    },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => window.location.href = "/api/login", 500);
-        return;
-      }
-      toast({ title: "Error", description: "Failed to update rules", variant: "destructive" });
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateMutation.mutate({ content });
-  };
-
-  return (
-    <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Edit Pick'em Rules</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="rules">Official Rules</Label>
-          <Textarea
-            id="rules"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={12}
-            required
-            data-testid="input-rules"
-          />
-        </div>
-
-        <Button type="submit" className="gap-2" disabled={updateMutation.isPending} data-testid="button-save-rules">
-          <Save className="w-4 h-4" />
-          {updateMutation.isPending ? "Saving..." : "Save Rules"}
-        </Button>
-      </form>
-    </Card>
   );
 }
 
