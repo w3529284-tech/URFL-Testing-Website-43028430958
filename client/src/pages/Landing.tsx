@@ -70,12 +70,12 @@ export default function Landing() {
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8">
       {maintenanceStatus?.enabled && isAdmin && (
-        <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+        <div className="mb-6 p-4 bg-muted border border-border rounded-lg">
           <div className="flex items-center gap-3">
-            <Wrench className="w-5 h-5 text-yellow-600" />
+            <Wrench className="w-5 h-5 text-muted-foreground" />
             <div>
-              <h3 className="font-semibold text-yellow-900">Website Under Maintenance</h3>
-              <p className="text-sm text-yellow-800">We're currently updating the website. Please check back soon!</p>
+              <h3 className="font-semibold">Website Under Maintenance</h3>
+              <p className="text-sm text-muted-foreground">We're currently updating the website. Please check back soon!</p>
             </div>
           </div>
         </div>
@@ -94,16 +94,16 @@ export default function Landing() {
       
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 mt-8">
         <div className="xl:col-span-2 space-y-6">
-          <Card className="p-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 border-2 border-primary/20 overflow-hidden relative">
+          <Card className="p-6 overflow-hidden relative">
             
             <div className="relative z-10">
-              <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
+              <Badge className="mb-4">
                 <Sparkles className="w-3 h-3 mr-1" />
                 Season 1 Highlights
               </Badge>
               
               <h2 className="text-3xl md:text-4xl font-black mb-4 leading-tight">
-                Week {currentWeek} is <span className="text-primary">Here!</span>
+                Week {currentWeek} is Here!
               </h2>
               
               <p className="text-muted-foreground mb-6 max-w-lg">
@@ -111,7 +111,7 @@ export default function Landing() {
               </p>
               
               <div className="flex flex-wrap gap-3">
-                <Button onClick={() => setLocation("/scores")} className="gap-2 shadow-lg shadow-primary/20">
+                <Button onClick={() => setLocation("/scores")} className="gap-2">
                   <Zap className="w-4 h-4" />
                   View Live Scores
                 </Button>
@@ -128,10 +128,10 @@ export default function Landing() {
           </Card>
         </div>
 
-        <Card className="p-5 border-2 border-accent/20 bg-gradient-to-b from-accent/5 to-background">
+        <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-accent" />
+              <Trophy className="w-5 h-5" />
               Quick Stats
             </h3>
             <span className="text-2xl">⚡</span>
@@ -146,15 +146,15 @@ export default function Landing() {
               <span className="text-sm text-muted-foreground">Games This Week</span>
               <span className="font-bold text-lg">{games?.length || 0}</span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
               <span className="text-sm text-muted-foreground">Live Now</span>
-              <span className="font-bold text-lg text-primary">{liveGames.length}</span>
+              <span className="font-bold text-lg">{liveGames.length}</span>
             </div>
           </div>
           
           <Button 
             variant="ghost" 
-            className="w-full mt-4 text-accent hover:bg-accent/10"
+            className="w-full mt-4"
             onClick={() => setLocation("/standings")}
           >
             <BarChart3 className="w-4 h-4 mr-2" />
@@ -287,7 +287,7 @@ export default function Landing() {
           })}
         </div>
       </div>
-      <Card className="p-6 bg-gradient-to-r from-secondary/10 via-background to-primary/10 border-2 border-secondary/20">
+      <Card className="p-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-4xl">
