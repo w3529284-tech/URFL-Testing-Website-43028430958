@@ -542,6 +542,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/admin/remove-coins", isAuthenticated, async (req: any, res) => {
+    try {
+      // Verify user is admin
+      if (req.session?.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId, amount } = req.body;
+      if (!userId || !amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid userId or amount" });
+      }
+
+      const currentBalance = await storage.getUserBalance(userId);
+      const newBalance = Math.max(0, currentBalance - amount);
+      await storage.updateUserBalance(userId, newBalance);
+
+      res.json({ success: true, newBalance });
+    } catch (error) {
+      console.error("Error removing coins:", error);
+      res.status(400).json({ message: "Failed to remove coins" });
+    }
+  });
+
   // Stream requests endpoints
   app.get("/api/stream-requests", isAuthenticated, async (req: any, res) => {
     try {

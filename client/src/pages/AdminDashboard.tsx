@@ -793,8 +793,10 @@ function NewsManager() {
 
 function CoinsManager() {
   const { toast } = useToast();
-  const [userId, setUserId] = useState("");
-  const [amount, setAmount] = useState("");
+  const [addUserId, setAddUserId] = useState("");
+  const [addAmount, setAddAmount] = useState("");
+  const [removeUserId, setRemoveUserId] = useState("");
+  const [removeAmount, setRemoveAmount] = useState("");
 
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/users"],
@@ -807,8 +809,8 @@ function CoinsManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({ title: "Success", description: "Coins added successfully" });
-      setUserId("");
-      setAmount("");
+      setAddUserId("");
+      setAddAmount("");
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
@@ -824,29 +826,67 @@ function CoinsManager() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const removeCoinsMutation = useMutation({
+    mutationFn: async (data: { userId: string; amount: number }) => {
+      await apiRequest("POST", "/api/admin/remove-coins", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      toast({ title: "Success", description: "Coins removed successfully" });
+      setRemoveUserId("");
+      setRemoveAmount("");
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => window.location.href = "/api/login", 500);
+        return;
+      }
+      toast({ title: "Error", description: "Failed to remove coins", variant: "destructive" });
+    },
+  });
+
+  const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId || !amount) {
+    if (!addUserId || !addAmount) {
       toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
       return;
     }
-    const coinsAmount = parseInt(amount);
+    const coinsAmount = parseInt(addAmount);
     if (coinsAmount <= 0) {
       toast({ title: "Error", description: "Amount must be greater than 0", variant: "destructive" });
       return;
     }
-    addCoinsMutation.mutate({ userId, amount: coinsAmount });
+    addCoinsMutation.mutate({ userId: addUserId, amount: coinsAmount });
+  };
+
+  const handleRemoveSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!removeUserId || !removeAmount) {
+      toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
+      return;
+    }
+    const coinsAmount = parseInt(removeAmount);
+    if (coinsAmount <= 0) {
+      toast({ title: "Error", description: "Amount must be greater than 0", variant: "destructive" });
+      return;
+    }
+    removeCoinsMutation.mutate({ userId: removeUserId, amount: coinsAmount });
   };
 
   return (
     <div className="space-y-6">
       <Card className="p-6">
         <h2 className="text-2xl font-bold mb-4">Add Coins to Account</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleAddSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="user-select">Select User</Label>
-            <Select value={userId} onValueChange={setUserId}>
-              <SelectTrigger id="user-select" data-testid="select-user-coins">
+            <Label htmlFor="user-select-add">Select User</Label>
+            <Select value={addUserId} onValueChange={setAddUserId}>
+              <SelectTrigger id="user-select-add" data-testid="select-user-add-coins">
                 <SelectValue placeholder="Choose a user..." />
               </SelectTrigger>
               <SelectContent>
@@ -860,22 +900,62 @@ function CoinsManager() {
           </div>
 
           <div>
-            <Label htmlFor="coins-amount">Amount of Coins</Label>
+            <Label htmlFor="coins-amount-add">Amount of Coins</Label>
             <Input
-              id="coins-amount"
+              id="coins-amount-add"
               type="number"
               min="1"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              value={addAmount}
+              onChange={(e) => setAddAmount(e.target.value)}
               placeholder="Enter amount"
               required
-              data-testid="input-coins-amount"
+              data-testid="input-coins-amount-add"
             />
           </div>
 
           <Button type="submit" className="gap-2" disabled={addCoinsMutation.isPending} data-testid="button-add-coins">
             <Plus className="w-4 h-4" />
             {addCoinsMutation.isPending ? "Adding..." : "Add Coins"}
+          </Button>
+        </form>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Remove Coins from Account</h2>
+        <form onSubmit={handleRemoveSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="user-select-remove">Select User</Label>
+            <Select value={removeUserId} onValueChange={setRemoveUserId}>
+              <SelectTrigger id="user-select-remove" data-testid="select-user-remove-coins">
+                <SelectValue placeholder="Choose a user..." />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.username} (ID: {user.id.substring(0, 8)}...)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="coins-amount-remove">Amount of Coins</Label>
+            <Input
+              id="coins-amount-remove"
+              type="number"
+              min="1"
+              value={removeAmount}
+              onChange={(e) => setRemoveAmount(e.target.value)}
+              placeholder="Enter amount"
+              required
+              data-testid="input-coins-amount-remove"
+            />
+          </div>
+
+          <Button type="submit" variant="destructive" className="gap-2" disabled={removeCoinsMutation.isPending} data-testid="button-remove-coins">
+            <Trash2 className="w-4 h-4" />
+            {removeCoinsMutation.isPending ? "Removing..." : "Remove Coins"}
           </Button>
         </form>
       </Card>
