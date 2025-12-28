@@ -1380,7 +1380,7 @@ function StreamRequestsManager() {
                         request.status === "rejected" ? "destructive" : 
                         "secondary"
                       }
-                      className={request.status === "approved" ? "bg-green-600" : ""}
+                      className={request.status === "approved" ? "bg-primary" : ""}
                     >
                       {request.status}
                     </Badge>
@@ -1389,8 +1389,7 @@ function StreamRequestsManager() {
                       <>
                         <Button 
                           size="sm" 
-                          variant="outline"
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          variant="default"
                           onClick={() => updateMutation.mutate({ id: request.id, status: "approved" })}
                           disabled={updateMutation.isPending}
                         >
@@ -1894,7 +1893,7 @@ function SettingsManager() {
                 <Button
                   onClick={handleStartBreakingNews}
                   disabled={breakingNewsMutation.isPending || !breakingNewsMessage.trim()}
-                  className="bg-red-600 hover:bg-red-700"
+                  variant="default"
                 >
                   {breakingNewsMutation.isPending ? "Starting..." : "Start Announcement"}
                 </Button>
@@ -1913,8 +1912,8 @@ function SettingsManager() {
       </Card>
 
       {breakingNewsActive && (
-        <Card className="p-4 border-red-500/20 bg-red-500/5">
-          <p className="text-sm text-red-800 dark:text-red-200">
+        <Card className="p-4 border-primary/20 bg-primary/5">
+          <p className="text-sm text-primary/80">
             📢 Breaking news is currently <span className="font-semibold">LIVE</span>: "{breakingNewsMessage}"
           </p>
         </Card>

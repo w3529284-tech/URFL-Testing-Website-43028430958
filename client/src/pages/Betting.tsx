@@ -540,7 +540,7 @@ export default function Betting() {
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm text-muted-foreground">Remaining Balance</p>
-                        <div className="flex items-center gap-2 text-2xl font-bold text-green-600 dark:text-green-400">
+                        <div className="flex items-center gap-2 text-2xl font-bold text-primary">
                           <Coins className="w-6 h-6" />
                           {remainingBalance}
                         </div>
@@ -746,7 +746,6 @@ export default function Betting() {
                                 {betResult && (
                                   <Badge 
                                     variant={betResult === "won" ? "default" : "destructive"}
-                                    className={betResult === "won" ? "bg-green-600 hover:bg-green-700" : ""}
                                   >
                                     {betResult === "won" ? "Won" : "Lost"}
                                   </Badge>

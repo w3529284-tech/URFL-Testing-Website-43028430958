@@ -2,45 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LIGHT MODE - Christmas Theme */
+/* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
   --opaque-button-border-intensity: -8;
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
-  --background: 34 25% 96%;
-  --foreground: 138 44% 18%;
-  --border: 138 44% 85%;
-  --card: 34 25% 94%;
-  --card-foreground: 138 44% 18%;
-  --card-border: 138 44% 88%;
-  --sidebar: 138 44% 20%;
-  --sidebar-foreground: 34 25% 96%;
-  --sidebar-border: 138 44% 28%;
-  --sidebar-primary: 0 78% 48%;
-  --sidebar-primary-foreground: 34 25% 96%;
-  --sidebar-accent: 43 96% 56%;
-  --sidebar-accent-foreground: 138 44% 18%;
-  --sidebar-ring: 0 78% 48%;
-  --popover: 34 25% 91%;
-  --popover-foreground: 138 44% 18%;
-  --popover-border: 34 25% 86%;
-  --primary: 0 78% 48%;
-  --primary-foreground: 34 25% 96%;
-  --secondary: 138 44% 28%;
-  --secondary-foreground: 34 25% 96%;
-  --muted: 34 25% 88%;
-  --muted-foreground: 138 44% 35%;
-  --accent: 43 96% 56%;
-  --accent-foreground: 138 44% 18%;
+  --background: 0 0% 98%;
+  --foreground: 0 0% 15%;
+  --border: 0 0% 85%;
+  --card: 0 0% 96%;
+  --card-foreground: 0 0% 15%;
+  --card-border: 0 0% 88%;
+  --sidebar: 210 40% 22%;
+  --sidebar-foreground: 0 0% 96%;
+  --sidebar-border: 210 40% 30%;
+  --sidebar-primary: 210 90% 50%;
+  --sidebar-primary-foreground: 0 0% 96%;
+  --sidebar-accent: 215 85% 55%;
+  --sidebar-accent-foreground: 0 0% 15%;
+  --sidebar-ring: 210 90% 50%;
+  --popover: 0 0% 91%;
+  --popover-foreground: 0 0% 15%;
+  --popover-border: 0 0% 86%;
+  --primary: 210 90% 50%;
+  --primary-foreground: 0 0% 96%;
+  --secondary: 215 85% 55%;
+  --secondary-foreground: 0 0% 96%;
+  --muted: 0 0% 88%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 195 100% 50%;
+  --accent-foreground: 0 0% 15%;
   --destructive: 0 84% 45%;
-  --destructive-foreground: 34 25% 96%;
-  --input: 138 44% 70%;
-  --ring: 0 78% 48%;
-  --chart-1: 0 78% 48%;
-  --chart-2: 138 44% 32%;
-  --chart-3: 43 96% 56%;
+  --destructive-foreground: 0 0% 96%;
+  --input: 0 0% 70%;
+  --ring: 210 90% 50%;
+  --chart-1: 210 90% 50%;
+  --chart-2: 215 85% 55%;
+  --chart-3: 195 100% 50%;
   --chart-4: 280 65% 40%;
   --chart-5: 33 95% 48%;
   --font-sans: Open Sans, sans-serif;
@@ -93,38 +93,38 @@
   --opaque-button-border-intensity: 9;
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
-  --background: 138 44% 12%;
-  --foreground: 34 25% 95%;
-  --border: 138 44% 22%;
-  --card: 138 44% 14%;
-  --card-foreground: 34 25% 95%;
-  --card-border: 138 44% 24%;
-  --sidebar: 138 44% 10%;
-  --sidebar-foreground: 34 25% 95%;
-  --sidebar-border: 138 44% 18%;
-  --sidebar-primary: 0 78% 58%;
-  --sidebar-primary-foreground: 34 25% 96%;
-  --sidebar-accent: 43 96% 66%;
-  --sidebar-accent-foreground: 138 44% 18%;
-  --sidebar-ring: 0 78% 58%;
-  --popover: 138 44% 18%;
-  --popover-foreground: 34 25% 95%;
-  --popover-border: 138 44% 26%;
-  --primary: 0 78% 58%;
-  --primary-foreground: 34 25% 96%;
-  --secondary: 138 44% 32%;
-  --secondary-foreground: 34 25% 95%;
-  --muted: 138 44% 20%;
-  --muted-foreground: 34 25% 75%;
-  --accent: 43 96% 66%;
-  --accent-foreground: 138 44% 18%;
+  --background: 0 0% 8%;
+  --foreground: 0 0% 95%;
+  --border: 0 0% 22%;
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 95%;
+  --card-border: 0 0% 24%;
+  --sidebar: 210 40% 8%;
+  --sidebar-foreground: 0 0% 95%;
+  --sidebar-border: 210 40% 18%;
+  --sidebar-primary: 210 90% 60%;
+  --sidebar-primary-foreground: 0 0% 96%;
+  --sidebar-accent: 215 85% 65%;
+  --sidebar-accent-foreground: 0 0% 18%;
+  --sidebar-ring: 210 90% 60%;
+  --popover: 0 0% 18%;
+  --popover-foreground: 0 0% 95%;
+  --popover-border: 0 0% 26%;
+  --primary: 210 90% 60%;
+  --primary-foreground: 0 0% 96%;
+  --secondary: 215 85% 65%;
+  --secondary-foreground: 0 0% 95%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 75%;
+  --accent: 195 100% 60%;
+  --accent-foreground: 0 0% 18%;
   --destructive: 0 84% 35%;
-  --destructive-foreground: 34 25% 96%;
-  --input: 138 44% 35%;
-  --ring: 0 78% 58%;
-  --chart-1: 0 78% 68%;
-  --chart-2: 138 44% 52%;
-  --chart-3: 43 96% 76%;
+  --destructive-foreground: 0 0% 96%;
+  --input: 0 0% 35%;
+  --ring: 210 90% 60%;
+  --chart-1: 210 90% 68%;
+  --chart-2: 215 85% 65%;
+  --chart-3: 195 100% 70%;
   --chart-4: 280 65% 65%;
   --chart-5: 33 95% 68%;
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);
@@ -305,83 +305,11 @@
 @keyframes flash-blue {
   0%, 100% {
     color: hsl(var(--primary));
-    text-shadow: 0 0 0px rgba(220, 38, 38, 0);
+    text-shadow: 0 0 0px rgba(59, 130, 246, 0);
   }
   50% {
-    color: hsl(0 78% 68%);
-    text-shadow: 0 0 30px rgba(220, 38, 38, 0.8), 0 0 60px rgba(220, 38, 38, 0.5);
-  }
-}
-
-/* Christmas Snowflake Animation */
-@keyframes snowfall {
-  0% {
-    transform: translateY(-10vh) translateX(0px) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) translateX(100px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-@keyframes snowfall-2 {
-  0% {
-    transform: translateY(-10vh) translateX(0px) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) translateX(-100px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-/* Twinkling lights */
-@keyframes twinkle {
-  0%, 100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes twinkle-delayed {
-  0%, 100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.9;
-  }
-}
-
-/* Christmas tree lights effect */
-@keyframes light-pulse {
-  0%, 100% {
-    background-color: hsl(0 78% 48%);
-    box-shadow: 0 0 10px hsl(0 78% 48% / 0.5);
-  }
-  25% {
-    background-color: hsl(43 96% 56%);
-    box-shadow: 0 0 10px hsl(43 96% 56% / 0.5);
-  }
-  50% {
-    background-color: hsl(138 44% 32%);
-    box-shadow: 0 0 10px hsl(138 44% 32% / 0.5);
-  }
-  75% {
-    background-color: hsl(0 78% 48%);
-    box-shadow: 0 0 10px hsl(0 78% 48% / 0.5);
-  }
-}
-
-/* Tinsel shimmer */
-@keyframes shimmer {
-  0%, 100% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
+    color: hsl(210 90% 60%);
+    text-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.5);
   }
 }
 
@@ -461,46 +389,8 @@
   }
 }
 
-.snowflake {
-  position: fixed;
-  color: white;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-  animation: snowflake-fall linear infinite;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.christmas-glow {
-  box-shadow: 0 0 20px hsl(var(--primary) / 0.3), 0 0 40px hsl(var(--primary) / 0.1);
-}
-
-.card-festive {
-  position: relative;
-  overflow: hidden;
-}
-
-.card-festive::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.card-festive:hover::before {
-  left: 100%;
-}
-
 @layer utilities {
-  .text-gradient-christmas {
+  .text-gradient {
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--secondary)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -530,21 +420,6 @@
   }
 }
 
-/* Christmas Celebration Animation */
-@keyframes christmas-pulse {
-  0%, 100% {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(34, 197, 94, 0.1));
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
-  }
-  50% {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(34, 197, 94, 0.2));
-    box-shadow: 0 0 40px rgba(34, 197, 94, 0.3);
-  }
-}
-
-.animate-christmas-pulse {
-  animation: christmas-pulse 0.6s ease-in-out infinite;
-}
 
 /* Fireworks Animation */
 @keyframes fireworks {

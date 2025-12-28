@@ -278,107 +278,7 @@ export default function GameDetail() {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 relative" style={{ margin: '12px' }}>
-          {/* Twinkling lights hanging around game card */}
-          <div className="absolute -inset-3 pointer-events-none rounded-md" style={{ margin: '-12px' }}>
-            {/* Wire line top */}
-            <div className="absolute -top-2 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700" style={{ top: '-4px' }} />
-            {/* Top lights */}
-            <div className="absolute -top-2 left-0 right-0 flex justify-around gap-0.5 px-1" style={{ top: '-6px' }}>
-              {Array.from({ length: 20 }).map((_, i) => {
-                const color = i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)';
-                return (
-                  <div
-                    key={`top-${i}`}
-                    className="rounded-full"
-                    style={{
-                      width: '12px',
-                      height: '12px',
-                      animation: `twinkle 0.8s ease-in-out infinite`,
-                      animationDelay: (i * 0.08) + 's',
-                      backgroundColor: color,
-                      boxShadow: `0 0 12px ${color}, 0 0 20px ${color}, inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.2)`,
-                      border: '1px solid rgba(0,0,0,0.1)',
-                      flexShrink: 0,
-                    }}
-                  />
-                );
-              })}
-            </div>
-            {/* Wire line bottom */}
-            <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700" style={{ bottom: '-4px' }} />
-            {/* Bottom lights */}
-            <div className="absolute -bottom-2 left-0 right-0 flex justify-around gap-0.5 px-1" style={{ bottom: '-6px' }}>
-              {Array.from({ length: 20 }).map((_, i) => {
-                const color = i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)';
-                return (
-                  <div
-                    key={`bottom-${i}`}
-                    className="rounded-full"
-                    style={{
-                      width: '12px',
-                      height: '12px',
-                      animation: `twinkle 0.8s ease-in-out infinite`,
-                      animationDelay: (i * 0.08 + 0.4) + 's',
-                      backgroundColor: color,
-                      boxShadow: `0 0 12px ${color}, 0 0 20px ${color}, inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.2)`,
-                      border: '1px solid rgba(0,0,0,0.1)',
-                      flexShrink: 0,
-                    }}
-                  />
-                );
-              })}
-            </div>
-            {/* Wire line left */}
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-gray-700 via-gray-600 to-gray-700" style={{ left: '-4px' }} />
-            {/* Left lights */}
-            <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-around gap-0.5 py-1" style={{ left: '-6px' }}>
-              {Array.from({ length: 14 }).map((_, i) => {
-                const color = i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)';
-                return (
-                  <div
-                    key={`left-${i}`}
-                    className="rounded-full"
-                    style={{
-                      width: '12px',
-                      height: '12px',
-                      animation: `twinkle 0.8s ease-in-out infinite`,
-                      animationDelay: (i * 0.12) + 's',
-                      backgroundColor: color,
-                      boxShadow: `0 0 12px ${color}, 0 0 20px ${color}, inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.2)`,
-                      border: '1px solid rgba(0,0,0,0.1)',
-                      flexShrink: 0,
-                    }}
-                  />
-                );
-              })}
-            </div>
-            {/* Wire line right */}
-            <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-gray-700 via-gray-600 to-gray-700" style={{ right: '-4px' }} />
-            {/* Right lights */}
-            <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-around gap-0.5 py-1" style={{ right: '-6px' }}>
-              {Array.from({ length: 14 }).map((_, i) => {
-                const color = i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)';
-                return (
-                  <div
-                    key={`right-${i}`}
-                    className="rounded-full"
-                    style={{
-                      width: '12px',
-                      height: '12px',
-                      animation: `twinkle 0.8s ease-in-out infinite`,
-                      animationDelay: (i * 0.12 + 0.4) + 's',
-                      backgroundColor: color,
-                      boxShadow: `0 0 12px ${color}, 0 0 20px ${color}, inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.2)`,
-                      border: '1px solid rgba(0,0,0,0.1)',
-                      flexShrink: 0,
-                    }}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
+        <div className="lg:col-span-2">
           <Card className="p-6">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -497,7 +397,7 @@ export default function GameDetail() {
                     if (myRequest.status === "approved") {
                       return (
                         <div className="space-y-2">
-                          <Badge variant="default" className="bg-green-600">Approved</Badge>
+                          <Badge variant="default">Approved</Badge>
                           <div className="flex gap-2">
                             <Input 
                               placeholder="Enter your stream link..."
