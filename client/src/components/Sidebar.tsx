@@ -59,32 +59,15 @@ export function Sidebar() {
   return (
     <>
       <aside 
-        className={`fixed left-0 top-0 h-full bg-gradient-to-b from-secondary via-secondary to-secondary/95 text-secondary-foreground z-50 transition-all duration-300 ease-in-out hidden md:flex flex-col ${
+        className={`fixed left-0 top-0 h-full bg-sidebar text-sidebar-foreground z-50 transition-all duration-300 ease-in-out hidden md:flex flex-col ${
           collapsed ? 'w-20' : 'w-64'
         }`}
       >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Snowflake 
-              key={i}
-              className="absolute text-white/10 animate-pulse"
-              style={{
-                width: Math.random() * 20 + 10,
-                height: Math.random() * 20 + 10,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${i * 0.5}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="relative p-4 border-b border-white/10">
+        <div className="relative p-4 border-b border-sidebar-border">
           <Link href="/">
             <div className={`flex items-center gap-3 cursor-pointer group ${collapsed ? 'justify-center' : ''}`}>
               <div className="relative">
-                <span className="text-3xl">🎄</span>
-                <Star className="absolute -top-1 -right-1 w-3 h-3 text-accent animate-pulse" fill="currentColor" />
+                <Zap className="w-8 h-8 text-sidebar-primary" />
               </div>
               {!collapsed && (
                 <div>
