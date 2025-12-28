@@ -10,16 +10,15 @@ import { useUserPreferences } from "@/hooks/useUserPreferences";
 interface GameCardProps {
   game: Game;
   onClick?: () => void;
-  showLights?: boolean;
 }
 
-export function GameCard({ game, onClick, showLights = true }: GameCardProps) {
+export function GameCard({ game, onClick }: GameCardProps) {
   const preferences = useUserPreferences();
   const showLogos = preferences.showTeamLogos !== false;
   const team2Logo = showLogos ? TEAMS[game.team2 as keyof typeof TEAMS] : null;
   const team1Logo = showLogos ? TEAMS[game.team1 as keyof typeof TEAMS] : null;
 
-  const cardContent = (
+  return (
     <Card
       className={`p-6 cursor-pointer hover:shadow-lg hover:border-primary/30 transition-all ${game.isLive ? 'border-primary' : ''}`}
       onClick={onClick}
@@ -92,106 +91,5 @@ export function GameCard({ game, onClick, showLights = true }: GameCardProps) {
         )}
       </div>
     </Card>
-  );
-
-  if (!showLights) {
-    return cardContent;
-  }
-
-  return (
-    <div className="relative" style={{ margin: '12px' }}>
-      {cardContent}
-
-      <div className="absolute -inset-3 pointer-events-none rounded-md" style={{ margin: '-12px' }}>
-        <div className="absolute -top-2 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700" style={{ top: '-4px' }} />
-        <div className="absolute -top-2 left-0 right-0 flex justify-around gap-0.5 px-1" style={{ top: '-6px' }}>
-          {Array.from({ length: 16 }).map((_, i) => {
-            const color = i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)';
-            return (
-              <div
-                key={`top-${i}`}
-                className="rounded-full"
-                style={{
-                  width: '12px',
-                  height: '12px',
-                  animation: `twinkle 0.8s ease-in-out infinite`,
-                  animationDelay: (i * 0.08) + 's',
-                  backgroundColor: color,
-                  boxShadow: `0 0 12px ${color}, 0 0 20px ${color}, inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.2)`,
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  flexShrink: 0,
-                }}
-              />
-            );
-          })}
-        </div>
-        <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700" style={{ bottom: '-4px' }} />
-        <div className="absolute -bottom-2 left-0 right-0 flex justify-around gap-0.5 px-1" style={{ bottom: '-6px' }}>
-          {Array.from({ length: 16 }).map((_, i) => {
-            const color = i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)';
-            return (
-              <div
-                key={`bottom-${i}`}
-                className="rounded-full"
-                style={{
-                  width: '12px',
-                  height: '12px',
-                  animation: `twinkle 0.8s ease-in-out infinite`,
-                  animationDelay: (i * 0.08 + 0.4) + 's',
-                  backgroundColor: color,
-                  boxShadow: `0 0 12px ${color}, 0 0 20px ${color}, inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.2)`,
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  flexShrink: 0,
-                }}
-              />
-            );
-          })}
-        </div>
-        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-gray-700 via-gray-600 to-gray-700" style={{ left: '-4px' }} />
-        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-around gap-0.5 py-1" style={{ left: '-6px' }}>
-          {Array.from({ length: 10 }).map((_, i) => {
-            const color = i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)';
-            return (
-              <div
-                key={`left-${i}`}
-                className="rounded-full"
-                style={{
-                  width: '12px',
-                  height: '12px',
-                  animation: `twinkle 0.8s ease-in-out infinite`,
-                  animationDelay: (i * 0.12) + 's',
-                  backgroundColor: color,
-                  boxShadow: `0 0 12px ${color}, 0 0 20px ${color}, inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.2)`,
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  flexShrink: 0,
-                }}
-              />
-            );
-          })}
-        </div>
-        <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-gray-700 via-gray-600 to-gray-700" style={{ right: '-4px' }} />
-        <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-around gap-0.5 py-1" style={{ right: '-6px' }}>
-          {Array.from({ length: 10 }).map((_, i) => {
-            const color = i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)';
-            return (
-              <div
-                key={`right-${i}`}
-                className="rounded-full"
-                style={{
-                  width: '12px',
-                  height: '12px',
-                  animation: `twinkle 0.8s ease-in-out infinite`,
-                  animationDelay: (i * 0.12 + 0.4) + 's',
-                  backgroundColor: color,
-                  boxShadow: `0 0 12px ${color}, 0 0 20px ${color}, inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.2)`,
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  flexShrink: 0,
-                }}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </div>
   );
 }

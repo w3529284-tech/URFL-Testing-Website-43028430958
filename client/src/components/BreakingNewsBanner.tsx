@@ -28,7 +28,7 @@ export function BreakingNewsBanner() {
   }
 
   return (
-    <div className="sticky top-0 left-0 right-0 z-[100] bg-red-600 text-white overflow-hidden">
+    <div className="sticky top-0 left-0 right-0 z-[100] bg-destructive text-destructive-foreground overflow-hidden">
       <div className="py-2 px-4">
         <div className="marquee-container">
           <div className="marquee-content">

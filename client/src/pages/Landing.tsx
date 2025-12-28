@@ -189,13 +189,12 @@ export default function Landing() {
                   key={game.id}
                   game={game}
                   onClick={() => setLocation(`/game/${game.id}`)}
-                  showLights={false}
                 />
               ))}
             </div>
           ) : (
             <Card className="p-8 text-center border-dashed border-2">
-              <div className="text-4xl mb-3">🎄</div>
+              <div className="text-4xl mb-3">📅</div>
               <p className="text-muted-foreground">No games scheduled yet</p>
               <p className="text-sm text-muted-foreground mt-1">Check back soon!</p>
             </Card>
