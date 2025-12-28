@@ -722,17 +722,36 @@ export default function Betting() {
                       const odds = bet.odds || getOdds(game, bet.pickedTeam);
                       const potentialWinnings = Math.floor(bet.amount * odds);
                       const isLiveOrFinal = game.isLive || game.isFinal;
+                      
+                      // Calculate if bet was won or lost
+                      let betResult = null;
+                      if (game.isFinal && game.team1Score !== null && game.team2Score !== null) {
+                        const didBetWin = 
+                          (bet.pickedTeam === game.team1 && game.team1Score > game.team2Score) ||
+                          (bet.pickedTeam === game.team2 && game.team2Score > game.team1Score);
+                        betResult = didBetWin ? "won" : "lost";
+                      }
 
                       return (
                         <Card key={bet.id} className="p-4 hover:shadow-lg transition-shadow">
                           <div className="space-y-3">
                             {/* Game Info */}
                             <div className="flex items-center justify-between">
-                              <Badge 
-                                variant={isLiveOrFinal ? (game.isFinal ? "default" : "secondary") : "outline"}
-                              >
-                                {isLiveOrFinal ? (game.isFinal ? "Final" : "Live") : "Upcoming"}
-                              </Badge>
+                              <div className="flex gap-2">
+                                <Badge 
+                                  variant={isLiveOrFinal ? (game.isFinal ? "default" : "secondary") : "outline"}
+                                >
+                                  {isLiveOrFinal ? (game.isFinal ? "Final" : "Live") : "Upcoming"}
+                                </Badge>
+                                {betResult && (
+                                  <Badge 
+                                    variant={betResult === "won" ? "default" : "destructive"}
+                                    className={betResult === "won" ? "bg-green-600 hover:bg-green-700" : ""}
+                                  >
+                                    {betResult === "won" ? "Won" : "Lost"}
+                                  </Badge>
+                                )}
+                              </div>
                               <span className="text-xs text-muted-foreground">
                                 Week {game.week}
                               </span>
