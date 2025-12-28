@@ -16,7 +16,6 @@ const AVAILABLE_TEAMS = Object.keys(TEAMS);
 
 interface UserPreferences {
   id?: string;
-  particleEffects?: number;
   darkMode?: boolean;
   compactLayout?: boolean;
   showTeamLogos?: boolean;
@@ -30,7 +29,6 @@ interface UserPreferences {
 export default function UserSettings() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const [particles, setParticles] = useState(100);
   const [darkMode, setDarkMode] = useState(false);
   const [compactLayout, setCompactLayout] = useState(false);
   const [showLogos, setShowLogos] = useState(true);
@@ -52,7 +50,6 @@ export default function UserSettings() {
 
   useEffect(() => {
     if (preferences && Object.keys(preferences).length > 0) {
-      setParticles(preferences.particleEffects || 100);
       setDarkMode(preferences.darkMode || false);
       setShowLogos(preferences.showTeamLogos !== false);
       setReduceAnimations(preferences.reduceAnimations || false);
@@ -66,7 +63,6 @@ export default function UserSettings() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", "/api/user/preferences", {
-        particleEffects: particles,
         darkMode,
         showTeamLogos: showLogos,
         reduceAnimations,
@@ -125,17 +121,6 @@ export default function UserSettings() {
             <div className="flex items-center justify-between">
               <Label>Show Team Logos</Label>
               <Switch checked={showLogos} onCheckedChange={setShowLogos} />
-            </div>
-            <div>
-              <Label className="mb-2 block">Particle Effects ({particles}%)</Label>
-              <Slider
-                min={0}
-                max={100}
-                step={10}
-                value={[particles]}
-                onValueChange={([v]) => setParticles(v)}
-                className="w-full"
-              />
             </div>
             <div className="flex items-center justify-between">
               <Label>Reduce Animations (Low-End PC)</Label>

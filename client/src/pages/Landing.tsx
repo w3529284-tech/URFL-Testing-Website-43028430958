@@ -11,8 +11,6 @@ import { ArrowRight, Trophy, Newspaper, Zap, Calendar, BarChart3, Target, Sparkl
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { SiteTour } from "@/components/SiteTour";
-import { NewYearCountdown } from "@/components/NewYearCountdown";
-import { NewYearPopup } from "@/components/NewYearPopup";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -96,7 +94,6 @@ export default function Landing() {
       
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 mt-8">
         <div className="xl:col-span-2 space-y-6">
-          <NewYearCountdown />
           <Card className="p-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 border-2 border-primary/20 overflow-hidden relative">
             
             <div className="relative z-10">
@@ -137,7 +134,7 @@ export default function Landing() {
               <Trophy className="w-5 h-5 text-accent" />
               Quick Stats
             </h3>
-            <span className="text-2xl">🎅</span>
+            <span className="text-2xl">⚡</span>
           </div>
           
           <div className="space-y-4">
@@ -294,25 +291,24 @@ export default function Landing() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-4xl">
-              <span>🎄</span>
-              <span>🎅</span>
-              <span>🎁</span>
+              <span>⚡</span>
+              <span>🏈</span>
+              <span>🎯</span>
             </div>
             <div>
-              <h3 className="font-bold text-lg">Happy Holidays from URFL!</h3>
-              <p className="text-muted-foreground text-sm">Enjoy the season and may the best team win!</p>
+              <h3 className="font-bold text-lg">Welcome to URFL Fan Hub!</h3>
+              <p className="text-muted-foreground text-sm">Check out all the latest news and scores!</p>
             </div>
           </div>
           <a href="/login">
             <Button variant="outline" className="gap-2 border-secondary/30 hover:bg-secondary/10">
-              <span>🎅</span>
+              <span>🔥</span>
               Login to your account
             </Button>
           </a>
         </div>
       </Card>
       {showTour && <SiteTour onComplete={() => setShowTour(false)} />}
-      <NewYearPopup onClose={() => {}} />
     </div>
   );
 }
