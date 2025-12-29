@@ -11,6 +11,7 @@ import { ArrowRight, Trophy, Newspaper, Zap, Calendar, BarChart3, Target, Sparkl
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { SiteTour } from "@/components/SiteTour";
+import { NewYearsCountdown } from "@/components/NewYearsCountdown";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -80,6 +81,7 @@ export default function Landing() {
           </div>
         </div>
       )}
+      <NewYearsCountdown />
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <div className="flex items-center gap-2">
