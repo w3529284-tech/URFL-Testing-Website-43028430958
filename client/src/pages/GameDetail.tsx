@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FootballField } from "@/components/FootballField";
 import type { Game, ChatMessage, Prediction, Standings, StreamRequest, User, GamePlay } from "@shared/schema";
 import { formatInTimeZone } from "date-fns-tz";
-import { ArrowLeft, AlertCircle, Video, ExternalLink } from "lucide-react";
+import { ArrowLeft, AlertCircle, Video, ExternalLink, Activity } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { TEAMS } from "@/lib/teams";
