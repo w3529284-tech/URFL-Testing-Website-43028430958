@@ -328,6 +328,11 @@ export default function GameDetail() {
                 team2={game.team2}
                 team1Score={game.team1Score || 0}
                 team2Score={game.team2Score || 0}
+                isAdmin={(currentUser as any)?.role === 'admin'}
+                onPositionChange={(pos) => {
+                  console.log("Ball moved to:", pos);
+                  // Optional: Sync to backend if needed
+                }}
               />
             </div>
             

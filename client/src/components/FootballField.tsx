@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { GamePlay } from "@shared/schema";
+import { motion, useMotionValue, useTransform } from "framer-motion";
+import fieldBg from "@/assets/field.jpg";
 
 interface FootballFieldProps {
   plays: GamePlay[];
@@ -7,127 +9,63 @@ interface FootballFieldProps {
   team2: string;
   team1Score: number;
   team2Score: number;
+  onPositionChange?: (position: number) => void;
+  isAdmin?: boolean;
 }
 
-export function FootballField({ plays, team1, team2, team1Score, team2Score }: FootballFieldProps) {
+export function FootballField({ plays, team1, team2, team1Score, team2Score, onPositionChange, isAdmin }: FootballFieldProps) {
   const [ballPosition, setBallPosition] = useState(50); // 0-100 scale, 50 = midfield
-  const [isAnimating, setIsAnimating] = useState(false);
+  const fieldRef = useRef<HTMLDivElement>(null);
 
-  // Calculate ball position based on plays
+  // Ball position on field is 10-110 (including endzones)
+  // We'll map 0-100 yards to 8.33% - 91.66% of the container width
+  const x = useMotionValue(50);
+  
   useEffect(() => {
-    if (plays.length === 0) return;
-
-    const lastPlay = plays[plays.length - 1];
-    setIsAnimating(true);
-
-    // Calculate new position based on yards gained
-    // Field is 120 yards total (two 10-yard endzones + 100-yard field)
-    const yardMovement = lastPlay.yardsGained || 0;
-    const yardScale = 100 / 120; // Convert field yards to percentage
-
-    // Determine direction based on which team is on offense
-    let newPosition = ballPosition;
-    if (lastPlay.team === team1) {
-      // Team1 going toward team2's endzone (right)
-      newPosition = Math.min(ballPosition + yardMovement * yardScale, 110);
-    } else {
-      // Team2 going toward team1's endzone (left)
-      newPosition = Math.max(ballPosition - yardMovement * yardScale, -10);
+    if (plays.length === 0) {
+      setBallPosition(50);
+      x.set(50);
+      return;
     }
+    const lastPlay = plays[plays.length - 1];
+    // Simple logic for now: keep track of position
+    // In a real app we'd probably have ballPosition in the DB
+    // For this demo we'll use the last known state or default
+  }, [plays]);
 
-    setBallPosition(newPosition);
-
-    // Reset animation flag after 1 second
-    const timer = setTimeout(() => setIsAnimating(false), 1000);
-    return () => clearTimeout(timer);
-  }, [plays, ballPosition, team1]);
-
-  // Convert ball position to visual position on field
-  const ballPercentage = ((ballPosition + 10) / 120) * 100;
+  const handleDragEnd = () => {
+    const currentX = x.get();
+    setBallPosition(currentX);
+    if (onPositionChange) {
+      onPositionChange(currentX);
+    }
+  };
 
   return (
-    <div className="w-full bg-green-700 rounded-lg overflow-hidden border-4 border-white shadow-lg">
-      {/* Field Container */}
-      <div className="relative w-full pt-[56.25%]">
-        <div className="absolute inset-0 flex">
-          {/* Team 1 Endzone (Left) */}
-          <div className="flex-1 bg-blue-600 border-r-2 border-white flex items-center justify-center">
-            <div className="text-white font-bold text-[10px] md:text-sm tracking-[0.2em] [writing-mode:vertical-rl] transform rotate-180 uppercase">
-              END ZONE
-            </div>
-          </div>
-
-          {/* Main Field */}
-          <div className="flex-[5] bg-green-700 relative border-y-2 border-white">
-            {/* Yard Lines */}
-            <div className="absolute inset-0 flex">
-              {[...Array(11)].map((_, i) => {
-                const yardLine = i * 10;
-                const displayYard = yardLine > 50 ? 100 - yardLine : yardLine;
-                return (
-                  <div
-                    key={i}
-                    className="flex-1 relative border-r border-white border-opacity-30 flex flex-col justify-between py-2"
-                  >
-                    {/* Yard Labels - Positioned on the line */}
-                    {i > 0 && i < 10 && (
-                      <>
-                        <div 
-                          className="absolute text-white text-[8px] md:text-xs font-bold whitespace-nowrap"
-                          style={{ 
-                            left: '100%', 
-                            top: '10%', 
-                            transform: 'translateX(-50%)' 
-                          }}
-                        >
-                          {displayYard}
-                        </div>
-                        <div 
-                          className="absolute text-white text-[8px] md:text-xs font-bold whitespace-nowrap"
-                          style={{ 
-                            left: '100%', 
-                            bottom: '10%', 
-                            transform: 'translateX(-50%)' 
-                          }}
-                        >
-                          {displayYard}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Ball */}
-            <div
-              className={`absolute w-2 h-3 bg-amber-900 rounded-full transition-all ${
-                isAnimating ? "duration-1000" : "duration-0"
-              } shadow-lg`}
-              style={{
-                left: `${ballPercentage}%`,
-                top: "50%",
-                transform: "translate(-50%, -50%)",
-                zIndex: 10,
-              }}
-            >
-              <div className="absolute inset-0 rounded-full bg-white opacity-30 animate-pulse" />
-            </div>
-
-            {/* Yard Markers */}
-            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none py-1">
-              <div className="h-1 bg-white bg-opacity-20 w-full" />
-              <div className="h-1 bg-white bg-opacity-20 w-full" />
-            </div>
-          </div>
-
-          {/* Team 2 Endzone (Right) */}
-          <div className="flex-1 bg-red-600 border-l-2 border-white flex items-center justify-center">
-            <div className="text-white font-bold text-[10px] md:text-sm tracking-[0.2em] [writing-mode:vertical-rl] uppercase">
-              END ZONE
-            </div>
-          </div>
-        </div>
+    <div className="w-full rounded-lg overflow-hidden shadow-lg border-4 border-white">
+      <div 
+        ref={fieldRef}
+        className="relative w-full aspect-[2/1] bg-cover bg-center"
+        style={{ backgroundImage: `url(${fieldBg})` }}
+      >
+        {/* Draggable Ball */}
+        <motion.div
+          drag={isAdmin ? "x" : false}
+          dragConstraints={fieldRef}
+          dragElastic={0}
+          dragMomentum={false}
+          onDragEnd={handleDragEnd}
+          style={{ 
+            x: `${x.get()}%`,
+            left: 0,
+            top: "50%",
+            transform: "translate(-50%, -50%)"
+          }}
+          className={`absolute w-4 h-6 bg-amber-900 rounded-full shadow-xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center border border-white/30 ${isAdmin ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+        >
+          <div className="w-full h-[1px] bg-white/50 absolute top-1/4" />
+          <div className="w-full h-[1px] bg-white/50 absolute top-3/4" />
+        </motion.div>
       </div>
     </div>
   );
