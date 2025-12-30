@@ -62,23 +62,42 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score }: F
           <div className="flex-[5] bg-green-700 relative border-y-2 border-white">
             {/* Yard Lines */}
             <div className="absolute inset-0 flex">
-              {[...Array(12)].map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-1 border-r border-white border-opacity-30 flex flex-col justify-between py-2"
-                >
-                  {i !== 0 && i !== 11 && (
-                    <>
-                      <div className="text-white text-[8px] md:text-xs font-bold text-center">
-                        {i * 10}
-                      </div>
-                      <div className="text-white text-[8px] md:text-xs font-bold text-center">
-                        {i * 10}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
+              {[...Array(11)].map((_, i) => {
+                const yardLine = i * 10;
+                const displayYard = yardLine > 50 ? 100 - yardLine : yardLine;
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 relative border-r border-white border-opacity-30 flex flex-col justify-between py-2"
+                  >
+                    {/* Yard Labels - Positioned on the line */}
+                    {i > 0 && i < 10 && (
+                      <>
+                        <div 
+                          className="absolute text-white text-[8px] md:text-xs font-bold whitespace-nowrap"
+                          style={{ 
+                            left: '100%', 
+                            top: '10%', 
+                            transform: 'translateX(-50%)' 
+                          }}
+                        >
+                          {displayYard}
+                        </div>
+                        <div 
+                          className="absolute text-white text-[8px] md:text-xs font-bold whitespace-nowrap"
+                          style={{ 
+                            left: '100%', 
+                            bottom: '10%', 
+                            transform: 'translateX(-50%)' 
+                          }}
+                        >
+                          {displayYard}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Ball */}
