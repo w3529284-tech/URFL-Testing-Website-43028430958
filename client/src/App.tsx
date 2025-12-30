@@ -14,6 +14,7 @@ import PreviousWeeks from "@/pages/PreviousWeeks";
 import Schedule from "@/pages/Schedule";
 import Playoffs from "@/pages/Playoffs";
 import Standings from "@/pages/Standings";
+import Stats from "@/pages/Stats";
 import News from "@/pages/News";
 import NewsDetail from "@/pages/NewsDetail";
 import Betting from "@/pages/Betting";
@@ -88,6 +89,7 @@ function MainContent() {
               <Route path="/schedule" component={Schedule} />
               <Route path="/playoffs" component={Playoffs} />
               <Route path="/standings" component={Standings} />
+              <Route path="/stats" component={Stats} />
               <Route path="/news" component={News} />
               <Route path="/news/:id" component={NewsDetail} />
               <Route path="/betting" component={Betting} />

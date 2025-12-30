@@ -17,7 +17,10 @@ import {
   insertBracketImageSchema,
   insertStreamRequestSchema,
   insertBetSchema,
+  insertPlayerStatsSchema,
 } from "@shared/schema";
+import { playerStats } from "@shared/schema";
+import { db } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
@@ -996,6 +999,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating tour status:", error);
       res.status(500).json({ message: "Failed to update tour status" });
+    }
+  });
+
+  // Player Stats endpoints
+  app.get("/api/player-stats", async (req, res) => {
+    try {
+      const stats = await db.select().from(playerStats);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching player stats:", error);
+      res.status(500).json({ message: "Failed to fetch player stats" });
+    }
+  });
+
+  app.post("/api/player-stats", isAuthenticated, async (req, res) => {
+    try {
+      const statData = insertPlayerStatsSchema.parse(req.body);
+      const stat = await db.insert(playerStats).values(statData).returning();
+      res.json(stat[0]);
+    } catch (error) {
+      console.error("Error creating player stat:", error);
+      res.status(400).json({ message: "Failed to create player stat" });
     }
   });
 

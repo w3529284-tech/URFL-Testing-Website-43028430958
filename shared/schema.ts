@@ -389,3 +389,32 @@ export const insertParlaySchema = createInsertSchema(parlays).omit({
 
 export type InsertParlay = z.infer<typeof insertParlaySchema>;
 export type Parlay = typeof parlays.$inferSelect;
+
+// Player Stats table
+export const playerStats = pgTable("player_stats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  playerName: varchar("player_name", { length: 100 }).notNull(),
+  team: varchar("team", { length: 100 }).notNull(),
+  position: varchar("position", { length: 10 }).notNull(), // "QB", "WR", "RB", "DEF"
+  passingYards: integer("passing_yards").default(0),
+  passingTouchdowns: integer("passing_touchdowns").default(0),
+  interceptions: integer("interceptions").default(0),
+  rushingYards: integer("rushing_yards").default(0),
+  rushingTouchdowns: integer("rushing_touchdowns").default(0),
+  receivingYards: integer("receiving_yards").default(0),
+  receivingTouchdowns: integer("receiving_touchdowns").default(0),
+  receptions: integer("receptions").default(0),
+  defensivePoints: integer("defensive_points").default(0),
+  week: integer("week").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPlayerStatsSchema = createInsertSchema(playerStats).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPlayerStats = z.infer<typeof insertPlayerStatsSchema>;
+export type PlayerStats = typeof playerStats.$inferSelect;

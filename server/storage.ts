@@ -17,6 +17,7 @@ import {
   updatePlans,
   bets,
   parlays,
+  playerStats,
   type User,
   type UpsertUser,
   type Game,
@@ -53,6 +54,8 @@ import {
   type InsertBet,
   type Parlay,
   type InsertParlay,
+  type PlayerStats,
+  type InsertPlayerStats,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
