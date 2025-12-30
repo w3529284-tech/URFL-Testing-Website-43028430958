@@ -78,6 +78,7 @@ export function GameCard({ game, onClick }: GameCardProps) {
               className="w-full gap-2"
               onClick={(e) => {
                 e.stopPropagation();
+                if (!game.streamLink) return;
                 const url = game.streamLink.startsWith('http://') || game.streamLink.startsWith('https://') 
                   ? game.streamLink 
                   : `https://${game.streamLink}`;

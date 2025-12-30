@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./simpleAuth";
 import { censorProfanity } from "./profanityFilter";
+import { eq, desc, and, sql } from "drizzle-orm";
 import {
   insertGameSchema,
   insertNewsSchema,
