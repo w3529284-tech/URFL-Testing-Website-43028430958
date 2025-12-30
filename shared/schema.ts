@@ -59,6 +59,7 @@ export const games = pgTable("games", {
   isPrimetime: boolean("is_primetime").default(false),
   team1Odds: integer("team1_odds").default(150), // 1.5x as decimal (150 = 1.50)
   team2Odds: integer("team2_odds").default(150), // 1.5x as decimal (150 = 1.50)
+  lastPlay: text("last_play"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

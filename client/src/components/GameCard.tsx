@@ -89,6 +89,13 @@ export function GameCard({ game, onClick }: GameCardProps) {
             </Button>
           </div>
         )}
+
+        {game.lastPlay && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-md border border-border/50">
+            <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-wider">Last Play</div>
+            <p className="text-sm font-medium leading-snug">{game.lastPlay}</p>
+          </div>
+        )}
       </div>
     </Card>
   );
