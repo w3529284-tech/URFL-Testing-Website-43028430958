@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChatComponent } from "@/components/ChatComponent";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Game, ChatMessage, Prediction, Standings, StreamRequest, User } from "@shared/schema";
+import { FootballField } from "@/components/FootballField";
+import type { Game, ChatMessage, Prediction, Standings, StreamRequest, User, GamePlay } from "@shared/schema";
 import { formatInTimeZone } from "date-fns-tz";
 import { ArrowLeft, AlertCircle, Video, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
@@ -84,6 +85,12 @@ export default function GameDetail() {
     queryKey: ["/api/stream-requests"],
     enabled: !!user,
     retry: false,
+  });
+
+  const { data: plays = [] } = useQuery<GamePlay[]>({
+    queryKey: ["/api/games", gameId, "plays"],
+    enabled: !!gameId,
+    refetchInterval: 1000,
   });
 
   const requestStreamMutation = useMutation({
@@ -308,6 +315,49 @@ export default function GameDetail() {
           Back to Scores
         </Button>
       </Link>
+
+      {/* Football Field */}
+      {(game?.isLive || game?.isFinal) && (
+        <Card className="p-6 mb-6">
+          <h2 className="text-2xl font-bold mb-4">Live Field</h2>
+          <FootballField 
+            plays={plays}
+            team1={game.team1}
+            team2={game.team2}
+            team1Score={game.team1Score || 0}
+            team2Score={game.team2Score || 0}
+          />
+        </Card>
+      )}
+
+      {/* Plays Display */}
+      {plays.length > 0 && (
+        <Card className="p-6 mb-6">
+          <h2 className="text-2xl font-bold mb-4">Play-by-Play</h2>
+          <div className="space-y-3 max-h-64 overflow-y-auto">
+            {[...plays].reverse().map((play) => (
+              <div
+                key={play.id}
+                className="p-3 bg-muted rounded border-l-4 border-primary"
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <p className="font-semibold text-sm">{play.team}</p>
+                  <Badge variant="outline">{play.quarter}</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  {play.playType.charAt(0).toUpperCase() + play.playType.slice(1)}
+                </p>
+                <p className="text-sm font-medium">{play.description}</p>
+                {play.yardsGained !== 0 && (
+                  <p className="text-xs text-primary mt-1">
+                    {play.yardsGained > 0 ? '+ ' : ''}{play.yardsGained} yards
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
