@@ -441,3 +441,27 @@ export const insertTeamSchema = createInsertSchema(teams).omit({
 
 export type InsertTeam = z.infer<typeof insertTeamSchema>;
 export type Team = typeof teams.$inferSelect;
+
+// Game Plays table (play-by-play tracking)
+export const gamePlays = pgTable("game_plays", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  gameId: varchar("game_id").notNull(),
+  quarter: varchar("quarter", { length: 20 }).notNull(), // "Q1", "Q2", "Q3", "Q4"
+  playType: varchar("play_type", { length: 50 }).notNull(), // "pass", "rush", "sack", "interception", "touchdown", etc.
+  team: varchar("team", { length: 100 }).notNull(), // team that made the play
+  playerName: varchar("player_name", { length: 100 }),
+  description: text("description").notNull(), // e.g., "Pass completion for 50 yards"
+  yardsGained: integer("yards_gained").default(0),
+  pointsAdded: integer("points_added").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertGamePlaySchema = createInsertSchema(gamePlays).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertGamePlay = z.infer<typeof insertGamePlaySchema>;
+export type GamePlay = typeof gamePlays.$inferSelect;

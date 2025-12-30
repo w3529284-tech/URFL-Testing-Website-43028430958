@@ -25,6 +25,11 @@ export default function GameDetail() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [celebrationTriggered, setCelebrationTriggered] = useState(false);
   const [streamLinkInput, setStreamLinkInput] = useState("");
+  const [playDescription, setPlayDescription] = useState("");
+  const [playType, setPlayType] = useState("pass");
+  const [yardsGained, setYardsGained] = useState(0);
+  const [pointsAdded, setPointsAdded] = useState(0);
+  const [selectedTeam, setSelectedTeam] = useState("");
   const wsRef = useRef<WebSocket | null>(null);
   const confettiTimeoutsRef = useRef<number[]>([]);
   const { user } = useAuth();
@@ -120,6 +125,33 @@ export default function GameDetail() {
     },
     onSuccess: () => {
       refetchPredictions();
+    },
+  });
+
+  const addPlayMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", `/api/games/${gameId}/plays`, {
+        quarter: game?.quarter || "Q1",
+        playType,
+        team: selectedTeam,
+        description: playDescription,
+        yardsGained,
+        pointsAdded,
+      });
+    },
+    onSuccess: () => {
+      toast({ title: "Play added", description: "Game stats updated" });
+      setPlayDescription("");
+      setPlayType("pass");
+      setYardsGained(0);
+      setPointsAdded(0);
+      setSelectedTeam("");
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["/api/games", gameId] });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || "Failed to add play";
+      toast({ title: "Error", description: msg, variant: "destructive" });
     },
   });
 
@@ -329,6 +361,69 @@ export default function GameDetail() {
                 <p className="text-muted-foreground" data-testid="text-game-location">
                   <span className="font-semibold">Location:</span> {game.location}
                 </p>
+              </div>
+            )}
+
+            {/* Admin Play Controls */}
+            {!game.isFinal && game.isLive && currentUser && (currentUser.role === "admin" || currentUser.role === "streamer") && (
+              <div className="pt-4 border-t mb-4">
+                <p className="font-semibold mb-3">📊 Add Play</p>
+                <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
+                  <div className="grid grid-cols-2 gap-2">
+                    <select 
+                      value={selectedTeam} 
+                      onChange={(e) => setSelectedTeam(e.target.value)}
+                      className="border rounded px-2 py-1 text-sm bg-background"
+                    >
+                      <option value="">Select Team</option>
+                      <option value={game.team1}>{game.team1}</option>
+                      <option value={game.team2}>{game.team2}</option>
+                    </select>
+                    <select 
+                      value={playType} 
+                      onChange={(e) => setPlayType(e.target.value)}
+                      className="border rounded px-2 py-1 text-sm bg-background"
+                    >
+                      <option value="pass">Pass</option>
+                      <option value="rush">Rush</option>
+                      <option value="sack">Sack</option>
+                      <option value="interception">Interception</option>
+                      <option value="touchdown">Touchdown</option>
+                      <option value="field_goal">Field Goal</option>
+                    </select>
+                  </div>
+                  <input 
+                    type="text"
+                    placeholder="Play description (e.g., 'Pass completion for 50 yards')"
+                    value={playDescription}
+                    onChange={(e) => setPlayDescription(e.target.value)}
+                    className="w-full border rounded px-2 py-1 text-sm bg-background"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input 
+                      type="number"
+                      placeholder="Yards gained"
+                      value={yardsGained}
+                      onChange={(e) => setYardsGained(parseInt(e.target.value) || 0)}
+                      className="border rounded px-2 py-1 text-sm bg-background"
+                    />
+                    <input 
+                      type="number"
+                      placeholder="Points added"
+                      value={pointsAdded}
+                      onChange={(e) => setPointsAdded(parseInt(e.target.value) || 0)}
+                      className="border rounded px-2 py-1 text-sm bg-background"
+                    />
+                  </div>
+                  <Button 
+                    size="sm" 
+                    onClick={() => addPlayMutation.mutate()}
+                    disabled={!selectedTeam || !playDescription || addPlayMutation.isPending}
+                    className="w-full"
+                  >
+                    Add Play
+                  </Button>
+                </div>
               </div>
             )}
 

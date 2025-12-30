@@ -18,8 +18,9 @@ import {
   insertStreamRequestSchema,
   insertBetSchema,
   insertPlayerStatsSchema,
+  insertGamePlaySchema,
 } from "@shared/schema";
-import { playerStats } from "@shared/schema";
+import { playerStats, gamePlays } from "@shared/schema";
 import { db } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1021,6 +1022,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating player stat:", error);
       res.status(400).json({ message: "Failed to create player stat" });
+    }
+  });
+
+  // Game Plays endpoints (for play-by-play updates)
+  app.get("/api/games/:gameId/plays", async (req, res) => {
+    try {
+      const plays = await db.select().from(gamePlays).where(eq(gamePlays.gameId, req.params.gameId));
+      res.json(plays);
+    } catch (error) {
+      console.error("Error fetching game plays:", error);
+      res.status(500).json({ message: "Failed to fetch game plays" });
+    }
+  });
+
+  app.post("/api/games/:gameId/plays", isAuthenticated, async (req: any, res) => {
+    try {
+      const role = req.session?.role;
+      if (role !== "admin" && role !== "streamer") {
+        return res.status(403).json({ message: "Only admins and streamers can add plays" });
+      }
+
+      const playData = insertGamePlaySchema.parse({
+        ...req.body,
+        gameId: req.params.gameId,
+      });
+
+      const play = await db.insert(gamePlays).values(playData).returning();
+      
+      // Update game scores based on play points
+      if (play[0].pointsAdded > 0) {
+        const game = await storage.getGame(req.params.gameId);
+        if (game) {
+          if (play[0].team === game.team1) {
+            await storage.updateGame(req.params.gameId, {
+              team1Score: game.team1Score + play[0].pointsAdded,
+            });
+          } else if (play[0].team === game.team2) {
+            await storage.updateGame(req.params.gameId, {
+              team2Score: game.team2Score + play[0].pointsAdded,
+            });
+          }
+        }
+      }
+
+      res.json(play[0]);
+    } catch (error) {
+      console.error("Error creating game play:", error);
+      res.status(400).json({ message: "Failed to create game play" });
     }
   });
 
