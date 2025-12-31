@@ -106,6 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const wasNotFinal = !wasFinal;
       
       // Update the game
+      console.log(`[API] PATCH /api/games/${id} body:`, JSON.stringify(req.body));
       const updatedGame = await storage.updateGame(id, req.body);
       
       // Broadcast update to all connected clients
@@ -117,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           game: updatedGame
         });
         wss.clients.forEach((client: any) => {
-          if (client.readyState === 1) { // WebSocket.OPEN
+          if (client.readyState === WebSocket.OPEN) {
             client.send(updateMessage);
           }
         });

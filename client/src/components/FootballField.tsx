@@ -71,10 +71,12 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score, onP
       apiRequest("PATCH", `/api/games/${game.id}`, payload)
         .then((updated) => {
           console.log("[FIELD] Successfully persisted to DB:", updated);
-          // Invalidate queries to ensure all components see the new state
+          // Directly update the local game state if possible, or invalidate
+          queryClient.setQueryData(["/api/games", game.id], (old: any) => {
+            if (!old) return old;
+            return { ...old, ballPosition: roundedX };
+          });
           queryClient.invalidateQueries({ queryKey: ["/api/games", game.id] });
-          queryClient.invalidateQueries({ queryKey: ["/api/games/all"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/games/current"] });
         })
         .catch(err => {
           console.error("[FIELD] Final save failed:", err);
