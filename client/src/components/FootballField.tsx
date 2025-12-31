@@ -28,42 +28,37 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score, onP
     const pos = game?.ballPosition ?? 50;
     x.set(pos);
     setBallPosition(pos);
+    console.log("[FIELD] Initial ball position set:", pos);
   }, [game?.ballPosition, x]);
 
   const handleDragEnd = () => {
     const currentX = x.get();
-    setBallPosition(currentX);
+    const roundedX = Math.round(currentX);
+    
+    // Update local state immediately for visual feedback
+    setBallPosition(roundedX);
+    x.set(roundedX);
+    
     if (onPositionChange) {
-      onPositionChange(currentX);
+      onPositionChange(roundedX);
     }
     
     // Persist to DB if we have a game ID
     if (game?.id) {
-      const payload = { ballPosition: Math.round(currentX) };
-      console.log("[FIELD] Syncing ball position:", payload);
-      
-      // Update local state immediately for responsiveness
-      setBallPosition(currentX);
+      const payload = { ballPosition: roundedX };
+      console.log("[FIELD] Persisting ball position to DB:", payload);
 
       apiRequest("PATCH", `/api/games/${game.id}`, payload)
         .then((updatedGame) => {
-          console.log("[FIELD] Successfully synced ball position", updatedGame);
-          // Sync with server version in case of server-side rounding or validation
-          if (updatedGame && updatedGame.ballPosition !== undefined) {
+          console.log("[FIELD] Successfully persisted ball position:", updatedGame);
+          // Only update state if server returned something different
+          if (updatedGame && updatedGame.ballPosition !== undefined && updatedGame.ballPosition !== roundedX) {
             setBallPosition(updatedGame.ballPosition);
+            x.set(updatedGame.ballPosition);
           }
         })
         .catch(err => {
-          console.error("[FIELD] Primary sync failed, trying snake_case:", err);
-          const altPayload = { ball_position: Math.round(currentX) };
-          apiRequest("PATCH", `/api/games/${game.id}`, altPayload as any)
-            .then((updatedGame) => {
-              console.log("[FIELD] Successfully synced ball position (snake_case)", updatedGame);
-              if (updatedGame && (updatedGame as any).ballPosition !== undefined) {
-                setBallPosition((updatedGame as any).ballPosition);
-              }
-            })
-            .catch(err2 => console.error("[FIELD] All sync attempts failed:", err2));
+          console.error("[FIELD] Failed to persist ball position:", err);
         });
     }
   };

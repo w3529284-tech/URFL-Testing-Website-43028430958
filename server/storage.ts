@@ -240,22 +240,25 @@ export class DatabaseStorage implements IStorage {
       updateData.gameTime = new Date(updateData.gameTime);
     }
     
-    // Explicitly handle ballPosition to ball_position mapping
-    // Ensure both camelCase and snake_case inputs are captured correctly
-    if ((gameData as any).ballPosition !== undefined) {
-      updateData.ballPosition = Number((gameData as any).ballPosition);
+    // Map camelCase to snake_case if Drizzle isn't picking it up from the set() call automatically
+    // The games table has "ball_position" column mapped to "ballPosition" in schema.ts
+    // We'll explicitly handle both just in case
+    const finalUpdate: any = { ...updateData };
+    
+    if (gameData.ballPosition !== undefined) {
+      finalUpdate.ballPosition = Number(gameData.ballPosition);
     }
     if ((gameData as any).ball_position !== undefined) {
-      updateData.ballPosition = Number((gameData as any).ball_position);
+      finalUpdate.ballPosition = Number((gameData as any).ball_position);
     }
 
     const [game] = await db
       .update(games)
-      .set(updateData)
+      .set(finalUpdate)
       .where(eq(games.id, id))
       .returning();
       
-    console.log(`[STORAGE] Updated game ${id}, ballPosition: ${game.ballPosition}`);
+    console.log(`[STORAGE] Game ${id} updated in DB. New ballPosition: ${game.ballPosition}`);
     return game;
   }
 
