@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import type { GamePlay, Game } from "@shared/schema";
 import { motion, useMotionValue } from "framer-motion";
 import fieldBg from "@assets/Football_field_diagram_1767142475671.webp";
+import { apiRequest } from "@/lib/queryClient";
 
 interface FootballFieldProps {
   plays: GamePlay[];
@@ -34,6 +35,12 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score, onP
     setBallPosition(currentX);
     if (onPositionChange) {
       onPositionChange(currentX);
+    }
+    
+    // Persist to DB if we have a game ID
+    if (game?.id) {
+      apiRequest("PATCH", `/api/games/${game.id}`, { ballPosition: Math.round(currentX) })
+        .catch(err => console.error("Failed to sync ball position:", err));
     }
   };
 
