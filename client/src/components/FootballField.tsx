@@ -41,13 +41,30 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score, onP
     if (game?.id) {
       const payload = { ballPosition: Math.round(currentX) };
       console.log("[FIELD] Syncing ball position:", payload);
+      
+      // Update local state immediately for responsiveness
+      setBallPosition(currentX);
+
       apiRequest("PATCH", `/api/games/${game.id}`, payload)
-        .then(() => {
-          console.log("[FIELD] Successfully synced ball position");
-          // Force a local update to match what we just sent
-          setBallPosition(currentX);
+        .then((updatedGame) => {
+          console.log("[FIELD] Successfully synced ball position", updatedGame);
+          // Sync with server version in case of server-side rounding or validation
+          if (updatedGame && updatedGame.ballPosition !== undefined) {
+            setBallPosition(updatedGame.ballPosition);
+          }
         })
-        .catch(err => console.error("[FIELD] Failed to sync ball position:", err));
+        .catch(err => {
+          console.error("[FIELD] Primary sync failed, trying snake_case:", err);
+          const altPayload = { ball_position: Math.round(currentX) };
+          apiRequest("PATCH", `/api/games/${game.id}`, altPayload as any)
+            .then((updatedGame) => {
+              console.log("[FIELD] Successfully synced ball position (snake_case)", updatedGame);
+              if (updatedGame && (updatedGame as any).ballPosition !== undefined) {
+                setBallPosition((updatedGame as any).ballPosition);
+              }
+            })
+            .catch(err2 => console.error("[FIELD] All sync attempts failed:", err2));
+        });
     }
   };
 

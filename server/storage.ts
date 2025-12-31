@@ -239,11 +239,23 @@ export class DatabaseStorage implements IStorage {
     if (updateData.gameTime && typeof updateData.gameTime === 'string') {
       updateData.gameTime = new Date(updateData.gameTime);
     }
+    
+    // Explicitly handle ballPosition to ball_position mapping
+    // Ensure both camelCase and snake_case inputs are captured correctly
+    if ((gameData as any).ballPosition !== undefined) {
+      updateData.ballPosition = Number((gameData as any).ballPosition);
+    }
+    if ((gameData as any).ball_position !== undefined) {
+      updateData.ballPosition = Number((gameData as any).ball_position);
+    }
+
     const [game] = await db
       .update(games)
       .set(updateData)
       .where(eq(games.id, id))
       .returning();
+      
+    console.log(`[STORAGE] Updated game ${id}, ballPosition: ${game.ballPosition}`);
     return game;
   }
 
