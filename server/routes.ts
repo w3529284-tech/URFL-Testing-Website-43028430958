@@ -137,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      res.json(game);
+      res.json(updatedGame);
     } catch (error) {
       console.error("Error updating game:", error);
       res.status(400).json({ message: "Failed to update game" });
