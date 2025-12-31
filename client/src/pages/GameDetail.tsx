@@ -334,11 +334,10 @@ export default function GameDetail() {
                 isAdmin={(currentUser as any)?.role === 'admin'}
                 game={game}
                 onPositionChange={async (pos) => {
-                  try {
-                    await apiRequest("PATCH", `/api/games/${gameId}`, { ballPosition: Math.round(pos) });
-                  } catch (err) {
-                    console.error("Failed to sync ball position:", err);
-                  }
+                  // The component itself now handles the PATCH request to /api/games/:id
+                  // We don't need to duplicate it here, but we can keep it for extra safety
+                  // or remove it to avoid double-patching.
+                  console.log("[DETAIL] Ball position changed callback:", pos);
                 }}
               />
             </div>

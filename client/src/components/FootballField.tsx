@@ -58,6 +58,8 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score, onP
     setBallPosition(roundedX);
     x.set(roundedX);
     
+    console.log("[FIELD] Drag ended, persisting ball position:", roundedX);
+
     if (onPositionChange) {
       onPositionChange(roundedX);
     }
@@ -65,6 +67,12 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score, onP
     if (game?.id) {
       const payload = { ballPosition: roundedX };
       apiRequest("PATCH", `/api/games/${game.id}`, payload)
+        .then((updated) => {
+          console.log("[FIELD] Successfully persisted to DB:", updated);
+          queryClient.invalidateQueries({ queryKey: ["/api/games", game.id] });
+          queryClient.invalidateQueries({ queryKey: ["/api/games/all"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/games/current"] });
+        })
         .catch(err => console.error("[FIELD] Final save failed:", err));
     }
   };
