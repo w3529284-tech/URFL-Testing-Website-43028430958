@@ -31,11 +31,30 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score, onP
     console.log("[FIELD] Initial ball position set:", pos);
   }, [game?.ballPosition, x]);
 
+  const handleDrag = () => {
+    const currentX = x.get();
+    const roundedX = Math.round(currentX);
+    
+    // Broadcast position live while dragging if it changed
+    if (game?.id && roundedX !== ballPosition) {
+      setBallPosition(roundedX);
+      const payload = { 
+        type: "ball_move",
+        gameId: game.id,
+        ballPosition: roundedX 
+      };
+      
+      const wss = (window as any).socket;
+      if (wss && wss.readyState === WebSocket.OPEN) {
+        wss.send(JSON.stringify(payload));
+      }
+    }
+  };
+
   const handleDragEnd = () => {
     const currentX = x.get();
     const roundedX = Math.round(currentX);
     
-    // Update local state immediately for visual feedback
     setBallPosition(roundedX);
     x.set(roundedX);
     
@@ -43,23 +62,10 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score, onP
       onPositionChange(roundedX);
     }
     
-    // Persist to DB if we have a game ID
     if (game?.id) {
       const payload = { ballPosition: roundedX };
-      console.log("[FIELD] Persisting ball position to DB:", payload);
-
       apiRequest("PATCH", `/api/games/${game.id}`, payload)
-        .then((updatedGame) => {
-          console.log("[FIELD] Successfully persisted ball position:", updatedGame);
-          // Only update state if server returned something different
-          if (updatedGame && updatedGame.ballPosition !== undefined && updatedGame.ballPosition !== roundedX) {
-            setBallPosition(updatedGame.ballPosition);
-            x.set(updatedGame.ballPosition);
-          }
-        })
-        .catch(err => {
-          console.error("[FIELD] Failed to persist ball position:", err);
-        });
+        .catch(err => console.error("[FIELD] Final save failed:", err));
     }
   };
 
@@ -76,6 +82,7 @@ export function FootballField({ plays, team1, team2, team1Score, team2Score, onP
           dragConstraints={fieldRef}
           dragElastic={0}
           dragMomentum={false}
+          onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           style={{ 
             x: `${x.get()}%`,

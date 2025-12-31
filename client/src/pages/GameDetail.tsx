@@ -236,6 +236,7 @@ export default function GameDetail() {
 
       socket.onopen = () => {
         console.log("WebSocket connected");
+        (window as any).socket = socket;
       };
 
       socket.onmessage = (event) => {

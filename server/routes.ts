@@ -1110,6 +1110,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const message = JSON.parse(data.toString());
         
+        // Handle real-time ball dragging
+        if (message.type === 'ball_move' && message.gameId && message.ballPosition !== undefined) {
+          // Broadcast to all other clients immediately
+          const updateMessage = JSON.stringify({
+            type: 'game_update',
+            gameId: message.gameId,
+            game: { id: message.gameId, ballPosition: message.ballPosition }
+          });
+          
+          wss.clients.forEach((client) => {
+            if (client !== ws && client.readyState === WebSocket.OPEN) {
+              client.send(updateMessage);
+            }
+          });
+          return;
+        }
+
         if (message.type === 'chat') {
           const censoredMessage = censorProfanity(message.message);
           const chatMessage = await storage.createChatMessage({
