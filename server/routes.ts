@@ -344,12 +344,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.session?.role !== "admin") {
         return res.status(403).json({ message: "Admin access required" });
       }
+      console.log("[API] POST /api/players request body:", JSON.stringify(req.body));
       const playerData = insertPlayerSchema.parse(req.body);
       const player = await storage.createPlayer(playerData);
+      console.log("[API] Player created successfully:", player.id);
       res.json(player);
     } catch (error) {
       console.error("Error creating player:", error);
-      res.status(400).json({ message: "Failed to create player" });
+      res.status(400).json({ message: "Failed to create player", error: error instanceof Error ? error.message : String(error) });
     }
   });
 

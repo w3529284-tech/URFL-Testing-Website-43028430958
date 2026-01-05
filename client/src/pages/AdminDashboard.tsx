@@ -2050,24 +2050,30 @@ function RosterManager() {
     queryFn: async () => {
       const response = await fetch(`/api/teams/${selectedTeamId}/players`);
       if (!response.ok) throw new Error("Failed to fetch players");
-      return response.json();
+      const data = await response.json();
+      console.log("Fetched players for team", selectedTeamId, ":", data);
+      return data;
     },
     enabled: !!selectedTeamId,
   });
 
   const createPlayerMutation = useMutation({
     mutationFn: async (data: { name: string; number: number; position: string; teamId: string }) => {
-      await apiRequest("POST", "/api/players", data);
+      console.log("Creating player with data:", data);
+      const res = await apiRequest("POST", "/api/players", data);
+      console.log("Player creation response:", res);
+      return res;
     },
     onSuccess: () => {
-      refetchPlayers();
       queryClient.invalidateQueries({ queryKey: ["/api/teams", selectedTeamId, "players"] });
+      refetchPlayers();
       setPlayerName("");
       setPlayerNumber("");
       setPlayerPosition("");
       toast({ title: "Success", description: "Player added to roster" });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Player creation error:", error);
       toast({ title: "Error", description: "Failed to add player", variant: "destructive" });
     },
   });
