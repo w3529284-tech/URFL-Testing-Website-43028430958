@@ -1,3 +1,4 @@
+import { Team, Player } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,8 +32,25 @@ export default function Stats() {
     queryKey: ["/api/player-stats"],
   });
 
+  const { data: teams = [] } = useQuery<Team[]>({
+    queryKey: ["/api/teams"],
+  });
+
   const { data: gameStats = [] } = useQuery<any[]>({
     queryKey: ["/api/games/all"],
+  });
+
+  // Aggregated roster data from players table
+  const { data: allPlayers = [] } = useQuery<Player[]>({
+    queryKey: ["/api/all-players"],
+    queryFn: async () => {
+      const response = await fetch("/api/teams");
+      if (!response.ok) return [];
+      const teams: Team[] = await response.json();
+      const playersPromises = teams.map(t => fetch(`/api/teams/${t.id}/players`).then(res => res.json()));
+      const playersArrays = await Promise.all(playersPromises);
+      return playersArrays.flat();
+    }
   });
 
   // Aggregate team stats from games

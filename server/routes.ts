@@ -109,6 +109,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update the game
       console.log(`[API] PATCH /api/games/${id} body:`, JSON.stringify(req.body));
       const updatedGame = await storage.updateGame(id, req.body);
+      if (!updatedGame) {
+        return res.status(404).json({ message: "Game not found" });
+      }
       
       // Broadcast update to all connected clients
       const wss = (app as any).wss;
@@ -128,13 +131,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If game is being marked as final (transition from not final to final), resolve bets
       if (req.body.isFinal === true && wasNotFinal) {
         console.log(`[BET RESOLUTION] Game ${id} marked as final. Resolving bets...`);
-        await storage.resolveBetsForGame(id);
+        if (updatedGame) {
+          await storage.resolveBetsForGame(id);
+        }
       }
       
       // If game is being marked as not final (transition from final to not final), unresolve bets
       if (req.body.isFinal === false && wasFinal) {
         console.log(`[BET UNRESOLVE] Game ${id} unmarked as final. Unresolving bets...`);
-        await storage.unresolveBetsForGame(id);
+        if (updatedGame) {
+          await storage.unresolveBetsForGame(id);
+        }
       }
       
       res.json(updatedGame);

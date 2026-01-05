@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 
 import { Team, Player } from "@shared/schema";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface PlayerStat {
   id: string;
@@ -48,16 +49,28 @@ export default function TeamDetail() {
   const teamName = decodeURIComponent(params?.name || "");
   const teamLogo = TEAMS[teamName as keyof typeof TEAMS];
 
-  const { data: teamPlayers = [] } = useQuery<Player[]>({
+  const { data: teamPlayers = [] } = useQuery<(Player & { stats?: PlayerStat })[]>({
     queryKey: ["/api/teams", teamName, "players"],
     queryFn: async () => {
-      // First find the team ID from the team name
-      const allTeams: Team[] = await (await fetch("/api/teams")).json();
-      const currentTeam = allTeams.find(t => t.name === teamName);
+      const response = await fetch("/api/teams");
+      if (!response.ok) throw new Error("Failed to fetch teams");
+      const allTeams: Team[] = await response.json();
+      
+      const currentTeam = allTeams.find(t => t.name.toLowerCase() === teamName.toLowerCase());
       if (!currentTeam) return [];
       
-      const players: Player[] = await (await fetch(`/api/teams/${currentTeam.id}/players`)).json();
-      return players;
+      const [playersRes, statsRes] = await Promise.all([
+        fetch(`/api/teams/${currentTeam.id}/players`),
+        fetch("/api/player-stats")
+      ]);
+      
+      const players: Player[] = await playersRes.json();
+      const stats: PlayerStat[] = await statsRes.json();
+      
+      return players.map(player => ({
+        ...player,
+        stats: stats.find(s => s.playerName === player.name)
+      }));
     },
     enabled: !!teamName,
   });
@@ -280,21 +293,13 @@ export default function TeamDetail() {
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {qbStats.map((player) => (
-                        <tr key={player.id}>
-                          <td className="px-4 py-2 font-semibold">
-                            {player.playerName}
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {player.passingYards}
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {player.passingTouchdowns}
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {player.interceptions}
-                          </td>
-                        </tr>
+                      {qbPlayers.map((player) => (
+                        <TableRow key={player.id}>
+                          <TableCell className="font-medium text-white">{player.name}</TableCell>
+                          <TableCell className="text-gray-300">{player.stats?.passingYards || 0}</TableCell>
+                          <TableCell className="text-gray-300">{player.stats?.passingTouchdowns || 0}</TableCell>
+                          <TableCell className="text-gray-300">{player.stats?.interceptions || 0}</TableCell>
+                        </TableRow>
                       ))}
                     </tbody>
                   </table>
@@ -315,18 +320,12 @@ export default function TeamDetail() {
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {rbStats.map((player) => (
-                        <tr key={player.id}>
-                          <td className="px-4 py-2 font-semibold">
-                            {player.playerName}
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {player.rushingYards}
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {player.rushingTouchdowns}
-                          </td>
-                        </tr>
+                      {rbPlayers.map((player) => (
+                        <TableRow key={player.id}>
+                          <TableCell className="font-medium text-white">{player.name}</TableCell>
+                          <TableCell className="text-gray-300">{player.stats?.rushingYards || 0}</TableCell>
+                          <TableCell className="text-gray-300">{player.stats?.rushingTouchdowns || 0}</TableCell>
+                        </TableRow>
                       ))}
                     </tbody>
                   </table>
@@ -348,21 +347,13 @@ export default function TeamDetail() {
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {wrStats.map((player) => (
-                        <tr key={player.id}>
-                          <td className="px-4 py-2 font-semibold">
-                            {player.playerName}
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {player.receivingYards}
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {player.receptions}
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {player.receivingTouchdowns}
-                          </td>
-                        </tr>
+                      {wrPlayers.map((player) => (
+                        <TableRow key={player.id}>
+                          <TableCell className="font-medium text-white">{player.name}</TableCell>
+                          <TableCell className="text-gray-300">{player.stats?.receivingYards || 0}</TableCell>
+                          <TableCell className="text-gray-300">{player.stats?.receptions || 0}</TableCell>
+                          <TableCell className="text-gray-300">{player.stats?.receivingTouchdowns || 0}</TableCell>
+                        </TableRow>
                       ))}
                     </tbody>
                   </table>

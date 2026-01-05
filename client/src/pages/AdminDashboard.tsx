@@ -2047,6 +2047,11 @@ function RosterManager() {
 
   const { data: players, refetch: refetchPlayers } = useQuery<Player[]>({
     queryKey: ["/api/teams", selectedTeamId, "players"],
+    queryFn: async () => {
+      const response = await fetch(`/api/teams/${selectedTeamId}/players`);
+      if (!response.ok) throw new Error("Failed to fetch players");
+      return response.json();
+    },
     enabled: !!selectedTeamId,
   });
 
