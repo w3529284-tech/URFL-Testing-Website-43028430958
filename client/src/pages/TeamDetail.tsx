@@ -87,7 +87,7 @@ export default function TeamDetail() {
   });
 
   // Get team roster from the new players table
-  const teamRoster = (teamPlayers as Player[])
+  const teamRoster = (teamPlayers as (Player & { stats?: PlayerStat })[])
     .sort((a, b) => {
       const positionOrder = { QB: 0, RB: 1, WR: 2, DEF: 3 };
       const aOrder = positionOrder[a.position as keyof typeof positionOrder] || 999;

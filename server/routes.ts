@@ -309,6 +309,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/player-stats", async (req, res) => {
+    try {
+      const stats = await db.select().from(playerStats);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching player stats:", error);
+      res.status(500).json({ message: "Failed to fetch player stats" });
+    }
+  });
+
   app.get("/api/teams", async (req, res) => {
     try {
       const allTeams = await storage.getAllTeams();
