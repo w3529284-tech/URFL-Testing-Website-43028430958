@@ -14,15 +14,39 @@ interface PlayerStat {
   playerName: string;
   team: string;
   position: string;
+  // QB
   passingYards: number;
   passingTouchdowns: number;
   interceptions: number;
+  completions: number;
+  attempts: number;
+  sacks: number;
+  // RB
   rushingYards: number;
   rushingTouchdowns: number;
+  rushingAttempts: number;
+  missedTacklesForced: number;
+  // WR
   receivingYards: number;
   receivingTouchdowns: number;
   receptions: number;
+  targets: number;
+  yardsAfterCatch: number;
+  // DB
+  defensiveInterceptions: number;
+  passesDefended: number;
+  completionsAllowed: number;
+  targetsAllowed: number;
+  swats: number;
+  defensiveTouchdowns: number;
+  // DEF
+  defensiveSacks: number;
+  tackles: number;
+  defensiveMisses: number;
+  safeties: number;
+  
   defensivePoints: number;
+  week: number;
 }
 
 interface GameResult {
@@ -285,27 +309,49 @@ export default function TeamDetail() {
             {qbStats.length > 0 && (
               <Card className="p-6">
                 <h3 className="text-xl font-bold mb-4">Quarterback Stats</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="px-4 py-2 text-left">Player</th>
-                        <th className="px-4 py-2 text-right">Pass Yds</th>
-                        <th className="px-4 py-2 text-right">Pass TD</th>
-                        <th className="px-4 py-2 text-right">INT</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {qbPlayers.map((player) => (
-                        <TableRow key={player.id}>
-                          <TableCell className="font-medium text-white">{player.name}</TableCell>
-                          <TableCell className="text-gray-300">{player.stats?.passingYards || 0}</TableCell>
-                          <TableCell className="text-gray-300">{player.stats?.passingTouchdowns || 0}</TableCell>
-                          <TableCell className="text-gray-300">{player.stats?.interceptions || 0}</TableCell>
-                        </TableRow>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-3">
+                  {qbPlayers.map((player) => {
+                    const stats = player.stats;
+                    const attempts = stats?.attempts || 0;
+                    const completions = stats?.completions || 0;
+                    const yards = stats?.passingYards || 0;
+                    const tds = stats?.passingTouchdowns || 0;
+                    const ints = stats?.interceptions || 0;
+                    const sacks = stats?.sacks || 0;
+
+                    const compPct = attempts > 0 ? ((completions / attempts) * 100).toFixed(1) : "0.0";
+                    const rating = attempts > 0 ? (
+                      ((8.4 * yards) + (330 * tds) + (100 * completions) - (200 * ints)) / attempts
+                    ).toFixed(1) : "0.0";
+
+                    return (
+                      <div key={player.id} className="flex justify-between items-center pb-3 border-b last:border-b-0">
+                        <div className="flex items-center gap-3">
+                          <p className="font-semibold">{player.name}</p>
+                        </div>
+                        <div className="flex-1 max-w-[300px] ml-4">
+                          <div className="border border-muted rounded-sm overflow-hidden">
+                            <div className="flex bg-muted/50 border-b border-muted">
+                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Pass Yds</div>
+                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Pass TD</div>
+                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">INT</div>
+                            </div>
+                            <div className="flex font-mono text-sm bg-card">
+                              <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{yards}</div>
+                              <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{tds}</div>
+                              <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{ints}</div>
+                            </div>
+                          </div>
+                          <div className="flex justify-between mt-1 px-1 text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+                            <span>RTG: {rating}</span>
+                            <span>{compPct}%</span>
+                            <span>{completions}/{attempts}</span>
+                            <span>SCK: {sacks}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </Card>
             )}
@@ -313,25 +359,41 @@ export default function TeamDetail() {
             {rbStats.length > 0 && (
               <Card className="p-6">
                 <h3 className="text-xl font-bold mb-4">Running Back Stats</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="px-4 py-2 text-left">Player</th>
-                        <th className="px-4 py-2 text-right">Rush Yds</th>
-                        <th className="px-4 py-2 text-right">Rush TD</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {rbPlayers.map((player) => (
-                        <TableRow key={player.id}>
-                          <TableCell className="font-medium text-white">{player.name}</TableCell>
-                          <TableCell className="text-gray-300">{player.stats?.rushingYards || 0}</TableCell>
-                          <TableCell className="text-gray-300">{player.stats?.rushingTouchdowns || 0}</TableCell>
-                        </TableRow>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-3">
+                  {rbPlayers.map((player) => {
+                    const stats = player.stats;
+                    const yards = stats?.rushingYards || 0;
+                    const tds = stats?.rushingTouchdowns || 0;
+                    const att = stats?.rushingAttempts || 0;
+                    const misses = stats?.missedTacklesForced || 0;
+                    const ypa = att > 0 ? (yards / att).toFixed(1) : "0.0";
+
+                    return (
+                      <div key={player.id} className="flex justify-between items-center pb-3 border-b last:border-b-0">
+                        <div className="flex items-center gap-3">
+                          <p className="font-semibold">{player.name}</p>
+                        </div>
+                        <div className="flex-1 max-w-[300px] ml-4">
+                          <div className="border border-muted rounded-sm overflow-hidden">
+                            <div className="flex bg-muted/50 border-b border-muted">
+                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Rush Yds</div>
+                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Rush TD</div>
+                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">Att</div>
+                            </div>
+                            <div className="flex font-mono text-sm bg-card">
+                              <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{yards}</div>
+                              <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{tds}</div>
+                              <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{att}</div>
+                            </div>
+                          </div>
+                          <div className="flex justify-between mt-1 px-1 text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+                            <span>YPA: {ypa}</span>
+                            <span>MISSES: {misses}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </Card>
             )}
@@ -339,27 +401,108 @@ export default function TeamDetail() {
             {wrStats.length > 0 && (
               <Card className="p-6">
                 <h3 className="text-xl font-bold mb-4">Wide Receiver Stats</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="px-4 py-2 text-left">Player</th>
-                        <th className="px-4 py-2 text-right">Rec Yds</th>
-                        <th className="px-4 py-2 text-right">Rec</th>
-                        <th className="px-4 py-2 text-right">Rec TD</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {wrPlayers.map((player) => (
-                        <TableRow key={player.id}>
-                          <TableCell className="font-medium text-white">{player.name}</TableCell>
-                          <TableCell className="text-gray-300">{player.stats?.receivingYards || 0}</TableCell>
-                          <TableCell className="text-gray-300">{player.stats?.receptions || 0}</TableCell>
-                          <TableCell className="text-gray-300">{player.stats?.receivingTouchdowns || 0}</TableCell>
-                        </TableRow>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-3">
+                  {wrPlayers.map((player) => {
+                    const stats = player.stats;
+                    const yards = stats?.receivingYards || 0;
+                    const tds = stats?.receivingTouchdowns || 0;
+                    const rec = stats?.receptions || 0;
+                    const targets = stats?.targets || 0;
+                    const yac = stats?.yardsAfterCatch || 0;
+                    const catchPct = targets > 0 ? ((rec / targets) * 100).toFixed(1) : "0.0";
+
+                    return (
+                      <div key={player.id} className="flex justify-between items-center pb-3 border-b last:border-b-0">
+                        <div className="flex items-center gap-3">
+                          <p className="font-semibold">{player.name}</p>
+                        </div>
+                        <div className="flex-1 max-w-[300px] ml-4">
+                          <div className="border border-muted rounded-sm overflow-hidden">
+                            <div className="flex bg-muted/50 border-b border-muted">
+                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Rec Yds</div>
+                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Rec TD</div>
+                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">Rec</div>
+                            </div>
+                            <div className="flex font-mono text-sm bg-card">
+                              <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{yards}</div>
+                              <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{tds}</div>
+                              <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{rec}</div>
+                            </div>
+                          </div>
+                          <div className="flex justify-between mt-1 px-1 text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+                            <span>{rec}/{targets} TGT ({catchPct}%)</span>
+                            <span>YAC: {yac}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {defStats.length > 0 && (
+              <Card className="p-6">
+                <h3 className="text-xl font-bold mb-4">Defense Stats</h3>
+                <div className="space-y-3">
+                  {defPlayers.map((player) => {
+                    const stats = player.stats;
+                    const scks = stats?.defensiveSacks || 0;
+                    const tkls = stats?.tackles || 0;
+                    const sftys = stats?.safeties || 0;
+                    const misses = stats?.defensiveMisses || 0;
+                    const ints = stats?.defensiveInterceptions || 0;
+                    const swats = stats?.swats || 0;
+                    const tds = stats?.defensiveTouchdowns || 0;
+                    const targets = stats?.targetsAllowed || 0;
+                    const comps = stats?.completionsAllowed || 0;
+                    const denyPct = targets > 0 ? (((targets - comps) / targets) * 100).toFixed(1) : "0.0";
+
+                    return (
+                      <div key={player.id} className="pb-6 border-b last:border-b-0 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <p className="font-semibold">{player.name}</p>
+                          <div className="flex-1 max-w-[300px] ml-4">
+                            <div className="border border-muted rounded-sm overflow-hidden">
+                              <div className="flex bg-muted/50 border-b border-muted">
+                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Sck</div>
+                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Tkl</div>
+                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">Sfty</div>
+                              </div>
+                              <div className="flex font-mono text-sm bg-card">
+                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{scks}</div>
+                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{tkls}</div>
+                                <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{sftys}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <div className="w-1/4"></div>
+                          <div className="flex-1 max-w-[300px] ml-4">
+                            <div className="border border-muted rounded-sm overflow-hidden">
+                              <div className="flex bg-muted/50 border-b border-muted">
+                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Int</div>
+                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Swat</div>
+                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">TD</div>
+                              </div>
+                              <div className="flex font-mono text-sm bg-card">
+                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{ints}</div>
+                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{swats}</div>
+                                <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{tds}</div>
+                              </div>
+                            </div>
+                            <div className="flex justify-between mt-1 px-1 text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+                              <span>MISS: {misses}</span>
+                              <span>DENY: {denyPct}%</span>
+                              <span>CMP: {comps}/{targets}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </Card>
             )}
