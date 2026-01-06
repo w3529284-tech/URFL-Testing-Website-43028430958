@@ -60,6 +60,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="changelogs" data-testid="tab-changelogs">Changelogs</TabsTrigger>
             <TabsTrigger value="streams" data-testid="tab-streams">Streams</TabsTrigger>
             <TabsTrigger value="rosters" data-testid="tab-rosters">Rosters</TabsTrigger>
+            <TabsTrigger value="player-stats" data-testid="tab-player-stats">Player Stats</TabsTrigger>
             <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
             <TabsTrigger value="partners" data-testid="tab-partners">Partners</TabsTrigger>
             <TabsTrigger value="settings" data-testid="tab-settings">Settings</TabsTrigger>
@@ -96,6 +97,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="rosters">
           <RosterManager />
+        </TabsContent>
+
+        <TabsContent value="player-stats">
+          <PlayerStatsManager />
         </TabsContent>
 
         <TabsContent value="users">
@@ -1424,6 +1429,139 @@ function StreamRequestsManager() {
               ))}
             </div>
           )}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function PlayerStatsManager() {
+  const { toast } = useToast();
+  const [selectedWeek, setSelectedWeek] = useState(1);
+  const [selectedTeam, setSelectedTeam] = useState("");
+  const [selectedPlayer, setSelectedPlayer] = useState("");
+  const [position, setPosition] = useState("");
+  
+  // QB Stats
+  const [passingYards, setPassingYards] = useState("0");
+  const [passingTouchdowns, setPassingTouchdowns] = useState("0");
+  const [interceptions, setInterceptions] = useState("0");
+  
+  // RB Stats
+  const [rushingYards, setRushingYards] = useState("0");
+  const [rushingTouchdowns, setRushingTouchdowns] = useState("0");
+  
+  // WR Stats
+  const [receivingYards, setReceivingYards] = useState("0");
+  const [receivingTouchdowns, setReceivingTouchdowns] = useState("0");
+
+  const { data: teams = [] } = useQuery<Team[]>({ queryKey: ["/api/teams"] });
+  const { data: teamPlayers = [] } = useQuery<Player[]>({ 
+    queryKey: ["/api/teams", selectedTeam, "players"],
+    enabled: !!selectedTeam
+  });
+  const { data: stats = [], refetch } = useQuery<any[]>({ queryKey: ["/api/player-stats"] });
+
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("POST", "/api/player-stats", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/player-stats"] });
+      toast({ title: "Success", description: "Stats saved" });
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/player-stats/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/player-stats"] });
+      toast({ title: "Success", description: "Stats deleted" });
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const player = teamPlayers.find(p => p.id === selectedPlayer);
+    if (!player) return;
+
+    createMutation.mutate({
+      playerName: player.name,
+      team: teams.find(t => t.id === selectedTeam)?.name || "",
+      position: player.position,
+      week: selectedWeek,
+      passingYards: parseInt(passingYards),
+      passingTouchdowns: parseInt(passingTouchdowns),
+      interceptions: parseInt(interceptions),
+      rushingYards: parseInt(rushingYards),
+      rushingTouchdowns: parseInt(rushingTouchdowns),
+      receivingYards: parseInt(receivingYards),
+      receivingTouchdowns: parseInt(receivingTouchdowns),
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Add Player Stats</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Week</Label>
+              <Input type="number" value={selectedWeek} onChange={e => setSelectedWeek(parseInt(e.target.value))} />
+            </div>
+            <div>
+              <Label>Team</Label>
+              <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+                <SelectTrigger><SelectValue placeholder="Team" /></SelectTrigger>
+                <SelectContent>
+                  {teams.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Player</Label>
+              <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
+                <SelectTrigger><SelectValue placeholder="Player" /></SelectTrigger>
+                <SelectContent>
+                  {teamPlayers.map(p => <SelectItem key={p.id} value={p.id}>{p.name} ({p.position})</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label>Pass Yds</Label>
+              <Input type="number" value={passingYards} onChange={e => setPassingYards(e.target.value)} />
+            </div>
+            <div>
+              <Label>Pass TD</Label>
+              <Input type="number" value={passingTouchdowns} onChange={e => setPassingTouchdowns(e.target.value)} />
+            </div>
+            <div>
+              <Label>INT</Label>
+              <Input type="number" value={interceptions} onChange={e => setInterceptions(e.target.value)} />
+            </div>
+          </div>
+
+          <Button type="submit" disabled={createMutation.isPending}>Save Stats</Button>
+        </form>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Recent Stats</h2>
+        <div className="space-y-2">
+          {stats.slice(0, 10).map((s: any) => (
+            <div key={s.id} className="flex justify-between items-center p-2 border rounded">
+              <span>W{s.week}: {s.playerName} ({s.team})</span>
+              <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(s.id)}>Delete</Button>
+            </div>
+          ))}
         </div>
       </Card>
     </div>
