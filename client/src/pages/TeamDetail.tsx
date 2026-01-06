@@ -125,6 +125,13 @@ export default function TeamDetail() {
   const qbPlayers = getPlayersByPosition("QB");
   const rbPlayers = getPlayersByPosition("RB");
   const wrPlayers = getPlayersByPosition("WR");
+  const tePlayers = getPlayersByPosition("TE");
+  const olPlayers = getPlayersByPosition("OL");
+  const dlPlayers = getPlayersByPosition("DL");
+  const lbPlayers = getPlayersByPosition("LB");
+  const dbPlayers = getPlayersByPosition("DB");
+  const kPlayers = getPlayersByPosition("K");
+  const pPlayers = getPlayersByPosition("P");
   const defPlayers = getPlayersByPosition("DEF");
 
   // Get team stats from games
@@ -173,6 +180,13 @@ export default function TeamDetail() {
   const qbStats = teamRoster.filter((p) => p.position === "QB");
   const rbStats = teamRoster.filter((p) => p.position === "RB");
   const wrStats = teamRoster.filter((p) => p.position === "WR");
+  const teStats = teamRoster.filter((p) => p.position === "TE");
+  const olStats = teamRoster.filter((p) => p.position === "OL");
+  const dlStats = teamRoster.filter((p) => p.position === "DL");
+  const lbStats = teamRoster.filter((p) => p.position === "LB");
+  const dbStats = teamRoster.filter((p) => p.position === "DB");
+  const kStats = teamRoster.filter((p) => p.position === "K");
+  const pStats = teamRoster.filter((p) => p.position === "P");
   const defStats = teamRoster.filter((p) => p.position === "DEF");
 
   return (
@@ -279,9 +293,128 @@ export default function TeamDetail() {
                 </Card>
               )}
 
+              {tePlayers.length > 0 && (
+                <Card className="p-6">
+                  <h3 className="text-2xl font-bold mb-4">Tight Ends</h3>
+                  <div className="space-y-2">
+                    {tePlayers.map((player) => (
+                      <div
+                        key={player.id}
+                        className="flex justify-between items-center p-3 border-b last:border-b-0"
+                      >
+                        <p className="font-semibold">{player.name} {player.number && <span className="text-muted-foreground ml-2">#{player.number}</span>}</p>
+                        <p className="text-sm text-muted-foreground">TE</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {olPlayers.length > 0 && (
+                <Card className="p-6">
+                  <h3 className="text-2xl font-bold mb-4">Offensive Line</h3>
+                  <div className="space-y-2">
+                    {olPlayers.map((player) => (
+                      <div
+                        key={player.id}
+                        className="flex justify-between items-center p-3 border-b last:border-b-0"
+                      >
+                        <p className="font-semibold">{player.name} {player.number && <span className="text-muted-foreground ml-2">#{player.number}</span>}</p>
+                        <p className="text-sm text-muted-foreground">OL</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {dlPlayers.length > 0 && (
+                <Card className="p-6">
+                  <h3 className="text-2xl font-bold mb-4">Defensive Line</h3>
+                  <div className="space-y-2">
+                    {dlPlayers.map((player) => (
+                      <div
+                        key={player.id}
+                        className="flex justify-between items-center p-3 border-b last:border-b-0"
+                      >
+                        <p className="font-semibold">{player.name} {player.number && <span className="text-muted-foreground ml-2">#{player.number}</span>}</p>
+                        <p className="text-sm text-muted-foreground">DL</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {lbPlayers.length > 0 && (
+                <Card className="p-6">
+                  <h3 className="text-2xl font-bold mb-4">Linebackers</h3>
+                  <div className="space-y-2">
+                    {lbPlayers.map((player) => (
+                      <div
+                        key={player.id}
+                        className="flex justify-between items-center p-3 border-b last:border-b-0"
+                      >
+                        <p className="font-semibold">{player.name} {player.number && <span className="text-muted-foreground ml-2">#{player.number}</span>}</p>
+                        <p className="text-sm text-muted-foreground">LB</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {dbPlayers.length > 0 && (
+                <Card className="p-6">
+                  <h3 className="text-2xl font-bold mb-4">Defensive Backs</h3>
+                  <div className="space-y-2">
+                    {dbPlayers.map((player) => (
+                      <div
+                        key={player.id}
+                        className="flex justify-between items-center p-3 border-b last:border-b-0"
+                      >
+                        <p className="font-semibold">{player.name} {player.number && <span className="text-muted-foreground ml-2">#{player.number}</span>}</p>
+                        <p className="text-sm text-muted-foreground">DB</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {kPlayers.length > 0 && (
+                <Card className="p-6">
+                  <h3 className="text-2xl font-bold mb-4">Kickers</h3>
+                  <div className="space-y-2">
+                    {kPlayers.map((player) => (
+                      <div
+                        key={player.id}
+                        className="flex justify-between items-center p-3 border-b last:border-b-0"
+                      >
+                        <p className="font-semibold">{player.name} {player.number && <span className="text-muted-foreground ml-2">#{player.number}</span>}</p>
+                        <p className="text-sm text-muted-foreground">K</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {pPlayers.length > 0 && (
+                <Card className="p-6">
+                  <h3 className="text-2xl font-bold mb-4">Punters</h3>
+                  <div className="space-y-2">
+                    {pPlayers.map((player) => (
+                      <div
+                        key={player.id}
+                        className="flex justify-between items-center p-3 border-b last:border-b-0"
+                      >
+                        <p className="font-semibold">{player.name} {player.number && <span className="text-muted-foreground ml-2">#{player.number}</span>}</p>
+                        <p className="text-sm text-muted-foreground">P</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
               {defPlayers.length > 0 && (
                 <Card className="p-6">
-                  <h3 className="text-2xl font-bold mb-4">Defense</h3>
+                  <h3 className="text-2xl font-bold mb-4">Special Teams</h3>
                   <div className="space-y-2">
                     {defPlayers.map((player) => (
                       <div
