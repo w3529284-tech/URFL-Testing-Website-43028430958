@@ -185,20 +185,20 @@ export default function Stats() {
                               <p className="text-sm text-muted-foreground">{player.team}</p>
                             </div>
                           </div>
-                          <div className="flex-1 max-w-[300px] ml-4">
-                            <div className="border border-muted rounded-sm overflow-hidden">
+                          <div className="flex-1 max-w-full ml-4 overflow-hidden">
+                            <div className="border border-muted rounded-md overflow-hidden shadow-sm">
                               <div className="flex bg-muted/50 border-b border-muted">
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Pass Yds</div>
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Pass TD</div>
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">INT</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Pass Yds</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Pass TD</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none h-7 flex items-center justify-center">INT</div>
                               </div>
-                              <div className="flex font-mono text-sm bg-card">
-                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{player.passingYards}</div>
-                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.passingTouchdowns}</div>
-                                <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{player.interceptions}</div>
+                              <div className="flex font-mono text-base bg-card">
+                                <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none">{player.passingYards}</div>
+                                <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.passingTouchdowns}</div>
+                                <div className="flex-1 py-2 px-1 text-center font-black leading-none">{player.interceptions}</div>
                               </div>
                             </div>
-                            <div className="flex justify-between mt-1 px-1 text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+                            <div className="flex justify-between mt-1.5 px-1 text-[10px] text-muted-foreground font-black uppercase tracking-tight">
                               <span>RTG: {rating}</span>
                               <span>{compPct}%</span>
                               <span>{player.completions}/{player.attempts}</span>
@@ -232,20 +232,20 @@ export default function Stats() {
                               <p className="text-sm text-muted-foreground">{player.team}</p>
                             </div>
                           </div>
-                          <div className="flex-1 max-w-[300px] ml-4">
-                            <div className="border border-muted rounded-sm overflow-hidden">
+                          <div className="flex-1 max-w-full ml-4 overflow-hidden">
+                            <div className="border border-muted rounded-md overflow-hidden shadow-sm">
                               <div className="flex bg-muted/50 border-b border-muted">
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Rec Yds</div>
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Rec TD</div>
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">Rec</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Rec Yds</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Rec TD</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none h-7 flex items-center justify-center">Rec</div>
                               </div>
-                              <div className="flex font-mono text-sm bg-card">
-                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{player.receivingYards}</div>
-                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.receivingTouchdowns}</div>
-                                <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{player.receptions}</div>
+                              <div className="flex font-mono text-base bg-card">
+                                <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none">{player.receivingYards}</div>
+                                <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.receivingTouchdowns}</div>
+                                <div className="flex-1 py-2 px-1 text-center font-black leading-none">{player.receptions}</div>
                               </div>
                             </div>
-                            <div className="flex justify-between mt-1 px-1 text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+                            <div className="flex justify-between mt-1.5 px-1 text-[10px] text-muted-foreground font-black uppercase tracking-tight">
                               <span>{player.receptions}/{player.targets} TGT ({catchPct}%)</span>
                               <span>YAC: {player.yardsAfterCatch}</span>
                             </div>
@@ -277,20 +277,20 @@ export default function Stats() {
                               <p className="text-sm text-muted-foreground">{player.team}</p>
                             </div>
                           </div>
-                          <div className="flex-1 max-w-[300px] ml-4">
-                            <div className="border border-muted rounded-sm overflow-hidden">
+                          <div className="flex-1 max-w-full ml-4 overflow-hidden">
+                            <div className="border border-muted rounded-md overflow-hidden shadow-sm">
                               <div className="flex bg-muted/50 border-b border-muted">
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Rush Yds</div>
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Rush TD</div>
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">Att</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Rush Yds</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Rush TD</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none h-7 flex items-center justify-center">Att</div>
                               </div>
-                              <div className="flex font-mono text-sm bg-card">
-                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{player.rushingYards}</div>
-                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.rushingTouchdowns}</div>
-                                <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{player.rushingAttempts}</div>
+                              <div className="flex font-mono text-base bg-card">
+                                <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none">{player.rushingYards}</div>
+                                <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.rushingTouchdowns}</div>
+                                <div className="flex-1 py-2 px-1 text-center font-black leading-none">{player.rushingAttempts}</div>
                               </div>
                             </div>
-                            <div className="flex justify-between mt-1 px-1 text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+                            <div className="flex justify-between mt-1.5 px-1 text-[10px] text-muted-foreground font-black uppercase tracking-tight">
                               <span>YPA: {ypa}</span>
                               <span>MISSES: {player.missedTacklesForced}</span>
                             </div>
@@ -322,20 +322,20 @@ export default function Stats() {
                               <p className="text-sm text-muted-foreground">{player.team}</p>
                             </div>
                           </div>
-                          <div className="flex-1 max-w-[300px] ml-4">
-                            <div className="border border-muted rounded-sm overflow-hidden">
+                          <div className="flex-1 max-w-full ml-4 overflow-hidden">
+                            <div className="border border-muted rounded-md overflow-hidden shadow-sm">
                               <div className="flex bg-muted/50 border-b border-muted">
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Int</div>
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Swat</div>
-                                <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">TD</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Int</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Swat</div>
+                                <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none h-7 flex items-center justify-center">TD</div>
                               </div>
-                              <div className="flex font-mono text-sm bg-card">
-                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{player.defensiveInterceptions}</div>
-                                <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.swats}</div>
-                                <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{player.defensiveTouchdowns}</div>
+                              <div className="flex font-mono text-base bg-card">
+                                <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none">{player.defensiveInterceptions}</div>
+                                <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.swats}</div>
+                                <div className="flex-1 py-2 px-1 text-center font-black leading-none">{player.defensiveTouchdowns}</div>
                               </div>
                             </div>
-                            <div className="flex justify-between mt-1 px-1 text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+                            <div className="flex justify-between mt-1.5 px-1 text-[10px] text-muted-foreground font-black uppercase tracking-tight">
                               <span>DENY: {denyPct}%</span>
                               <span>CMP: {player.completionsAllowed}/{player.targetsAllowed}</span>
                             </div>
@@ -365,20 +365,20 @@ export default function Stats() {
                             <p className="text-sm text-muted-foreground">{player.team}</p>
                           </div>
                         </div>
-                        <div className="flex-1 max-w-[300px] ml-4">
-                          <div className="border border-muted rounded-sm overflow-hidden">
+                        <div className="flex-1 max-w-full ml-4 overflow-hidden">
+                          <div className="border border-muted rounded-md overflow-hidden shadow-sm">
                             <div className="flex bg-muted/50 border-b border-muted">
-                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Sck</div>
-                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none border-r border-muted h-6 flex items-center justify-center">Tkl</div>
-                              <div className="flex-1 py-1 px-0.5 text-[10px] font-black uppercase tracking-tighter text-center leading-none h-6 flex items-center justify-center">Sfty</div>
+                              <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Sck</div>
+                              <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Tkl</div>
+                              <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none h-7 flex items-center justify-center">Sfty</div>
                             </div>
-                            <div className="flex font-mono text-sm bg-card">
-                              <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none">{player.defensiveSacks}</div>
-                              <div className="flex-1 py-1.5 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.tackles}</div>
-                              <div className="flex-1 py-1.5 px-1 text-center font-black leading-none">{player.safeties}</div>
+                            <div className="flex font-mono text-base bg-card">
+                              <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none">{player.defensiveSacks}</div>
+                              <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none text-primary">{player.tackles}</div>
+                              <div className="flex-1 py-2 px-1 text-center font-black leading-none">{player.safeties}</div>
                             </div>
                           </div>
-                          <div className="flex justify-between mt-1 px-1 text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+                          <div className="flex justify-between mt-1.5 px-1 text-[10px] text-muted-foreground font-black uppercase tracking-tight">
                             <span>MISS: {player.defensiveMisses}</span>
                           </div>
                         </div>
