@@ -397,7 +397,7 @@ export const playerStats = pgTable("player_stats", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   playerName: varchar("player_name", { length: 100 }).notNull(),
   team: varchar("team", { length: 100 }).notNull(),
-  position: varchar("position", { length: 10 }).notNull(), // "QB", "WR", "RB", "DB", "DEF"
+  position: varchar("position", { length: 10 }).notNull(), // "QB", "WR", "TE", "OL", "DE", "LB", "DB", "S", "K"
   
   // QB Stats
   passingYards: integer("passing_yards").default(0),

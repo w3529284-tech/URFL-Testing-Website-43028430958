@@ -2260,6 +2260,8 @@ function UpdatePlanManager() {
   );
 }
 
+const POSITIONS = ["QB", "WR", "TE", "OL", "DE", "LB", "DB", "S", "K"];
+
 function RosterManager() {
   const { toast } = useToast();
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
