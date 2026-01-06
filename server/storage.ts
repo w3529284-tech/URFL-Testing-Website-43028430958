@@ -628,6 +628,19 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(updatePlans).where(sql`EXTRACT(YEAR FROM ${updatePlans.createdAt}) = ${year}`);
   }
 
+  async getAllPlayerStats(): Promise<PlayerStats[]> {
+    return await db.select().from(playerStats).orderBy(desc(playerStats.week));
+  }
+
+  async createPlayerStats(statsData: InsertPlayerStats): Promise<PlayerStats> {
+    const [stats] = await db.insert(playerStats).values(cleanObject(statsData) as InsertPlayerStats).returning();
+    return stats;
+  }
+
+  async deletePlayerStats(id: string): Promise<void> {
+    await db.delete(playerStats).where(eq(playerStats.id, id));
+  }
+
   async upsertUpdatePlan(planData: InsertUpdatePlan): Promise<UpdatePlan> {
     const cleanData = cleanObject(planData);
     const existing = await db.select().from(updatePlans).where(eq(updatePlans.updateDate, cleanData.updateDate as string));

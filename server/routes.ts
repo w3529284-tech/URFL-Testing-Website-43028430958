@@ -311,11 +311,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/player-stats", async (req, res) => {
     try {
-      const stats = await db.select().from(playerStats);
+      const stats = await storage.getAllPlayerStats();
       res.json(stats);
     } catch (error) {
       console.error("Error fetching player stats:", error);
       res.status(500).json({ message: "Failed to fetch player stats" });
+    }
+  });
+
+  app.post("/api/player-stats", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session?.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const statsData = insertPlayerStatsSchema.parse(req.body);
+      const stats = await storage.createPlayerStats(statsData);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error creating player stats:", error);
+      res.status(400).json({ message: "Failed to create player stats" });
+    }
+  });
+
+  app.delete("/api/player-stats/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session?.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      await storage.deletePlayerStats(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting player stats:", error);
+      res.status(400).json({ message: "Failed to delete player stats" });
     }
   });
 
