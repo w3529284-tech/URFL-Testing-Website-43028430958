@@ -264,6 +264,34 @@ export default function Stats() {
                                   </div>
                                 </>
                               )}
+                              {showDB && (
+                                <>
+                                  <div className="flex bg-muted/50 border-b border-muted">
+                                    <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Int</div>
+                                    <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">PD</div>
+                                    <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none h-7 flex items-center justify-center">TD</div>
+                                  </div>
+                                  <div className="flex font-mono text-base bg-card">
+                                    <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none">{player.defensiveInterceptions || 0}</div>
+                                    <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none">{player.passesDefended || 0}</div>
+                                    <div className="flex-1 py-2 px-1 text-center font-black leading-none text-primary">{player.defensiveTouchdowns || 0}</div>
+                                  </div>
+                                </>
+                              )}
+                              {showDEF && (
+                                <>
+                                  <div className="flex bg-muted/50 border-b border-muted">
+                                    <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Sacks</div>
+                                    <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none border-r border-muted h-7 flex items-center justify-center">Tkl</div>
+                                    <div className="flex-1 py-1 px-1 text-[11px] font-black uppercase tracking-tight text-center leading-none h-7 flex items-center justify-center">Pts</div>
+                                  </div>
+                                  <div className="flex font-mono text-base bg-card">
+                                    <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none">{player.defensiveSacks || 0}</div>
+                                    <div className="flex-1 py-2 px-1 text-center font-black border-r border-muted leading-none">{player.tackles || 0}</div>
+                                    <div className="flex-1 py-2 px-1 text-center font-black leading-none text-primary">{player.defensivePoints || 0}</div>
+                                  </div>
+                                </>
+                              )}
                             </div>
                             <div className="flex justify-between mt-1.5 px-1 text-[10px] text-muted-foreground font-black uppercase tracking-tight min-w-[400px]">
                               {showQB && (
@@ -272,6 +300,30 @@ export default function Stats() {
                                   <span>{compPct}%</span>
                                   <span>{player.completions || 0}/{player.attempts || 0}</span>
                                   <span>SCK: {player.sacks || 0}</span>
+                                </>
+                              )}
+                              {showRB && (
+                                <>
+                                  <span>YPA: {player.rushingAttempts > 0 ? (player.rushingYards / player.rushingAttempts).toFixed(1) : "0.0"}</span>
+                                  <span>MISSES: {player.missedTacklesForced}</span>
+                                </>
+                              )}
+                              {showWR && (
+                                <>
+                                  <span>{player.receptions}/{player.targets || 0} TGT</span>
+                                  <span>YAC: {player.yardsAfterCatch}</span>
+                                </>
+                              )}
+                              {showDB && (
+                                <>
+                                  <span>SWAT: {player.swats || 0}</span>
+                                  <span>ALLOW: {player.completionsAllowed || 0}/{player.targetsAllowed || 0}</span>
+                                </>
+                              )}
+                              {showDEF && (
+                                <>
+                                  <span>MISS: {player.defensiveMisses || 0}</span>
+                                  <span>SAF: {player.safeties || 0}</span>
                                 </>
                               )}
                               {showK && (
