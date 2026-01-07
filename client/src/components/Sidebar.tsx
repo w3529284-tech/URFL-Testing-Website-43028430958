@@ -48,6 +48,7 @@ export function Sidebar() {
     { path: "/standings", label: "Standings", icon: BarChart3 },
     { path: "/stats", label: "Stats & Data", icon: BarChart3 },
     { path: "/teams", label: "Teams", icon: Shirt },
+    { path: "/archive/season-1", label: "S1 Archive", icon: Clock },
     { path: "/previous-weeks", label: "Archives", icon: Calendar },
     { path: "/news", label: "News", icon: Newspaper },
     { path: "/betting", label: "Betting", icon: Target },

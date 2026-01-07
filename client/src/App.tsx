@@ -26,6 +26,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import SocialLinks from "@/pages/SocialLinks";
 import Changelogs from "@/pages/Changelogs";
 import UpdatePlanner from "@/pages/UpdatePlanner";
+import Season1Archive from "@/pages/Season1Archive";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
@@ -102,6 +103,7 @@ function MainContent() {
               <Route path="/social" component={SocialLinks} />
               <Route path="/changelogs" component={Changelogs} />
               <Route path="/update-planner" component={UpdatePlanner} />
+              <Route path="/archive/season-1" component={Season1Archive} />
             </>
           )}
           {isAdmin && <Route path="/admin" component={AdminDashboard} />}

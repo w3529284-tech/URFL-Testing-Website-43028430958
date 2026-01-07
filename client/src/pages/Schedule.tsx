@@ -23,7 +23,7 @@ export default function Schedule() {
   const { data: allGames, isLoading, error } = useQuery<Game[]>({
     queryKey: ["/api/games/all"],
     queryFn: async () => {
-      const res = await fetch(`/api/games/all?season=1`);
+      const res = await fetch(`/api/games/all?season=2`);
       if (!res.ok) throw new Error("Failed to fetch games");
       return res.json();
     }
@@ -71,7 +71,7 @@ export default function Schedule() {
             Full Schedule
           </h1>
           <p className="text-muted-foreground text-lg mb-4">
-            Complete Season 1 schedule with dates, times, and locations
+            Complete Season 2 schedule with dates, times, and locations
           </p>
         </div>
       </div>

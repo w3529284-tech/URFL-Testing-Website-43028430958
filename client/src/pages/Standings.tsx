@@ -50,7 +50,7 @@ export default function Standings() {
   const { data: dbStandings, isLoading } = useQuery({
     queryKey: ["/api/standings"],
     queryFn: async () => {
-      const res = await fetch(`/api/standings?season=1`);
+      const res = await fetch(`/api/standings?season=2`);
       if (!res.ok) throw new Error("Failed to fetch standings");
       return res.json();
     }
@@ -82,7 +82,7 @@ export default function Standings() {
         losses: entry.losses,
         pointDifferential: entry.pointDifferential,
         manualOrder: entry.manualOrder,
-        season: 1,
+        season: 2,
       });
     },
     onSuccess: () => {
@@ -256,7 +256,7 @@ export default function Standings() {
           <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
             Standings
           </h1>
-          <p className="text-muted-foreground text-lg">URFL Season 1 Standings</p>
+          <p className="text-muted-foreground text-lg">URFL Season 2 Standings</p>
         </div>
       </div>
       {isAdmin && (
@@ -418,7 +418,7 @@ export default function Standings() {
                                 <Input
                                   type="text"
                                   inputMode="numeric"
-                                  value={editingPD[entry.id] !== undefined ? editingPD[entry.id] : (entry.pointDifferential || 0)}
+                                  value={editingPD[entry.id] !== undefined ? editingPD[entry.id] : (entry.pointDifferential || 0).toString()}
                                   onChange={(e) => {
                                     setEditingPD({ ...editingPD, [entry.id]: e.target.value });
                                   }}

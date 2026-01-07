@@ -46,7 +46,7 @@ export type User = typeof users.$inferSelect;
 export const games = pgTable("games", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   week: integer("week").notNull(),
-  season: integer("season").default(1),
+  season: integer("season").default(2),
   team1: varchar("team1", { length: 100 }).notNull(),
   team2: varchar("team2", { length: 100 }).notNull(),
   team1Score: integer("team1_score").default(0),
@@ -151,7 +151,7 @@ export type PickemRules = typeof pickemRules.$inferSelect;
 export const standings = pgTable("standings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   team: varchar("team", { length: 100 }).notNull(),
-  season: integer("season").default(1),
+  season: integer("season").default(2),
   division: varchar("division", { length: 10 }).notNull(),
   wins: integer("wins").default(0),
   losses: integer("losses").default(0),

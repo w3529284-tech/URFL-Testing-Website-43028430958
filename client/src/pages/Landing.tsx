@@ -19,7 +19,7 @@ export default function Landing() {
   const { data: games, isLoading: gamesLoading } = useQuery<Game[]>({
     queryKey: ["/api/games/current"],
     queryFn: async () => {
-      const res = await fetch(`/api/games/current?season=1`);
+      const res = await fetch(`/api/games/current?season=2`);
       if (!res.ok) throw new Error("Failed to fetch games");
       return res.json();
     }
@@ -104,7 +104,7 @@ export default function Landing() {
             <div className="relative z-10">
             <Badge className="mb-4">
               <Sparkles className="w-3 h-3 mr-1" />
-              Season 1 Highlights
+              Season 2 Highlights
             </Badge>
               
               <h2 className="text-3xl md:text-4xl font-black mb-4 leading-tight">
