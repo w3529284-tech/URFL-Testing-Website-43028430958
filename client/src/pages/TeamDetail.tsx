@@ -225,7 +225,7 @@ export default function TeamDetail() {
                         <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary italic">#{player.number || '00'}</div>
                         <div>
                           <p className="text-lg font-black uppercase tracking-tight">{player.name}</p>
-                          <Badge variant="ghost" className="p-0 text-[10px] font-black text-muted-foreground uppercase tracking-widest">{player.position}</Badge>
+                          <Badge variant="outline" className="p-0 border-none text-[10px] font-black text-muted-foreground uppercase tracking-widest">{player.position}</Badge>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-8 text-center flex-1 max-w-xs">

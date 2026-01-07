@@ -189,7 +189,7 @@ export default function Betting() {
                   <Input
                     placeholder="Search matchups..."
                     value={searchQuery}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-12 h-14 bg-card/40 backdrop-blur-xl border-border/40 rounded-2xl font-medium"
                   />
                 </div>
