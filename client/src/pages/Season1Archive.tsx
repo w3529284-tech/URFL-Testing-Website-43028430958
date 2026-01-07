@@ -23,6 +23,15 @@ export default function Season1Archive() {
     }
   });
 
+  const { data: standings, isLoading: standingsLoading } = useQuery<any[]>({
+    queryKey: ["/api/standings", "archive-1"],
+    queryFn: async () => {
+      const res = await fetch(`/api/standings?season=1`);
+      if (!res.ok) throw new Error("Failed to fetch standings");
+      return res.json();
+    }
+  });
+
   const { data: allGames, isLoading: allGamesLoading } = useQuery<Game[]>({
     queryKey: ["/api/games/all", "archive-1"],
     queryFn: async () => {
@@ -165,6 +174,35 @@ export default function Season1Archive() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {standings && standings.length > 0 && (
+        <div className="mt-16 pt-8 border-t">
+          <h2 className="text-3xl font-bold mb-8 text-primary">Final Standings</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {['AFC', 'NFC'].map(conference => (
+              <div key={conference} className="space-y-4">
+                <h3 className="text-xl font-bold border-b pb-2">{conference}</h3>
+                <div className="space-y-2">
+                  {standings
+                    .filter(s => s.division?.startsWith(conference))
+                    .sort((a, b) => (b.wins || 0) - (a.wins || 0) || (b.pointDifferential || 0) - (a.pointDifferential || 0))
+                    .map(team => (
+                      <div key={team.id} className="flex justify-between items-center p-3 bg-card rounded-lg border">
+                        <span className="font-bold">{team.team}</span>
+                        <div className="flex gap-4 text-sm font-medium">
+                          <span>{team.wins}W - {team.losses}L</span>
+                          <span className={team.pointDifferential >= 0 ? 'text-green-500' : 'text-red-500'}>
+                            {team.pointDifferential > 0 ? '+' : ''}{team.pointDifferential} PD
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
