@@ -61,56 +61,50 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
       <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
-        <div className="relative group p-8 md:p-12 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[40px] overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] -mr-32 -mt-32" />
-          <div className="relative z-10 space-y-6">
-            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1.5 text-[11px] font-black uppercase tracking-widest">
-              <ShieldCheck className="w-3.5 h-3.5 mr-2" />
-              League Operations
-            </Badge>
-            <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-[0.9] text-foreground">
-              Admin <span className="text-primary">Console</span>
-            </h1>
-            <p className="text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
-              Manage matchups, content, and system configuration with elite control.
-            </p>
-          </div>
-          <div className="absolute -bottom-16 -right-16 text-[200px] opacity-[0.02] select-none font-black italic pointer-events-none">ADMIN</div>
+        <div className="space-y-4">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1.5 text-[11px] font-black uppercase tracking-widest">
+            <ShieldCheck className="w-3.5 h-3.5 mr-2" />
+            League Operations
+          </Badge>
+          <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-[0.9] text-foreground">
+            Admin <span className="text-primary">Console</span>
+          </h1>
+          <p className="text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
+            Manage matchups, content, and system configuration.
+          </p>
         </div>
 
         <Tabs defaultValue="games" className="space-y-10">
-          <div className="p-2 bg-card/30 backdrop-blur-xl border border-border/40 rounded-[32px] inline-flex">
-            <TabsList className="flex flex-wrap h-auto gap-1 bg-transparent p-0">
-              {ADMIN_TABS.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="h-10 px-6 rounded-2xl font-black uppercase tracking-widest text-[9px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all hover:bg-white/5"
-                  data-testid={`tab-${tab.value}`}
-                >
-                  <tab.icon className="w-3.5 h-3.5 mr-2" />
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
+          <TabsList className="flex flex-wrap h-auto gap-2 bg-transparent p-0">
+            {ADMIN_TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="h-11 px-5 rounded-2xl font-black uppercase tracking-widest text-[9px] border border-border/40 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+                data-testid={`tab-${tab.value}`}
+              >
+                <tab.icon className="w-3 h-3 mr-2" />
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-          <Card className="p-8 md:p-12 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[48px] shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-            <TabsContent value="games" className="mt-0 outline-none">
+          <Card className="p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[40px]">
+            <TabsContent value="games" className="mt-0">
               <GamesManager />
             </TabsContent>
-            <TabsContent value="scores" className="mt-0 outline-none"><ScoresManager /></TabsContent>
-            <TabsContent value="news" className="mt-0 outline-none"><NewsManager /></TabsContent>
-            <TabsContent value="coins" className="mt-0 outline-none"><CoinsManager /></TabsContent>
-            <TabsContent value="bracket" className="mt-0 outline-none"><BracketManager /></TabsContent>
-            <TabsContent value="changelogs" className="mt-0 outline-none"><ChangelogManager /></TabsContent>
-            <TabsContent value="streams" className="mt-0 outline-none"><StreamRequestsManager /></TabsContent>
-            <TabsContent value="rosters" className="mt-0 outline-none"><RosterManager /></TabsContent>
-            <TabsContent value="player-stats" className="mt-0 outline-none"><PlayerStatsManager /></TabsContent>
-            <TabsContent value="users" className="mt-0 outline-none"><UsersManager /></TabsContent>
-            <TabsContent value="partners" className="mt-0 outline-none"><PartnersManager /></TabsContent>
-            <TabsContent value="settings" className="mt-0 outline-none"><SettingsManager /></TabsContent>
+            {/* Other Contents would follow same pattern, keeping implementation intact */}
+            <TabsContent value="scores" className="mt-0"><ScoresManager /></TabsContent>
+            <TabsContent value="news" className="mt-0"><NewsManager /></TabsContent>
+            <TabsContent value="coins" className="mt-0"><CoinsManager /></TabsContent>
+            <TabsContent value="bracket" className="mt-0"><BracketManager /></TabsContent>
+            <TabsContent value="changelogs" className="mt-0"><ChangelogManager /></TabsContent>
+            <TabsContent value="streams" className="mt-0"><StreamRequestsManager /></TabsContent>
+            <TabsContent value="rosters" className="mt-0"><RosterManager /></TabsContent>
+            <TabsContent value="player-stats" className="mt-0"><PlayerStatsManager /></TabsContent>
+            <TabsContent value="users" className="mt-0"><UsersManager /></TabsContent>
+            <TabsContent value="partners" className="mt-0"><PartnersManager /></TabsContent>
+            <TabsContent value="settings" className="mt-0"><SettingsManager /></TabsContent>
           </Card>
         </Tabs>
       </div>
