@@ -28,22 +28,16 @@ export function BreakingNewsBanner() {
   }
 
   return (
-    <div className="sticky top-0 left-0 right-0 z-[100] bg-destructive text-destructive-foreground overflow-hidden">
-      <div className="py-2 px-4">
+    <div className="sticky top-0 left-0 right-0 z-[100] bg-accent text-accent-foreground border-b border-accent-foreground/10 overflow-hidden backdrop-blur-md">
+      <div className="py-1.5 px-4">
         <div className="marquee-container">
-          <div className="marquee-content">
-            <span className="font-bold mr-4">BREAKING NEWS:</span>
-            <span>{breakingNews.message}</span>
-            <span className="mx-8">•</span>
-            <span className="font-bold mr-4">BREAKING NEWS:</span>
-            <span>{breakingNews.message}</span>
-            <span className="mx-8">•</span>
-            <span className="font-bold mr-4">BREAKING NEWS:</span>
-            <span>{breakingNews.message}</span>
-            <span className="mx-8">•</span>
-            <span className="font-bold mr-4">BREAKING NEWS:</span>
-            <span>{breakingNews.message}</span>
-            <span className="mx-8">•</span>
+          <div className="marquee-content py-0.5">
+            <span className="font-black italic mr-4 tracking-tighter uppercase">BREAKING:</span>
+            <span className="font-bold">{breakingNews.message}</span>
+            <span className="mx-12 opacity-50 font-black">///</span>
+            <span className="font-black italic mr-4 tracking-tighter uppercase">BREAKING:</span>
+            <span className="font-bold">{breakingNews.message}</span>
+            <span className="mx-12 opacity-50 font-black">///</span>
           </div>
         </div>
       </div>

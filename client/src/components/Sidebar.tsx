@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   Home, Zap, Calendar, Trophy, BarChart3, Newspaper, Target, 
-  Users, BookOpen, Shield, Moon, Sun, LogOut, LogIn, Settings,
-  Snowflake, ChevronLeft, ChevronRight, Star, Clock, Shirt
+  Users, BookOpen, Shield, LogOut, LogIn, Settings,
+  ChevronLeft, ChevronRight, Clock, Shirt
 } from "lucide-react";
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useTheme } from "@/components/ThemeProvider";
@@ -36,7 +36,6 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 export function Sidebar() {
   const [location] = useLocation();
   const { isAuthenticated, user } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
   const { collapsed, setCollapsed } = useSidebar();
   const isAdmin = isAuthenticated && (user as any)?.role === "admin";
 
@@ -61,33 +60,28 @@ export function Sidebar() {
   return (
     <>
       <aside 
-        className={`fixed left-0 top-0 h-full bg-sidebar text-sidebar-foreground z-50 transition-all duration-300 ease-in-out hidden md:flex flex-col ${
+        className={`fixed left-0 top-0 h-full bg-card/50 backdrop-blur-xl text-sidebar-foreground z-50 border-r border-border/50 transition-all duration-300 ease-in-out hidden md:flex flex-col ${
           collapsed ? 'w-20' : 'w-64'
         }`}
       >
-        <div className="relative p-4 border-b border-sidebar-border">
+        <div className="relative p-6">
           <Link href="/">
             <div className={`flex items-center gap-3 cursor-pointer group ${collapsed ? 'justify-center' : ''}`}>
               <div className="relative">
-                <Zap className="w-8 h-8 text-sidebar-primary" />
+                <div className="absolute -inset-1 bg-primary/20 blur rounded-full group-hover:bg-primary/30 transition-all" />
+                <Zap className="relative w-8 h-8 text-primary fill-primary/10" />
               </div>
               {!collapsed && (
                 <div>
-                  <h1 className="text-xl font-black tracking-tight group-hover:text-accent transition-colors">URFL</h1>
-                  <p className="text-xs text-white/60 font-medium">Fan Hub</p>
+                  <h1 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors uppercase italic leading-none">URFL</h1>
+                  <p className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase mt-1">Fan Hub</p>
                 </div>
               )}
             </div>
           </Link>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-4 px-2 relative">
-          <div className={`mb-4 ${collapsed ? 'px-1' : 'px-2'}`}>
-            {!collapsed && (
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">Navigation</p>
-            )}
-          </div>
-          
+        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
           <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -96,16 +90,15 @@ export function Sidebar() {
                 <Link key={item.path} href={item.path}>
                   <Button
                     variant="ghost"
-                    className={`w-full font-medium transition-all duration-200 ${
-                      collapsed ? 'justify-center px-2' : 'justify-start px-3'
+                    className={`w-full font-bold uppercase tracking-wide text-[11px] transition-all duration-200 ${
+                      collapsed ? 'justify-center px-0' : 'justify-start px-4'
                     } ${
                       isActive 
-                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary hover:text-primary-foreground' 
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
+                        ? 'bg-primary/10 text-primary border-r-2 border-primary rounded-none' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                     }`}
-                    title={collapsed ? item.label : undefined}
                   >
-                    <Icon className={`w-5 h-5 ${collapsed ? '' : 'mr-3'} flex-shrink-0`} />
+                    <Icon className={`w-4 h-4 ${collapsed ? '' : 'mr-4'} flex-shrink-0 ${isActive ? 'text-primary' : ''}`} />
                     {!collapsed && <span>{item.label}</span>}
                   </Button>
                 </Link>
@@ -114,23 +107,22 @@ export function Sidebar() {
           </nav>
 
           {isAdmin && (
-            <div className={`mt-6 ${collapsed ? 'px-1' : 'px-2'}`}>
+            <div className="space-y-1">
               {!collapsed && (
-                <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">Admin</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 px-4">Admin Control</p>
               )}
               <Link href="/admin">
                 <Button
                   variant="ghost"
-                  className={`w-full font-medium transition-all duration-200 ${
-                    collapsed ? 'justify-center px-2' : 'justify-start px-3'
+                  className={`w-full font-bold uppercase tracking-wide text-[11px] transition-all duration-200 ${
+                    collapsed ? 'justify-center px-0' : 'justify-start px-4'
                   } ${
                     location === '/admin'
-                      ? 'bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:bg-accent hover:text-accent-foreground'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                      ? 'bg-accent/10 text-accent border-r-2 border-accent rounded-none'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                   }`}
-                  title={collapsed ? 'Admin Dashboard' : undefined}
                 >
-                  <Shield className={`w-5 h-5 ${collapsed ? '' : 'mr-3'} flex-shrink-0`} />
+                  <Shield className={`w-4 h-4 ${collapsed ? '' : 'mr-4'} flex-shrink-0`} />
                   {!collapsed && <span>Admin Dashboard</span>}
                 </Button>
               </Link>
@@ -138,17 +130,16 @@ export function Sidebar() {
           )}
         </div>
 
-        <div className="relative p-3 border-t border-white/10 space-y-2">
+        <div className="relative p-4 border-t border-border/50 space-y-2 bg-card/30">
           {isAuthenticated ? (
             <a href="/api/logout">
               <Button
                 variant="ghost"
-                className={`w-full text-white/80 hover:text-white hover:bg-white/10 ${
-                  collapsed ? 'justify-center px-2' : 'justify-start px-3'
+                className={`w-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 font-bold uppercase tracking-wide text-[11px] ${
+                  collapsed ? 'justify-center px-0' : 'justify-start px-4'
                 }`}
-                title={collapsed ? 'Logout' : undefined}
               >
-                <LogOut className={`w-5 h-5 ${collapsed ? '' : 'mr-3'}`} />
+                <LogOut className={`w-4 h-4 ${collapsed ? '' : 'mr-4'}`} />
                 {!collapsed && <span>Logout</span>}
               </Button>
             </a>
@@ -156,12 +147,11 @@ export function Sidebar() {
             <a href="/login">
               <Button
                 variant="ghost"
-                className={`w-full text-white/80 hover:text-white hover:bg-white/10 ${
-                  collapsed ? 'justify-center px-2' : 'justify-start px-3'
+                className={`w-full text-muted-foreground hover:text-primary hover:bg-primary/5 font-bold uppercase tracking-wide text-[11px] ${
+                  collapsed ? 'justify-center px-0' : 'justify-start px-4'
                 }`}
-                title={collapsed ? 'Admin Login' : undefined}
               >
-                <LogIn className={`w-5 h-5 ${collapsed ? '' : 'mr-3'}`} />
+                <LogIn className={`w-4 h-4 ${collapsed ? '' : 'mr-4'}`} />
                 {!collapsed && <span>Login</span>}
               </Button>
             </a>
@@ -171,14 +161,12 @@ export function Sidebar() {
             variant="ghost"
             size="sm"
             onClick={() => setCollapsed(!collapsed)}
-            className="w-full text-white/60 hover:text-white hover:bg-white/10 mt-2"
+            className="w-full text-muted-foreground hover:text-foreground transition-colors mt-2"
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-            {!collapsed && <span className="ml-2 text-xs">Collapse</span>}
+            {!collapsed && <span className="ml-2 text-[10px] font-bold uppercase tracking-widest">Collapse</span>}
           </Button>
         </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-primary/20 to-transparent pointer-events-none" />
       </aside>
       <MobileNav navItems={navItems} isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
     </>
@@ -189,9 +177,9 @@ function MobileNav({ navItems, isAuthenticated, isAdmin }: { navItems: Array<{ p
   const [location] = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-secondary/95 backdrop-blur-lg border-t border-white/10 z-50 md:hidden safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border/50 z-50 md:hidden safe-area-bottom">
       <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex items-center h-16 px-2 gap-1 min-w-min">
+        <div className="flex items-center h-16 px-4 gap-2 min-w-min">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
@@ -200,32 +188,16 @@ function MobileNav({ navItems, isAuthenticated, isAdmin }: { navItems: Array<{ p
                 <button
                   className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 ${
                     isActive 
-                      ? 'bg-primary text-primary-foreground shadow-lg' 
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                      ? 'bg-primary/10 text-primary' 
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
-                  title={item.label}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-[10px] mt-1 font-medium">{item.label.split(' ')[0]}</span>
+                  <Icon className="w-4 h-4" />
+                  <span className="text-[9px] mt-1 font-black uppercase tracking-tighter leading-none">{item.label.split(' ')[0]}</span>
                 </button>
               </Link>
             );
           })}
-          {isAdmin && (
-            <Link href="/admin">
-              <button
-                className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 ${
-                  location === '/admin'
-                    ? 'bg-accent text-accent-foreground shadow-lg' 
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
-                }`}
-                title="Admin Dashboard"
-              >
-                <Shield className="w-5 h-5" />
-                <span className="text-[10px] mt-1 font-medium">Admin</span>
-              </button>
-            </Link>
-          )}
         </div>
       </div>
     </nav>
