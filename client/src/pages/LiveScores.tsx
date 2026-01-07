@@ -4,6 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Game } from "@shared/schema";
 import { useLocation } from "wouter";
 import { AlertCircle, Search } from "lucide-react";
@@ -13,11 +15,17 @@ import { useState } from "react";
 export default function LiveScores() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSeason, setSelectedSeason] = useState("2");
   const [primetimeFilter, setPrimetimeFilter] = useState<"all" | "primetime" | "regular">("all");
   const preferences = useUserPreferences();
   
   const { data: games, isLoading, error } = useQuery<Game[]>({
-    queryKey: ["/api/games/current"],
+    queryKey: ["/api/games/current", selectedSeason],
+    queryFn: async () => {
+      const res = await fetch(`/api/games/current?season=${selectedSeason}`);
+      if (!res.ok) throw new Error("Failed to fetch games");
+      return res.json();
+    },
     refetchInterval: 30000,
   });
 
@@ -59,17 +67,33 @@ export default function LiveScores() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-4xl md:text-5xl font-black" data-testid="text-page-title">
-            Live Scores
-          </h1>
-          <Badge variant="outline" className="text-lg px-4 py-2" data-testid="badge-current-week">
-            Week {currentWeek}
-          </Badge>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-black mb-2" data-testid="text-page-title">
+              Live Scores
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Follow all the action as it happens in Season {selectedSeason}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="season-select" className="shrink-0 text-sm font-medium text-muted-foreground">Season:</Label>
+              <Select value={selectedSeason} onValueChange={setSelectedSeason}>
+                <SelectTrigger id="season-select" className="w-[120px] bg-background border-2 border-primary/20 font-bold">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Season 1</SelectItem>
+                  <SelectItem value="2">Season 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Badge variant="outline" className="text-lg px-4 py-2 bg-primary/5 text-primary border-primary/20" data-testid="badge-current-week">
+              Week {currentWeek}
+            </Badge>
+          </div>
         </div>
-        <p className="text-muted-foreground text-lg mb-4">
-          Follow all the action as it happens
-        </p>
         <div className="space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
