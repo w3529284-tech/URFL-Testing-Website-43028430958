@@ -14,12 +14,13 @@ import { useState } from "react";
 
 export default function Schedule() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSeason, setSelectedSeason] = useState("1");
   const [primetimeFilter, setPrimetimeFilter] = useState<"all" | "primetime" | "regular">("all");
   const preferences = useUserPreferences();
   const showLogos = preferences.showTeamLogos !== false;
   
   const { data: allGames, isLoading, error } = useQuery<Game[]>({
-    queryKey: ["/api/games/all"],
+    queryKey: ["/api/games/all", { season: selectedSeason }],
   });
 
   if (error) {
@@ -58,25 +59,40 @@ export default function Schedule() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
-          Full Schedule
-        </h1>
-        <p className="text-muted-foreground text-lg mb-4">
-          Complete season schedule with dates, times, and locations
-        </p>
-        <div className="space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search by team name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="flex gap-2">
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
+            Full Schedule
+          </h1>
+          <p className="text-muted-foreground text-lg mb-4">
+            Complete Season {selectedSeason} schedule with dates, times, and locations
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="season-select" className="shrink-0">Season:</Label>
+          <Select value={selectedSeason} onValueChange={setSelectedSeason}>
+            <SelectTrigger id="season-select" className="w-[120px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">Season 1</SelectItem>
+              <SelectItem value="2">Season 2</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="mb-8 space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search by team name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <div className="flex gap-2">
             <Button
               variant={primetimeFilter === "all" ? "default" : "outline"}
               size="sm"

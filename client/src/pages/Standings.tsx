@@ -41,6 +41,7 @@ export default function Standings() {
   const { toast } = useToast();
   const isAdmin = isAuthenticated && (user as any)?.role === "admin";
   const [standings, setStandings] = useState<StandingsEntry[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState("1");
   const [newTeam, setNewTeam] = useState("");
   const [newDivision, setNewDivision] = useState<"AFC_D1" | "AFC_D2" | "NFC_D1" | "NFC_D2">("AFC_D1");
   const [editingPD, setEditingPD] = useState<Record<string, string>>({});
@@ -48,7 +49,7 @@ export default function Standings() {
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
 
   const { data: dbStandings, isLoading } = useQuery({
-    queryKey: ["/api/standings"],
+    queryKey: ["/api/standings", { season: selectedSeason }],
   });
 
   useEffect(() => {
@@ -77,10 +78,11 @@ export default function Standings() {
         losses: entry.losses,
         pointDifferential: entry.pointDifferential,
         manualOrder: entry.manualOrder,
+        season: parseInt(selectedSeason),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/standings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/standings", { season: selectedSeason }] });
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || "Failed to save standing";
@@ -245,11 +247,25 @@ export default function Standings() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
-          Standings
-        </h1>
-        <p className="text-muted-foreground text-lg">URFL Season 1 Standings</p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
+            Standings
+          </h1>
+          <p className="text-muted-foreground text-lg">URFL Season {selectedSeason} Standings</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="season-select" className="shrink-0">Season:</Label>
+          <Select value={selectedSeason} onValueChange={setSelectedSeason}>
+            <SelectTrigger id="season-select" className="w-[120px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">Season 1</SelectItem>
+              <SelectItem value="2">Season 2</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       {isAdmin && (
         <Card className="p-6 mb-8">
