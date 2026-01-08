@@ -8,14 +8,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FootballField } from "@/components/FootballField";
 import type { Game, ChatMessage, Prediction, Standings, StreamRequest, User, GamePlay } from "@shared/schema";
 import { formatInTimeZone } from "date-fns-tz";
-import { ArrowLeft, AlertCircle, Video, ExternalLink, Activity } from "lucide-react";
+import { ArrowLeft, AlertCircle, Video, ExternalLink, Activity, Trophy, Zap, Target, PlayCircle, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { TEAMS } from "@/lib/teams";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { calculateWinProbability, getWinProbabilityFactors, getConferenceRanking } from "@/lib/winProbability";
+import { calculateWinProbability, getConferenceRanking } from "@/lib/winProbability";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
@@ -26,10 +26,6 @@ export default function GameDetail() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [celebrationTriggered, setCelebrationTriggered] = useState(false);
   const [streamLinkInput, setStreamLinkInput] = useState("");
-  const [playDescription, setPlayDescription] = useState("");
-  const [playType, setPlayType] = useState("pass");
-  const [yardsGained, setYardsGained] = useState(0);
-  const [pointsAdded, setPointsAdded] = useState(0);
   const [selectedTeam, setSelectedTeam] = useState("");
   const wsRef = useRef<WebSocket | null>(null);
   const confettiTimeoutsRef = useRef<number[]>([]);
@@ -45,7 +41,6 @@ export default function GameDetail() {
     gcTime: 0,
   });
   
-  // Force refetch when component mounts or gameId changes
   useEffect(() => {
     if (gameId) {
       refetch();
@@ -70,7 +65,7 @@ export default function GameDetail() {
     queryKey: ["/api/games/all"],
   });
 
-  const { data: streamRequests, refetch: refetchStreamRequests } = useQuery<StreamRequest[]>({
+  const { data: streamRequests } = useQuery<StreamRequest[]>({
     queryKey: ["/api/stream-requests/game", gameId],
     enabled: !!gameId,
   });
@@ -135,40 +130,12 @@ export default function GameDetail() {
     },
   });
 
-  const addPlayMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", `/api/games/${gameId}/plays`, {
-        quarter: game?.quarter || "Q1",
-        playType,
-        team: selectedTeam,
-        description: playDescription,
-        yardsGained,
-        pointsAdded,
-      });
-    },
-    onSuccess: () => {
-      toast({ title: "Play added", description: "Game stats updated" });
-      setPlayDescription("");
-      setPlayType("pass");
-      setYardsGained(0);
-      setPointsAdded(0);
-      setSelectedTeam("");
-      refetch();
-      queryClient.invalidateQueries({ queryKey: ["/api/games", gameId] });
-    },
-    onError: (error: any) => {
-      const msg = error?.response?.data?.message || "Failed to add play";
-      toast({ title: "Error", description: msg, variant: "destructive" });
-    },
-  });
-
   useEffect(() => {
     if (initialMessages) {
       setChatMessages(initialMessages);
     }
   }, [initialMessages]);
 
-  // Cleanup confetti when component unmounts
   useEffect(() => {
     return () => {
       confettiTimeoutsRef.current.forEach(timeoutId => clearTimeout(timeoutId));
@@ -191,7 +158,6 @@ export default function GameDetail() {
     container.className = 'confetti-container';
     document.body.appendChild(container);
 
-    // Create falling confetti - faster spawn for flash effect
     for (let i = 0; i < 400; i++) {
       const timeoutId = window.setTimeout(() => {
         const piece = document.createElement('div');
@@ -199,7 +165,6 @@ export default function GameDetail() {
         piece.style.left = Math.random() * 100 + '%';
         piece.style.top = -20 + 'px';
         piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        // Mix of sizes - some bigger for impact
         const size = Math.random() > 0.8 ? Math.random() * 18 + 10 : Math.random() * 12 + 4;
         piece.style.width = size + 'px';
         piece.style.height = size + 'px';
@@ -287,426 +252,328 @@ export default function GameDetail() {
 
   if (gameError) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="flex items-center justify-center gap-3 text-destructive">
-          <AlertCircle className="w-5 h-5" />
-          <p>Failed to load game details</p>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full p-12 border-none bg-card/50 backdrop-blur-2xl shadow-2xl text-center space-y-6">
+          <div className="relative inline-block">
+            <div className="absolute inset-0 bg-destructive/20 blur-3xl rounded-full" />
+            <AlertCircle className="w-20 h-20 text-destructive relative z-10 mx-auto" />
+          </div>
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter text-foreground">Error</h1>
+          <p className="text-muted-foreground font-medium">Failed to load game details. Please try again later.</p>
+          <Link href="/scores">
+            <Button variant="outline" className="w-full">Back to Scores</Button>
+          </Link>
+        </Card>
       </div>
     );
   }
 
   if (gameLoading || !game) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <Skeleton className="h-96 mb-6" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Skeleton className="h-[600px] lg:col-span-2" />
-          <Skeleton className="h-[600px]" />
+      <div className="min-h-screen bg-background p-6 md:p-10 space-y-12">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <Skeleton className="h-12 w-48 rounded-full" />
+          <Skeleton className="h-[400px] w-full rounded-[40px]" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <Skeleton className="h-[600px] lg:col-span-2 rounded-[40px]" />
+            <Skeleton className="h-[600px] rounded-[40px]" />
+          </div>
         </div>
       </div>
     );
   }
 
   const isScheduled = game.quarter === "Scheduled";
+  const team1Percent = calculateWinProbability(game, "team1", standings, allGames);
+  const team2Percent = calculateWinProbability(game, "team2", standings, allGames);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link href="/scores">
-        <Button variant="ghost" className="mb-6 gap-2" data-testid="button-back">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Scores
-        </Button>
-      </Link>
-
-      {/* Football Field and Last Play Update */}
-      {game.isLive && (
-        <Card className="p-6 mb-6">
-          <div className="flex flex-col gap-6">
-            <div className="py-4">
-              <h2 className="text-2xl font-bold mb-4">Live Field</h2>
-              <FootballField 
-                plays={plays}
-                team1={game.team1}
-                team2={game.team2}
-                team1Score={game.team1Score || 0}
-                team2Score={game.team2Score || 0}
-                isAdmin={(currentUser as any)?.role === 'admin'}
-                game={game}
-                onPositionChange={async (pos) => {
-                  // The component itself now handles the PATCH request to /api/games/:id
-                  // We don't need to duplicate it here, but we can keep it for extra safety
-                  // or remove it to avoid double-patching.
-                  console.log("[DETAIL] Ball position changed callback:", pos);
-                }}
-              />
-            </div>
-            
-            {game.lastPlay && (
-              <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
-                <div className="text-xs uppercase font-bold text-muted-foreground mb-2 tracking-wider flex items-center gap-2">
-                  <Activity className="w-4 h-4" /> Last Play Update
-                </div>
-                <p className="text-lg font-medium leading-snug">{game.lastPlay}</p>
-              </div>
-            )}
-          </div>
-        </Card>
-      )}
-
-      {/* Plays Display */}
-      {plays.length > 0 && (
-        <Card className="p-6 mb-6">
-          <h2 className="text-2xl font-bold mb-4">Play-by-Play</h2>
-          <div className="space-y-3 max-h-64 overflow-y-auto">
-            {[...plays].reverse().map((play) => (
-              <div
-                key={play.id}
-                className="p-3 bg-muted rounded border-l-4 border-primary"
-              >
-                <div className="flex justify-between items-start mb-1">
-                  <p className="font-semibold text-sm">{play.team}</p>
-                  <Badge variant="outline">{play.quarter}</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  {play.playType.charAt(0).toUpperCase() + play.playType.slice(1)}
-                </p>
-                <p className="text-sm font-medium">{play.description}</p>
-                {(play.yardsGained ?? 0) !== 0 && (
-                  <p className="text-xs text-primary mt-1">
-                    {(play.yardsGained ?? 0) > 0 ? '+ ' : ''}{play.yardsGained ?? 0} yards
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Card className="p-6">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Badge
-                variant={game.isLive ? "default" : game.isFinal ? "secondary" : "outline"}
-                className={`text-lg px-4 py-2 ${game.isLive ? 'animate-pulse' : ''}`}
-                data-testid="badge-game-status"
-              >
-                {game.isLive ? `LIVE${game.quarter && game.quarter !== "Scheduled" ? ` - ${game.quarter}` : ""}` : game.isFinal ? "FINAL" : game.quarter || "Scheduled"}
-              </Badge>
-              <span className="text-sm text-muted-foreground" data-testid="text-game-time">
-                {game.gameTime ? formatInTimeZone(new Date(game.gameTime), "America/New_York", "EEEE, MMMM d 'at' h:mm a 'EST'") : "Time TBD"}
-              </span>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-center justify-between py-4 border-b gap-4">
-                <div className="flex-1 flex items-center gap-4 min-w-0">
-                  {preferences.showTeamLogos !== false && TEAMS[game.team2 as keyof typeof TEAMS] && (
-                    <img src={TEAMS[game.team2 as keyof typeof TEAMS]} alt={game.team2} className="w-16 h-16 object-contain flex-shrink-0" />
-                  )}
-                  <h2 className={`text-2xl md:text-3xl font-bold truncate ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-team2">
-                    {game.team2}
-                  </h2>
-                </div>
-                <div className={`text-6xl md:text-7xl font-black tabular-nums flex-shrink-0 ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary celebration-score' : ''}`} data-testid="text-team2-score">
-                  {game.team2Score}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between py-4 gap-4">
-                <div className="flex-1 flex items-center gap-4 min-w-0">
-                  {preferences.showTeamLogos !== false && TEAMS[game.team1 as keyof typeof TEAMS] && (
-                    <img src={TEAMS[game.team1 as keyof typeof TEAMS]} alt={game.team1} className="w-16 h-16 object-contain flex-shrink-0" />
-                  )}
-                  <h2 className={`text-2xl md:text-3xl font-bold truncate ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-team1">
-                    {game.team1}
-                  </h2>
-                </div>
-                <div className={`text-6xl md:text-7xl font-black tabular-nums flex-shrink-0 ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary celebration-score' : ''}`} data-testid="text-team1-score">
-                  {game.team1Score}
-                </div>
-              </div>
-            </div>
-
-            {game.location && (
-              <div className="pt-4 border-t">
-                <p className="text-muted-foreground" data-testid="text-game-location">
-                  <span className="font-semibold">Location:</span> {game.location}
-                </p>
-              </div>
-            )}
-
-            {/* Stream Link Section */}
-            <div className="pt-4 border-t">
-              <div className="flex items-center gap-2 mb-3">
-                <Video className="w-5 h-5 text-primary" />
-                <span className="font-semibold">Watch Live</span>
-              </div>
-              
-              {game.streamLink ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const streamUrl = game.streamLink || "";
-                    const url = streamUrl.startsWith('http://') || streamUrl.startsWith('https://') 
-                      ? streamUrl 
-                      : `https://${streamUrl}`;
-                    window.open(url, '_blank');
-                  }}
-                  className="gap-2"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Watch Stream
-                </Button>
-              ) : (
-                <p className="text-sm text-muted-foreground mb-3">No stream available yet</p>
-              )}
-
-              {/* Streamer controls - show if user is logged in and is a streamer/admin */}
-              {currentUser && (currentUser.role === "streamer" || currentUser.role === "admin") && (
-                <div className="mt-3 pt-3 border-t">
-                  {(() => {
-                    const myRequest = myStreamRequests?.find(r => r.gameId === gameId);
-                    
-                    if (!myRequest) {
-                      return (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => requestStreamMutation.mutate()}
-                          disabled={requestStreamMutation.isPending}
-                        >
-                          Request to Stream This Game
-                        </Button>
-                      );
-                    }
-                    
-                    if (myRequest.status === "pending") {
-                      return (
-                        <div className="text-sm">
-                          <Badge variant="secondary">Pending Approval</Badge>
-                          <p className="text-muted-foreground mt-1">Your stream request is awaiting admin approval</p>
-                        </div>
-                      );
-                    }
-                    
-                    if (myRequest.status === "rejected") {
-                      return (
-                        <div className="text-sm">
-                          <Badge variant="destructive">Request Rejected</Badge>
-                        </div>
-                      );
-                    }
-                    
-                    if (myRequest.status === "approved") {
-                      return (
-                        <div className="space-y-2">
-                          <Badge variant="default">Approved</Badge>
-                          <div className="flex gap-2">
-                            <Input 
-                              placeholder="Enter your stream link..."
-                              value={streamLinkInput}
-                              onChange={(e) => setStreamLinkInput(e.target.value)}
-                              className="flex-1"
-                            />
-                            <Button 
-                              size="sm"
-                              onClick={() => updateStreamLinkMutation.mutate({ 
-                                requestId: myRequest.id, 
-                                streamLink: streamLinkInput 
-                              })}
-                              disabled={!streamLinkInput || updateStreamLinkMutation.isPending}
-                            >
-                              Post Link
-                            </Button>
-                          </div>
-                          {myRequest.streamLink && (
-                            <p className="text-xs text-muted-foreground">
-                              Current link: {String(myRequest.streamLink)}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    }
-                    
-                    return null;
-                  })()}
-                </div>
-              )}
-            </div>
-
-            {!game.isFinal && (isScheduled || game.isLive) && (
-              <div className="pt-4 border-t">
-                <p className="font-semibold mb-4">Win Probability & Predictions</p>
-                
-                {(() => {
-                  const team1Standing = standings?.find(s => s.team === game.team1);
-                  const team2Standing = standings?.find(s => s.team === game.team2);
-                  
-                  const team1PD = team1Standing?.pointDifferential || 0;
-                  const team2PD = team2Standing?.pointDifferential || 0;
-                  
-                  // Calculate dynamic win probability using all factors
-                  const team1Percent = calculateWinProbability(game, "team1", standings, allGames);
-                  const team2Percent = calculateWinProbability(game, "team2", standings, allGames);
-                  
-                  // Get detailed factors for display
-                  const factors = standings ? {
-                    team1Rank: getConferenceRanking(game.team1, standings),
-                    team2Rank: getConferenceRanking(game.team2, standings),
-                  } : { team1Rank: "N/A", team2Rank: "N/A" };
-                  
-                  return (
-                    <div className="mb-6 space-y-3">
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-semibold">{game.team1}</span>
-                          <span className="text-lg font-bold text-primary">{team1Percent}%</span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                          <div 
-                            className="bg-primary h-full transition-all duration-300"
-                            style={{ width: `${team1Percent}%` }}
-                            data-testid={`winprob-bar-${game.team1}`}
-                          />
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {factors.team1Rank} • {team1Standing?.wins || 0}-{team1Standing?.losses || 0} • PD: {team1PD > 0 ? '+' : ''}{team1PD}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-semibold">{game.team2}</span>
-                          <span className="text-lg font-bold text-primary">{team2Percent}%</span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                          <div 
-                            className="bg-primary h-full transition-all duration-300"
-                            style={{ width: `${team2Percent}%` }}
-                            data-testid={`winprob-bar-${game.team2}`}
-                          />
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {factors.team2Rank} • {team2Standing?.wins || 0}-{team2Standing?.losses || 0} • PD: {team2PD > 0 ? '+' : ''}{team2PD}
-                        </p>
-                      </div>
-                      
-                      <p className="text-xs text-muted-foreground text-center mt-3 pt-2 border-t">
-                        {game.isLive ? `Updated live during ${game.quarter}` : 'Based on ranking, record, point differential & schedule strength'}
-                      </p>
-                      
-                      {(() => {
-                        const factorData = getWinProbabilityFactors(game, standings, allGames);
-                        if (!factorData) return null;
-                        
-                        return (
-                          <div className="mt-4 pt-4 border-t space-y-2">
-                            <p className="text-xs font-semibold text-muted-foreground mb-2">Factor Breakdown:</p>
-                            
-                            <div className="grid grid-cols-3 gap-2 text-xs">
-                              <div className="text-left font-medium">Factor</div>
-                              <div className="text-center font-medium">{game.team1}</div>
-                              <div className="text-center font-medium">{game.team2}</div>
-                              
-                              <div className="text-left text-muted-foreground">Ranking</div>
-                              <div className={`text-center ${factorData.factors.ranking.advantage === game.team1 ? 'text-primary font-semibold' : ''}`}>
-                                {factorData.factors.ranking.team1Rank}
-                              </div>
-                              <div className={`text-center ${factorData.factors.ranking.advantage === game.team2 ? 'text-primary font-semibold' : ''}`}>
-                                {factorData.factors.ranking.team2Rank}
-                              </div>
-                              
-                              <div className="text-left text-muted-foreground">Record</div>
-                              <div className={`text-center ${factorData.factors.record.advantage === game.team1 ? 'text-primary font-semibold' : ''}`}>
-                                {factorData.factors.record.team1Record}
-                              </div>
-                              <div className={`text-center ${factorData.factors.record.advantage === game.team2 ? 'text-primary font-semibold' : ''}`}>
-                                {factorData.factors.record.team2Record}
-                              </div>
-                              
-                              <div className="text-left text-muted-foreground">Point Diff</div>
-                              <div className={`text-center ${factorData.factors.pointDiff.advantage === game.team1 ? 'text-primary font-semibold' : ''}`}>
-                                {factorData.factors.pointDiff.team1PD > 0 ? '+' : ''}{factorData.factors.pointDiff.team1PD}
-                              </div>
-                              <div className={`text-center ${factorData.factors.pointDiff.advantage === game.team2 ? 'text-primary font-semibold' : ''}`}>
-                                {factorData.factors.pointDiff.team2PD > 0 ? '+' : ''}{factorData.factors.pointDiff.team2PD}
-                              </div>
-                              
-                              <div className="text-left text-muted-foreground">Schedule</div>
-                              <div className={`text-center ${factorData.factors.schedule.advantage === game.team1 ? 'text-primary font-semibold' : ''}`}>
-                                {factorData.factors.schedule.team1SOS >= 0 ? `${factorData.factors.schedule.team1SOS}%` : 'N/A'}
-                              </div>
-                              <div className={`text-center ${factorData.factors.schedule.advantage === game.team2 ? 'text-primary font-semibold' : ''}`}>
-                                {factorData.factors.schedule.team2SOS >= 0 ? `${factorData.factors.schedule.team2SOS}%` : 'N/A'}
-                              </div>
-                            </div>
-                            
-                            <p className="text-xs text-muted-foreground italic mt-2">
-                              Bold = Advantage in that factor
-                            </p>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  );
-                })()}
-                
-                {!user ? (
-                  <div className="p-4 rounded-lg bg-muted border border-muted-foreground/20 text-center">
-                    <p className="text-sm text-muted-foreground mb-3">You must log in to make a prediction</p>
-                    <a href="/login">
-                      <Button size="sm" className="w-full">Login to Predict</Button>
-                    </a>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <Button
-                      variant="outline"
-                      className="gap-2 flex-col md:flex-row h-auto md:h-auto py-3 md:py-2"
-                      onClick={() => voteMutation.mutate(game.team2)}
-                      disabled={voteMutation.isPending || predictions?.some(p => p.votedFor === game.team2 && (p as any).userId === user.id) || predictions?.some(p => (p as any).userId === user.id)}
-                      data-testid={`button-predict-${game.team2}`}
-                    >
-                      <span className="flex-1 break-words">{game.team2}</span>
-                      <Badge variant="secondary" className="mt-2 md:mt-0 md:ml-auto flex-shrink-0">
-                        {predictions?.filter(p => p.votedFor === game.team2).length || 0}
-                      </Badge>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="gap-2 flex-col md:flex-row h-auto md:h-auto py-3 md:py-2"
-                      onClick={() => voteMutation.mutate(game.team1)}
-                      disabled={voteMutation.isPending || predictions?.some(p => p.votedFor === game.team1 && (p as any).userId === user.id) || predictions?.some(p => (p as any).userId === user.id)}
-                      data-testid={`button-predict-${game.team1}`}
-                    >
-                      <span className="flex-1 break-words">{game.team1}</span>
-                      <Badge variant="secondary" className="mt-2 md:mt-0 md:ml-auto flex-shrink-0">
-                        {predictions?.filter(p => p.votedFor === game.team1).length || 0}
-                      </Badge>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          </Card>
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
+      <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
+        
+        {/* Header/Back Button */}
+        <div className="flex items-center justify-between">
+          <Link href="/scores">
+            <Button variant="ghost" className="rounded-full font-black uppercase tracking-widest text-[10px] hover:bg-white/5 gap-2 transition-all">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Scores
+            </Button>
+          </Link>
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1.5 text-[11px] font-black uppercase tracking-widest">
+            <Zap className="w-3.5 h-3.5 mr-2" />
+            Season 2 • Week {game.week}
+          </Badge>
         </div>
 
-        <Card className="h-[600px] flex flex-col overflow-hidden">
-          <ChatComponent
-            gameId={gameId}
-            messages={chatMessages}
-            onSendMessage={handleSendMessage}
-            username={currentUser?.username}
-            isAuthenticated={!!user}
-            role={(currentUser as any)?.role}
-            game={game}
-          />
-        </Card>
+        {/* Hero Scoreboard Section */}
+        <section className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent opacity-20 blur-3xl group-hover:opacity-30 transition-opacity duration-1000" />
+          <Card className="relative overflow-hidden border-none bg-card/40 backdrop-blur-3xl p-8 md:p-12 lg:p-16 rounded-[40px]">
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
+              
+              {/* Team 2 */}
+              <div className="flex-1 flex flex-col items-center md:items-start gap-6 w-full">
+                <div className="relative group/logo">
+                  <div className="absolute -inset-4 bg-primary/20 blur-2xl rounded-full scale-0 group-hover/logo:scale-100 transition-transform duration-500" />
+                  {preferences.showTeamLogos !== false && TEAMS[game.team2 as keyof typeof TEAMS] ? (
+                    <img src={TEAMS[game.team2 as keyof typeof TEAMS]} alt={game.team2} className="w-24 h-24 md:w-32 md:h-32 object-contain relative z-10 drop-shadow-2xl transition-transform group-hover/logo:scale-110" />
+                  ) : (
+                    <div className="w-24 h-24 md:w-32 md:h-32 bg-white/5 rounded-full flex items-center justify-center relative z-10">
+                      <Trophy className="w-12 h-12 text-muted-foreground/20" />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <h2 className={`text-3xl md:text-5xl font-black italic uppercase tracking-tighter ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary' : 'text-foreground'}`}>
+                    {game.team2}
+                  </h2>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Away Team</p>
+                </div>
+              </div>
+
+              {/* Score Display */}
+              <div className="flex flex-col items-center gap-6 flex-shrink-0 bg-white/5 backdrop-blur-md px-10 py-8 rounded-[40px] border border-white/10 min-w-[200px]">
+                <div className="flex items-center gap-8">
+                  <span className={`text-6xl md:text-8xl font-black italic tabular-nums tracking-tighter ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary drop-shadow-[0_0_20px_rgba(var(--primary),0.5)]' : ''}`}>
+                    {game.team2Score}
+                  </span>
+                  <div className="w-1 h-12 bg-white/10 rounded-full" />
+                  <span className={`text-6xl md:text-8xl font-black italic tabular-nums tracking-tighter ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary drop-shadow-[0_0_20px_rgba(var(--primary),0.5)]' : ''}`}>
+                    {game.team1Score}
+                  </span>
+                </div>
+                <Badge className={`px-6 py-2 rounded-full font-black uppercase tracking-[0.2em] text-[10px] ${game.isLive ? 'bg-primary text-primary-foreground animate-pulse' : 'bg-white/10 text-muted-foreground'}`}>
+                  {game.isLive ? `LIVE • ${game.quarter}` : game.isFinal ? 'FINAL' : 'SCHEDULED'}
+                </Badge>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  {game.gameTime ? formatInTimeZone(new Date(game.gameTime), "America/New_York", "MMM d • h:mm a") : "Time TBD"}
+                </p>
+              </div>
+
+              {/* Team 1 */}
+              <div className="flex-1 flex flex-col items-center md:items-end gap-6 w-full text-center md:text-right">
+                <div className="relative group/logo">
+                  <div className="absolute -inset-4 bg-primary/20 blur-2xl rounded-full scale-0 group-hover/logo:scale-100 transition-transform duration-500" />
+                  {preferences.showTeamLogos !== false && TEAMS[game.team1 as keyof typeof TEAMS] ? (
+                    <img src={TEAMS[game.team1 as keyof typeof TEAMS]} alt={game.team1} className="w-24 h-24 md:w-32 md:h-32 object-contain relative z-10 drop-shadow-2xl transition-transform group-hover/logo:scale-110" />
+                  ) : (
+                    <div className="w-24 h-24 md:w-32 md:h-32 bg-white/5 rounded-full flex items-center justify-center relative z-10">
+                      <Trophy className="w-12 h-12 text-muted-foreground/20" />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <h2 className={`text-3xl md:text-5xl font-black italic uppercase tracking-tighter ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary' : 'text-foreground'}`}>
+                    {game.team1}
+                  </h2>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Home Team</p>
+                </div>
+              </div>
+
+            </div>
+            <div className="absolute -bottom-24 -right-24 text-[300px] opacity-[0.02] select-none font-black italic pointer-events-none">GAME</div>
+          </Card>
+        </section>
+
+        {/* Action Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+          
+          {/* Main Content Area */}
+          <div className="xl:col-span-2 space-y-12">
+            
+            {/* Live Field Card */}
+            {game.isLive && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-black italic uppercase tracking-tight flex items-center gap-3">
+                  <div className="w-1.5 h-8 bg-primary rounded-full" />
+                  Live Broadcast <span className="text-muted-foreground/30 ml-2">Real-time Data</span>
+                </h2>
+                <Card className="p-8 bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[40px] overflow-hidden relative">
+                  <div className="relative z-10 space-y-8">
+                    <FootballField 
+                      plays={plays}
+                      team1={game.team1}
+                      team2={game.team2}
+                      team1Score={game.team1Score || 0}
+                      team2Score={game.team2Score || 0}
+                      isAdmin={(currentUser as any)?.role === 'admin'}
+                      game={game}
+                      onPositionChange={async (pos) => console.log("[DETAIL] Ball position changed callback:", pos)}
+                    />
+                    
+                    {game.lastPlay && (
+                      <div className="p-6 bg-primary/5 rounded-[32px] border border-primary/10 group hover:bg-primary/10 transition-all duration-500">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Activity className="w-4 h-4 text-primary animate-pulse" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Last Play Highlight</span>
+                        </div>
+                        <p className="text-xl font-medium leading-relaxed italic text-foreground/90">{game.lastPlay}</p>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            )}
+
+            {/* Play-by-Play List */}
+            {plays.length > 0 && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-black italic uppercase tracking-tight flex items-center gap-3">
+                  <div className="w-1.5 h-8 bg-accent rounded-full" />
+                  Match Recap <span className="text-muted-foreground/30 ml-2">{plays.length} Events</span>
+                </h2>
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-4 custom-scrollbar">
+                  {[...plays].reverse().map((play, idx) => (
+                    <Card key={play.id} className="p-6 bg-card/40 backdrop-blur-xl border-border/40 hover:bg-card/60 transition-all duration-300 rounded-[32px] group">
+                      <div className="flex gap-6 items-center">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                          <p className="text-xs font-black italic text-white/50">{play.quarter}</p>
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">{play.team}</span>
+                            <div className="w-1 h-1 bg-white/10 rounded-full" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{play.playType}</span>
+                          </div>
+                          <p className="text-lg font-bold text-foreground/90">{play.description}</p>
+                          {play.yardsGained !== 0 && (
+                            <p className="text-xs font-black text-accent">{play.yardsGained! > 0 ? '+' : ''}{play.yardsGained} YARDS</p>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Prediction and Stats */}
+            {!game.isFinal && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-black italic uppercase tracking-tight flex items-center gap-3">
+                  <div className="w-1.5 h-8 bg-white/10 rounded-full" />
+                  Analysis <span className="text-muted-foreground/30 ml-2">Winning Probability</span>
+                </h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {[
+                    { team: game.team2, percent: team2Percent, pd: standings?.find(s => s.team === game.team2)?.pointDifferential || 0 },
+                    { team: game.team1, percent: team1Percent, pd: standings?.find(s => s.team === game.team1)?.pointDifferential || 0 }
+                  ].map((stat, i) => (
+                    <Card key={i} className="p-8 bg-card/40 backdrop-blur-xl border-border/40 rounded-[40px] space-y-6">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-black italic uppercase tracking-tighter">{stat.team}</span>
+                        <span className="text-3xl font-black italic text-primary">{stat.percent}%</span>
+                      </div>
+                      <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                        <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${stat.percent}%` }} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Rank Factor</span>
+                        <span className="text-sm font-black italic">{getConferenceRanking(stat.team, standings || [])}</span>
+                      </div>
+                      <Button 
+                        onClick={() => voteMutation.mutate(stat.team)} 
+                        disabled={voteMutation.isPending}
+                        className="w-full h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-transform"
+                      >
+                        Predict Winner
+                      </Button>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar Area */}
+          <div className="space-y-10">
+            
+            {/* Watch Section */}
+            <Card className="p-8 bg-primary rounded-[40px] border-none shadow-2xl shadow-primary/20 overflow-hidden relative group">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/20 to-transparent" />
+              <div className="relative z-10 space-y-6 text-white">
+                <div className="flex items-center gap-3">
+                  <Video className="w-6 h-6" />
+                  <h3 className="text-2xl font-black italic uppercase tracking-tighter">Live Broadcast</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  {game.streamLink ? (
+                    <Button 
+                      variant="secondary" 
+                      onClick={() => window.open(game.streamLink!.startsWith('http') ? game.streamLink! : `https://${game.streamLink}`, '_blank')}
+                      className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-white text-primary hover:bg-white/90 group/btn"
+                    >
+                      Watch Stream Now
+                      <ExternalLink className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+                    </Button>
+                  ) : (
+                    <div className="p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 text-center">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">No active broadcast yet</p>
+                    </div>
+                  )}
+
+                  {currentUser && (currentUser.role === "streamer" || currentUser.role === "admin") && (
+                    <div className="pt-4 border-t border-white/10 space-y-4">
+                      {(() => {
+                        const myRequest = myStreamRequests?.find(r => r.gameId === gameId);
+                        if (!myRequest) return (
+                          <Button size="sm" variant="ghost" onClick={() => requestStreamMutation.mutate()} className="w-full text-white/70 hover:text-white hover:bg-white/10">
+                            Apply to Broadcast
+                          </Button>
+                        );
+                        if (myRequest.status === "pending") return <Badge className="w-full py-2 bg-white/10 text-white border-none justify-center">PENDING APPROVAL</Badge>;
+                        if (myRequest.status === "approved") return (
+                          <div className="space-y-3">
+                            <Input placeholder="Enter stream URL..." value={streamLinkInput} onChange={(e) => setStreamLinkInput(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/30 rounded-xl" />
+                            <Button size="sm" onClick={() => updateStreamLinkMutation.mutate({ requestId: myRequest.id, streamLink: streamLinkInput })} className="w-full bg-white text-primary rounded-xl">Update Link</Button>
+                          </div>
+                        );
+                        return null;
+                      })()}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            {/* Chat Section */}
+            <Card className="p-8 bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[40px] shadow-2xl overflow-hidden relative flex flex-col h-[600px]">
+              <div className="flex items-center gap-3 mb-6 relative z-10">
+                <Zap className="w-5 h-5 text-primary" />
+                <h3 className="text-xl font-black italic uppercase tracking-tight">Live Sideline</h3>
+              </div>
+              <div className="flex-1 min-h-0 relative z-10">
+                <ChatComponent 
+                  gameId={gameId}
+                  initialMessages={chatMessages}
+                  onSendMessage={handleSendMessage}
+                />
+              </div>
+            </Card>
+
+            {/* Game Info Quick List */}
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground px-4">Game Information</h4>
+              <div className="grid gap-3">
+                {[
+                  { icon: Target, label: "Location", value: game.location || "TBD", bg: "bg-primary/5", text: "text-primary" },
+                  { icon: Calendar, label: "Schedule", value: `Week ${game.week}`, bg: "bg-accent/5", text: "text-accent" },
+                  { icon: PlayCircle, label: "Quarter", value: game.quarter || "Scheduled", bg: "bg-white/5", text: "text-foreground" },
+                ].map((item, i) => (
+                  <div key={i} className={`p-6 flex items-center justify-between rounded-[32px] border border-border/40 ${item.bg}`}>
+                    <div className="flex items-center gap-4">
+                      <item.icon className={`w-5 h-5 ${item.text}`} />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.label}</span>
+                    </div>
+                    <span className="text-sm font-black italic">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
     </div>
   );
