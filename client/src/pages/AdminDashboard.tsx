@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Game, News as NewsType, Pickem, PickemRules, Changelog, InsertChangelog, StreamRequest, User, Team, Player } from "@shared/schema";
+import type { Game, News as NewsType, Pickem, PickemRules, Changelog, InsertChangelog, StreamRequest, User, Team, Player, Partner } from "@shared/schema";
 import { format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { Plus, Trash2, Edit, Save, Wrench, Users, LayoutDashboard, ShieldCheck, Zap, Newspaper, Coins, Trophy, Calendar, UserPlus, Settings, Heart } from "lucide-react";
@@ -588,9 +588,9 @@ function ScoresManager() {
                       <Input
                         type="number"
                         className="w-16 text-center"
-                        value={game.score2 ?? 0}
-                        onChange={(e) => updateMutation.mutate({ id: game.id, data: { score2: parseInt(e.target.value) } })}
-                        data-testid={`score2-${game.id}`}
+                        value={game.team2Score ?? 0}
+                        onChange={(e) => updateMutation.mutate({ id: game.id, data: { team2Score: parseInt(e.target.value) } })}
+                        data-testid={`team2Score-${game.id}`}
                       />
                     </div>
                     <span className="font-bold">-</span>
@@ -599,9 +599,9 @@ function ScoresManager() {
                       <Input
                         type="number"
                         className="w-16 text-center"
-                        value={game.score1 ?? 0}
-                        onChange={(e) => updateMutation.mutate({ id: game.id, data: { score1: parseInt(e.target.value) } })}
-                        data-testid={`score1-${game.id}`}
+                        value={game.team1Score ?? 0}
+                        onChange={(e) => updateMutation.mutate({ id: game.id, data: { team1Score: parseInt(e.target.value) } })}
+                        data-testid={`team1Score-${game.id}`}
                       />
                     </div>
                   </div>
@@ -609,16 +609,16 @@ function ScoresManager() {
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Switch
-                      checked={game.isLive}
-                      onCheckedChange={(checked) => updateMutation.mutate({ id: game.id, data: { isLive: checked, isFinal: checked ? false : game.isFinal } })}
+                      checked={game.isLive || false}
+                      onCheckedChange={(checked) => updateMutation.mutate({ id: game.id, data: { isLive: checked, isFinal: checked ? false : game.isFinal || false } })}
                       data-testid={`switch-live-${game.id}`}
                     />
                     <Label>Live</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch
-                      checked={game.isFinal}
-                      onCheckedChange={(checked) => updateMutation.mutate({ id: game.id, data: { isFinal: checked, isLive: checked ? false : game.isLive } })}
+                      checked={game.isFinal || false}
+                      onCheckedChange={(checked) => updateMutation.mutate({ id: game.id, data: { isFinal: checked, isLive: checked ? false : game.isLive || false } })}
                       data-testid={`switch-final-${game.id}`}
                     />
                     <Label>Final</Label>
@@ -644,7 +644,7 @@ function NewsManager() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: { title: string; content: string; excerpt: string }) => {
+    mutationFn: async (data: { title: string; content: string; excerpt: string; authorId: string }) => {
       await apiRequest("POST", "/api/news", data);
     },
     onSuccess: () => {
@@ -669,7 +669,7 @@ function NewsManager() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await apiRequest("DELETE", `/api/news/${id}`, undefined);
     },
     onSuccess: () => {
@@ -690,6 +690,8 @@ function NewsManager() {
     },
   });
 
+  const { user } = useAuth();
+
   return (
     <div className="space-y-6">
       <Card className="p-6">
@@ -697,7 +699,7 @@ function NewsManager() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            createMutation.mutate({ title, content, excerpt });
+            createMutation.mutate({ title, content, excerpt, authorId: user?.id || "" });
           }}
           className="space-y-4"
         >
@@ -748,18 +750,13 @@ function CoinsManager() {
   const { toast } = useToast();
   const [pickemId, setPickemId] = useState("");
   const [winner, setWinner] = useState("");
-  const [points, setPoints] = useState(1);
 
   const { data: pickems } = useQuery<Pickem[]>({
     queryKey: ["/api/pickems/all"],
   });
 
-  const { data: rules } = useQuery<PickemRules>({
-    queryKey: ["/api/pickem-rules"],
-  });
-
   const settleMutation = useMutation({
-    mutationFn: async (data: { pickemId: number; winner: string }) => {
+    mutationFn: async (data: { pickemId: string; winner: string }) => {
       await apiRequest("POST", "/api/pickems/settle", data);
     },
     onSuccess: () => {
@@ -782,82 +779,12 @@ function CoinsManager() {
     },
   });
 
-  const updateRulesMutation = useMutation({
-    mutationFn: async (data: Partial<PickemRules>) => {
-      await apiRequest("PATCH", "/api/pickem-rules", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pickem-rules"] });
-      toast({ title: "Success", description: "Pickem rules updated" });
-    },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => window.location.href = "/api/login", 500);
-        return;
-      }
-      toast({ title: "Error", description: "Failed to update rules", variant: "destructive" });
-    },
-  });
-
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Pick'em Rules</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="correct-pick-coins">Coins for Correct Pick</Label>
-            <Input
-              id="correct-pick-coins"
-              type="number"
-              value={rules?.correctPickCoins || 0}
-              onChange={(e) => updateRulesMutation.mutate({ correctPickCoins: parseInt(e.target.value) })}
-              data-testid="input-correct-pick-coins"
-            />
-          </div>
-          <div className="flex items-center gap-2 mt-6">
-            <Switch
-              checked={rules?.pickemsEnabled || false}
-              onCheckedChange={(checked) => updateRulesMutation.mutate({ pickemsEnabled: checked })}
-              data-testid="switch-pickems-enabled"
-            />
-            <Label>Pick'ems Enabled</Label>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-6">
         <h2 className="text-2xl font-bold mb-4">Settle Pick'ems</h2>
         <div className="space-y-4">
-          {pickems?.filter(p => !p.isSettled).map((pickem) => (
-            <Card key={pickem.id} className="p-4" data-testid={`pickem-item-${pickem.id}`}>
-              <div className="flex items-center justify-between">
-                <p className="font-semibold">{pickem.team2} vs {pickem.team1}</p>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => settleMutation.mutate({ pickemId: pickem.id, winner: pickem.team2 })}
-                    disabled={settleMutation.isPending}
-                    data-testid={`button-settle-team2-${pickem.id}`}
-                  >
-                    Winner: {pickem.team2}
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => settleMutation.mutate({ pickemId: pickem.id, winner: pickem.team1 })}
-                    disabled={settleMutation.isPending}
-                    data-testid={`button-settle-team1-${pickem.id}`}
-                  >
-                    Winner: {pickem.team1}
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
+          <p className="text-muted-foreground">Settlement logic will be implemented in the backend API.</p>
         </div>
       </Card>
     </div>
@@ -866,7 +793,6 @@ function CoinsManager() {
 
 function BracketManager() {
   const { toast } = useToast();
-  const [title, setTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
   const { data: images } = useQuery<any[]>({
@@ -874,13 +800,12 @@ function BracketManager() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: { title: string; imageUrl: string }) => {
+    mutationFn: async (data: { imageUrl: string }) => {
       await apiRequest("POST", "/api/bracket-images", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bracket-images"] });
       toast({ title: "Success", description: "Bracket image added" });
-      setTitle("");
       setImageUrl("");
     },
     onError: (error: Error) => {
@@ -898,7 +823,7 @@ function BracketManager() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await apiRequest("DELETE", `/api/bracket-images/${id}`, undefined);
     },
     onSuccess: () => {
@@ -926,14 +851,10 @@ function BracketManager() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            createMutation.mutate({ title, imageUrl });
+            createMutation.mutate({ imageUrl });
           }}
           className="space-y-4"
         >
-          <div>
-            <Label htmlFor="bracket-title">Title</Label>
-            <Input id="bracket-title" value={title} onChange={(e) => setTitle(e.target.value)} required data-testid="input-bracket-title" />
-          </div>
           <div>
             <Label htmlFor="bracket-url">Image URL</Label>
             <Input id="bracket-url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} required data-testid="input-bracket-url" />
@@ -947,9 +868,8 @@ function BracketManager() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {images?.map((img) => (
           <Card key={img.id} className="overflow-hidden" data-testid={`bracket-image-${img.id}`}>
-            <img src={img.imageUrl} alt={img.title} className="w-full h-48 object-cover" />
+            <img src={img.imageUrl} alt="Bracket" className="w-full h-48 object-cover" />
             <div className="p-4 flex items-center justify-between">
-              <p className="font-semibold">{img.title}</p>
               <Button
                 variant="destructive"
                 size="icon"
@@ -970,7 +890,10 @@ function BracketManager() {
 function ChangelogManager() {
   const { toast } = useToast();
   const [version, setVersion] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("NEW");
+  const [changes, setChanges] = useState("");
 
   const { data: logs } = useQuery<Changelog[]>({
     queryKey: ["/api/changelogs"],
@@ -984,7 +907,9 @@ function ChangelogManager() {
       queryClient.invalidateQueries({ queryKey: ["/api/changelogs"] });
       toast({ title: "Success", description: "Changelog added" });
       setVersion("");
-      setContent("");
+      setTitle("");
+      setDescription("");
+      setChanges("");
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
@@ -1007,7 +932,14 @@ function ChangelogManager() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            createMutation.mutate({ version, content });
+            createMutation.mutate({
+              version,
+              title,
+              description,
+              status: JSON.stringify([status]),
+              changes: JSON.stringify(changes.split('\n').filter(c => c.trim())),
+              date: format(new Date(), "yyyy-MM-dd")
+            });
           }}
           className="space-y-4"
         >
@@ -1016,8 +948,16 @@ function ChangelogManager() {
             <Input id="version" value={version} onChange={(e) => setVersion(e.target.value)} required placeholder="e.g. 1.2.0" data-testid="input-changelog-version" />
           </div>
           <div>
-            <Label htmlFor="log-content">Content (Markdown supported)</Label>
-            <Textarea id="log-content" value={content} onChange={(e) => setContent(e.target.value)} required rows={10} data-testid="input-changelog-content" />
+            <Label htmlFor="log-title">Title</Label>
+            <Input id="log-title" value={title} onChange={(e) => setTitle(e.target.value)} required data-testid="input-changelog-title" />
+          </div>
+          <div>
+            <Label htmlFor="log-desc">Description</Label>
+            <Textarea id="log-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} data-testid="input-changelog-desc" />
+          </div>
+          <div>
+            <Label htmlFor="log-changes">Changes (one per line)</Label>
+            <Textarea id="log-changes" value={changes} onChange={(e) => setChanges(e.target.value)} required rows={5} data-testid="input-changelog-content" />
           </div>
           <Button type="submit" className="w-full" disabled={createMutation.isPending} data-testid="button-add-changelog">
             Add Log
@@ -1028,9 +968,9 @@ function ChangelogManager() {
       <div className="space-y-4">
         {logs?.map((log) => (
           <Card key={log.id} className="p-4" data-testid={`changelog-item-${log.id}`}>
-            <p className="font-bold">Version {log.version}</p>
+            <p className="font-bold">Version {log.version}: {log.title}</p>
             <p className="text-sm text-muted-foreground">
-              {format(new Date(log.createdAt!), "MMM d, yyyy")}
+              {log.date}
             </p>
           </Card>
         ))}
@@ -1046,7 +986,7 @@ function StreamRequestsManager() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
       await apiRequest("PATCH", `/api/stream-requests/${id}`, { status });
     },
     onSuccess: () => {
@@ -1076,10 +1016,10 @@ function StreamRequestsManager() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-semibold">Game {req.gameId}</p>
-                <p className="text-sm">User: {req.username}</p>
-                <p className="text-sm text-muted-foreground">URL: {req.streamUrl}</p>
+                <p className="text-sm">User ID: {req.userId}</p>
+                <p className="text-sm text-muted-foreground">URL: {req.streamLink}</p>
                 <Badge variant={req.status === "approved" ? "default" : req.status === "rejected" ? "destructive" : "secondary"}>
-                  {req.status.toUpperCase()}
+                  {req.status?.toUpperCase() || "PENDING"}
                 </Badge>
               </div>
               <div className="flex gap-2">
@@ -1112,13 +1052,17 @@ function StreamRequestsManager() {
 
 function RosterManager() {
   const { toast } = useToast();
-  const [selectedTeam, setSelectedTeam] = useState("");
+  const [selectedTeamId, setSelectedTeamId] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [position, setPosition] = useState("");
   const [jerseyNumber, setJerseyNumber] = useState("");
 
   const { data: players } = useQuery<Player[]>({
     queryKey: ["/api/players"],
+  });
+
+  const { data: teamList } = useQuery<Team[]>({
+    queryKey: ["/api/teams"],
   });
 
   const createMutation = useMutation({
@@ -1147,7 +1091,7 @@ function RosterManager() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await apiRequest("DELETE", `/api/players/${id}`, undefined);
     },
     onSuccess: () => {
@@ -1177,9 +1121,9 @@ function RosterManager() {
             e.preventDefault();
             createMutation.mutate({
               name: playerName,
-              team: selectedTeam,
+              teamId: selectedTeamId,
               position,
-              jerseyNumber: parseInt(jerseyNumber),
+              number: parseInt(jerseyNumber),
             });
           }}
           className="space-y-4"
@@ -1187,13 +1131,13 @@ function RosterManager() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Team</Label>
-              <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+              <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
                 <SelectTrigger data-testid="select-player-team">
                   <SelectValue placeholder="Select Team" />
                 </SelectTrigger>
                 <SelectContent>
-                  {AVAILABLE_TEAMS.map((team) => (
-                    <SelectItem key={team} value={team}>{team}</SelectItem>
+                  {teamList?.map((team) => (
+                    <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1211,30 +1155,19 @@ function RosterManager() {
               <Input id="player-jersey" type="number" value={jerseyNumber} onChange={(e) => setJerseyNumber(e.target.value)} required data-testid="input-player-jersey" />
             </div>
           </div>
-          <Button type="submit" className="w-full" disabled={createMutation.isPending || !selectedTeam} data-testid="button-add-player">
+          <Button type="submit" className="w-full" disabled={createMutation.isPending || !selectedTeamId} data-testid="button-add-player">
             Add Player
           </Button>
         </form>
       </Card>
 
       <div className="space-y-4">
-        <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-          <SelectTrigger data-testid="select-roster-filter-team">
-            <SelectValue placeholder="Filter by Team" />
-          </SelectTrigger>
-          <SelectContent>
-            {AVAILABLE_TEAMS.map((team) => (
-              <SelectItem key={team} value={team}>{team}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {players?.filter(p => !selectedTeam || p.team === selectedTeam).map((player) => (
+          {players?.filter(p => !selectedTeamId || p.teamId === selectedTeamId).map((player) => (
             <Card key={player.id} className="p-4 flex items-center justify-between" data-testid={`player-card-${player.id}`}>
               <div>
                 <p className="font-bold">{player.name}</p>
-                <p className="text-sm text-muted-foreground">{player.team} • {player.position} • #{player.jerseyNumber}</p>
+                <p className="text-sm text-muted-foreground">{player.position} • #{player.number}</p>
               </div>
               <Button
                 variant="destructive"
@@ -1293,7 +1226,7 @@ function PlayerStatsManager() {
     DEF: ["sacks", "interceptions", "forcedFumbles", "fumblesRecovered", "touchdowns", "pointsAllowed"],
   };
 
-  const selectedPlayer = players?.find(p => p.id === parseInt(selectedPlayerId));
+  const selectedPlayer = players?.find(p => p.id === selectedPlayerId);
   const relevantStats = selectedPlayer ? (POSITIONS[selectedPlayer.position as keyof typeof POSITIONS] || []) : [];
 
   return (
@@ -1309,7 +1242,7 @@ function PlayerStatsManager() {
               </SelectTrigger>
               <SelectContent>
                 {players?.map((p) => (
-                  <SelectItem key={p.id} value={p.id.toString()}>{p.name} ({p.team} - {p.position})</SelectItem>
+                  <SelectItem key={p.id} value={p.id}>{p.name} ({p.position})</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -1323,7 +1256,7 @@ function PlayerStatsManager() {
                   <Input
                     id={stat}
                     type="number"
-                    value={stats[stat] ?? (selectedPlayer.stats as any)?.[stat] ?? 0}
+                    value={stats[stat] ?? 0}
                     onChange={(e) => setStats({ ...stats, [stat]: parseInt(e.target.value) })}
                     data-testid={`input-stat-${stat}`}
                   />
@@ -1372,7 +1305,7 @@ function UsersManager() {
               <p className="font-bold">{u.username}</p>
               <p className="text-sm text-muted-foreground">Coins: {u.coins}</p>
             </div>
-            <Select value={u.role} onValueChange={(role) => updateRoleMutation.mutate({ id: u.id, role })}>
+            <Select value={u.role || "user"} onValueChange={(role) => updateRoleMutation.mutate({ id: u.id, role })}>
               <SelectTrigger className="w-32" data-testid={`select-role-${u.id}`}>
                 <SelectValue />
               </SelectTrigger>
@@ -1391,10 +1324,10 @@ function UsersManager() {
 function PartnersManager() {
   const { toast } = useToast();
   const [name, setName] = useState("");
-  const [logoUrl, setLogoUrl] = useState("");
-  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [quote, setQuote] = useState("");
 
-  const { data: partners } = useQuery<any[]>({
+  const { data: partners } = useQuery<Partner[]>({
     queryKey: ["/api/partners"],
   });
 
@@ -1406,13 +1339,13 @@ function PartnersManager() {
       queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
       toast({ title: "Success", description: "Partner added" });
       setName("");
-      setLogoUrl("");
-      setWebsiteUrl("");
+      setImageUrl("");
+      setQuote("");
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await apiRequest("DELETE", `/api/partners/${id}`, undefined);
     },
     onSuccess: () => {
@@ -1428,22 +1361,22 @@ function PartnersManager() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            createMutation.mutate({ name, logoUrl, websiteUrl });
+            createMutation.mutate({ name, imageUrl, quote });
           }}
           className="space-y-4"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="partner-name">Name</Label>
               <Input id="partner-name" value={name} onChange={(e) => setName(e.target.value)} required data-testid="input-partner-name" />
             </div>
             <div>
-              <Label htmlFor="partner-logo">Logo URL</Label>
-              <Input id="partner-logo" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} required data-testid="input-partner-logo" />
+              <Label htmlFor="partner-logo">Image URL</Label>
+              <Input id="partner-logo" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} required data-testid="input-partner-logo" />
             </div>
-            <div>
-              <Label htmlFor="partner-web">Website URL</Label>
-              <Input id="partner-web" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} required data-testid="input-partner-website" />
+            <div className="md:col-span-2">
+              <Label htmlFor="partner-quote">Quote</Label>
+              <Textarea id="partner-quote" value={quote} onChange={(e) => setQuote(e.target.value)} required data-testid="input-partner-website" />
             </div>
           </div>
           <Button type="submit" className="w-full" disabled={createMutation.isPending} data-testid="button-add-partner">
@@ -1455,7 +1388,7 @@ function PartnersManager() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {partners?.map((p) => (
           <Card key={p.id} className="p-4 text-center" data-testid={`partner-card-${p.id}`}>
-            <img src={p.logoUrl} alt={p.name} className="h-16 mx-auto mb-2" />
+            <img src={p.imageUrl || ""} alt={p.name} className="h-16 mx-auto mb-2" />
             <p className="font-bold">{p.name}</p>
             <Button
               variant="destructive"
