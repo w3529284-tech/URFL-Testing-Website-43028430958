@@ -147,14 +147,14 @@ export default function Stats() {
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
       <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
         <div className="space-y-4">
-          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1.5 text-[11px] font-black uppercase tracking-widest">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1.5 text-[11px] font-black uppercase tracking-widest w-fit">
             <BarChart3 className="w-3.5 h-3.5 mr-2" />
             League Analytics
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-[0.9] text-foreground">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-[0.9] text-foreground">
             Stats & <span className="text-primary">Data</span>
           </h1>
-          <p className="text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
+          <p className="text-base md:text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
             Deep dive into Season 2 performance metrics and rankings.
           </p>
         </div>

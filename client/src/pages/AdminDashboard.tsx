@@ -61,17 +61,17 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
       <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
-        <div className="relative group p-8 md:p-12 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[40px] overflow-hidden shadow-2xl">
+        <div className="relative group p-6 sm:p-8 md:p-12 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[32px] sm:rounded-[40px] overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] -mr-32 -mt-32" />
-          <div className="relative z-10 space-y-6">
-            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1.5 text-[11px] font-black uppercase tracking-widest">
+          <div className="relative z-10 space-y-4 sm:space-y-6">
+            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1.5 text-[11px] font-black uppercase tracking-widest w-fit">
               <ShieldCheck className="w-3.5 h-3.5 mr-2" />
               League Operations
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-[0.9] text-foreground">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-[0.9] text-foreground">
               Admin <span className="text-primary">Console</span>
             </h1>
-            <p className="text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
+            <p className="text-base sm:text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
               Manage matchups, content, and system configuration with elite control.
             </p>
           </div>

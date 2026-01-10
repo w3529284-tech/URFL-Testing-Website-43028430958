@@ -43,12 +43,12 @@ export default function News() {
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-7xl mx-auto space-y-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-4">
-          <Badge className="bg-accent/10 text-accent border-none font-black uppercase tracking-[0.2em] text-[10px] px-4 py-1.5 rounded-full">
+          <Badge className="bg-accent/10 text-accent border-none font-black uppercase tracking-[0.2em] text-[10px] px-4 py-1.5 rounded-full w-fit">
             League Press
           </Badge>
-          <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter leading-none">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter leading-[0.9]">
             Latest <span className="text-muted-foreground/20">Updates</span>
           </h1>
         </div>

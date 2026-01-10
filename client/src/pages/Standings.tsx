@@ -199,12 +199,12 @@ export default function Standings() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 max-w-7xl mx-auto space-y-12">
+    <div className="min-h-screen bg-background p-4 sm:p-6 md:p-10 max-w-7xl mx-auto space-y-8 sm:space-y-12">
       <div className="space-y-4">
-        <Badge className="bg-primary/10 text-primary border-none font-black uppercase tracking-[0.2em] text-[10px] px-4 py-1.5 rounded-full">
+        <Badge className="bg-primary/10 text-primary border-none font-black uppercase tracking-[0.2em] text-[10px] px-4 py-1.5 rounded-full w-fit">
           League Rankings
         </Badge>
-        <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter leading-none">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter leading-[0.9]">
           Standings <span className="text-muted-foreground/20">S2</span>
         </h1>
       </div>
