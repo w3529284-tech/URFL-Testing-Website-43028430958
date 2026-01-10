@@ -195,15 +195,22 @@ export function calculateWinProbability(
     // Moderate quarter weight adjustment for large score differentials
     let adjustedQuarterWeight = quarterWeight;
     if (Math.abs(scoreDifference) > 21) {
-      adjustedQuarterWeight = Math.min(0.85, quarterWeight + 0.3);
+      adjustedQuarterWeight = Math.min(0.95, quarterWeight + 0.35);
     } else if (Math.abs(scoreDifference) > 14) {
-      adjustedQuarterWeight = Math.min(0.75, quarterWeight + 0.2);
+      adjustedQuarterWeight = Math.min(0.85, quarterWeight + 0.25);
     } else if (Math.abs(scoreDifference) > 7) {
-      adjustedQuarterWeight = Math.min(0.65, quarterWeight + 0.1);
+      adjustedQuarterWeight = Math.min(0.75, quarterWeight + 0.15);
     }
 
     const preGameWeight = 1 - adjustedQuarterWeight;
     probability = (probability * preGameWeight) + (50 + scoreImpact) * adjustedQuarterWeight;
+  } else if (game.quarter === "Scheduled") {
+    const scoreDifference = (game.team1Score || 0) - (game.team2Score || 0);
+    if (scoreDifference !== 0) {
+      const scoreImpact = (scoreDifference / 3) * 15;
+      const weight = 0.15; // 15% weight for score even if scheduled
+      probability = (probability * (1 - weight)) + (50 + scoreImpact) * weight;
+    }
   }
 
   // Keep probabilities between 1-99% to avoid absolute certainties
