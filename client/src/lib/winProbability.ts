@@ -110,116 +110,87 @@ export function calculateWinProbability(
   standings?: Standings[],
   allGames?: Game[]
 ): number {
-  if (!standings || standings.length === 0) {
-    return 50;
-  }
-
-  const games = allGames || [];
-  const rankings = calculateRankings(standings);
-
-  const team1Analysis = analyzeTeam(game.team1, standings, games, rankings);
-  const team2Analysis = analyzeTeam(game.team2, standings, games, rankings);
-
   let probability = 50;
+  const hasStandings = standings && standings.length > 0;
 
-  const totalTeams = standings.length;
-  const team1RankScore = (totalTeams - team1Analysis.ranking + 1) / totalTeams;
-  const team2RankScore = (totalTeams - team2Analysis.ranking + 1) / totalTeams;
-  const rankingDiff = team1RankScore - team2RankScore;
-  // Increased from 20 to 40 for more significant impact
-  const rankingImpact = rankingDiff * 40;
+  if (hasStandings) {
+    const games = allGames || [];
+    const rankings = calculateRankings(standings!);
+    const team1Analysis = analyzeTeam(game.team1, standings!, games, rankings);
+    const team2Analysis = analyzeTeam(game.team2, standings!, games, rankings);
 
-  const pdDifference = team1Analysis.pointDifferential - team2Analysis.pointDifferential;
-  // Increased PD impact range
-  const cappedPdDiff = Math.max(-200, Math.min(200, pdDifference));
-  const pdImpact = (cappedPdDiff / 30) * 25;
+    const totalTeams = standings!.length;
+    const team1RankScore = (totalTeams - team1Analysis.ranking + 1) / totalTeams;
+    const team2RankScore = (totalTeams - team2Analysis.ranking + 1) / totalTeams;
+    const rankingDiff = team1RankScore - team2RankScore;
+    const rankingImpact = rankingDiff * 40;
 
-  const winPctDiff = team1Analysis.winPercentage - team2Analysis.winPercentage;
-  // Increased from 25 to 50 for more realistic probabilities
-  const recordImpact = winPctDiff * 50;
+    const pdDifference = team1Analysis.pointDifferential - team2Analysis.pointDifferential;
+    const cappedPdDiff = Math.max(-200, Math.min(200, pdDifference));
+    const pdImpact = (cappedPdDiff / 30) * 25;
 
-  const team1SOS = team1Analysis.scheduleStrength;
-  const team2SOS = team2Analysis.scheduleStrength;
+    const winPctDiff = team1Analysis.winPercentage - team2Analysis.winPercentage;
+    const recordImpact = winPctDiff * 50;
 
-  // Only apply SOS adjustment if both teams have played games
-  let sosImpact = 0;
-  if (team1SOS >= 0 && team2SOS >= 0) {
-    const sosDiff = team1SOS - team2SOS;
-    // Increased impact from 10 to 20
-    sosImpact = sosDiff * 20;
-  }
+    const team1SOS = team1Analysis.scheduleStrength;
+    const team2SOS = team2Analysis.scheduleStrength;
 
-  const hasGames1 = team1Analysis.totalGamesPlayed > 0;
-  const hasGames2 = team2Analysis.totalGamesPlayed > 0;
+    let sosImpact = 0;
+    if (team1SOS >= 0 && team2SOS >= 0) {
+      const sosDiff = team1SOS - team2SOS;
+      sosImpact = sosDiff * 20;
+    }
 
-  if (hasGames1 && hasGames2) {
-    // Stronger overall impact
-    probability += rankingImpact * 0.40;
-    probability += recordImpact * 0.35;
-    probability += pdImpact * 0.25;
-    probability += sosImpact * 0.30;
-  } else if (hasGames1 || hasGames2) {
-    probability += rankingImpact * 0.50;
-    probability += pdImpact * 0.40;
-    probability += recordImpact * 0.40;
-  } else {
-    probability += rankingImpact * 0.70;
-    probability += pdImpact * 0.50;
-  }
+    const hasGames1 = team1Analysis.totalGamesPlayed > 0;
+    const hasGames2 = team2Analysis.totalGamesPlayed > 0;
 
-  if (game.quarter && game.quarter !== "Scheduled") {
-    const scoreDifference = (game.team1Score || 0) - (game.team2Score || 0);
-
-    const quarterMap: { [key: string]: number } = {
-      "1st": 0.25,
-      "2nd": 0.45,
-      "3rd": 0.7,
-      "4th": 0.9,
-      "OT": 0.95,
-      "Q1": 0.25,
-      "Q2": 0.45,
-      "Q3": 0.7,
-      "Q4": 0.9,
-      "FINAL": 1.0,
-    };
-
-    const quarterWeight = quarterMap[game.quarter] || 0.5;
-
-    // Calculate score impact - high sensitivity
-    // A 7-point lead should be significant
-    const scoreImpact = (scoreDifference / 7) * 25;
-    
-    // Blowout multiplier for leads over 14 points
-    const blowoutMultiplier = Math.abs(scoreDifference) > 14 ? 1.5 : 1.0;
-    const finalScoreImpact = scoreImpact * blowoutMultiplier;
-
-    // Quarter progress increases the weight of the current score
-    const totalWeight = Math.min(0.99, quarterWeight + (Math.abs(scoreDifference) > 21 ? 0.2 : 0));
-    
-    const preGameWeight = 1 - totalWeight;
-    probability = (probability * preGameWeight) + (50 + finalScoreImpact) * totalWeight;
-  } else {
-    // For Scheduled or unspecified quarter, score still counts if it exists
-    const scoreDifference = (game.team1Score || 0) - (game.team2Score || 0);
-    if (scoreDifference !== 0) {
-      const scoreImpact = (scoreDifference / 7) * 20;
-      const weight = 0.3; // 30% weight for score even if scheduled
-      probability = (probability * (1 - weight)) + (50 + scoreImpact) * weight;
+    if (hasGames1 && hasGames2) {
+      probability += rankingImpact * 0.40;
+      probability += recordImpact * 0.35;
+      probability += pdImpact * 0.25;
+      probability += sosImpact * 0.30;
+    } else if (hasGames1 || hasGames2) {
+      probability += rankingImpact * 0.50;
+      probability += pdImpact * 0.40;
+      probability += recordImpact * 0.40;
+    } else {
+      probability += rankingImpact * 0.70;
+      probability += pdImpact * 0.50;
     }
   }
 
-  // Keep probabilities between 1-99% to avoid absolute certainties
+  // Score impact ALWAYS applies if there is a score
+  const scoreDifference = (game.team1Score || 0) - (game.team2Score || 0);
+  const isScheduled = game.quarter === "Scheduled" || !game.quarter;
+
+  if (scoreDifference !== 0 || !isScheduled) {
+    const quarterMap: { [key: string]: number } = {
+      "1st": 0.2, "Q1": 0.2,
+      "2nd": 0.4, "Q2": 0.4,
+      "3rd": 0.65, "Q3": 0.65,
+      "4th": 0.85, "Q4": 0.85,
+      "OT": 0.95, "FINAL": 1.0,
+      "Scheduled": 0.1
+    };
+
+    const quarterWeight = quarterMap[game.quarter || "Scheduled"] || (isScheduled ? 0.1 : 0.5);
+    
+    // High sensitivity score impact
+    // A 14 point lead should be very strong
+    const baseScoreImpact = (scoreDifference / 7) * 35; 
+    
+    // Blowout multiplier
+    const blowoutMultiplier = Math.abs(scoreDifference) > 14 ? 1.8 : 1.0;
+    const scoreImpact = baseScoreImpact * blowoutMultiplier;
+    
+    const weightedScoreProb = 50 + scoreImpact;
+    
+    probability = (probability * (1 - quarterWeight)) + (weightedScoreProb * quarterWeight);
+  }
+
   probability = Math.max(1, Math.min(99, Math.round(probability)));
 
-  // If we are in the browser, update the server's view of the odds via an internal API call if needed
-  // However, we'll just return the value and let the UI handle the display.
-  // The backend resolution will need to recalculate this.
-
-  if (team === "team1") {
-    return probability;
-  } else {
-    return 100 - probability;
-  }
+  return team === "team1" ? probability : 100 - probability;
 }
 
 export function calculateOdds(probability: number): number {

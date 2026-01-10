@@ -542,7 +542,7 @@ export default function GameDetail() {
                       <item.icon className={`w-5 h-5 ${item.text}`} />
                       <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.label}</span>
                     </div>
-                    {item.isSelect && currentUser?.role === 'admin' ? (
+                    {item.isSelect ? (
                       <select 
                         value={game.quarter || "Scheduled"}
                         onChange={(e) => updateQuarterMutation.mutate(e.target.value)}
@@ -553,7 +553,7 @@ export default function GameDetail() {
                         ))}
                       </select>
                     ) : (
-                      <span className="text-sm font-black italic">{item.value}</span>
+                      <span className="text-sm font-black italic uppercase tracking-tighter text-foreground">{item.value}</span>
                     )}
                   </div>
                 ))}
