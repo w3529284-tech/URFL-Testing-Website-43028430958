@@ -97,15 +97,27 @@ export function Sidebar() {
 
         {/* Actions Section */}
         <div className="flex items-center gap-2">
-          {/* Secondary Nav Dropdown */}
-          <div className="hidden sm:flex items-center gap-2 mr-2 pr-2 border-r border-border/40">
-            {secondaryItems.slice(0, 2).map((item) => (
-              <Link key={item.path} href={item.path}>
-                <Button variant="ghost" size="icon" className="w-9 h-9 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-xl">
-                  <item.icon className="w-4 h-4" />
-                </Button>
-              </Link>
-            ))}
+          {/* Secondary Nav Items */}
+          <div className="hidden sm:flex items-center gap-1 mr-2 pr-2 border-r border-border/40">
+            {secondaryItems.slice(0, 2).map((item) => {
+              const Icon = item.icon;
+              const isActive = location === item.path;
+              return (
+                <Link key={item.path} href={item.path}>
+                  <Button
+                    variant="ghost"
+                    className={`h-9 px-3 font-black uppercase tracking-widest text-[9px] rounded-xl transition-all duration-300 ${
+                      isActive 
+                        ? 'bg-primary/10 text-primary' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5 mr-2" />
+                    {item.label}
+                  </Button>
+                </Link>
+              );
+            })}
           </div>
 
           {isAdmin && (
