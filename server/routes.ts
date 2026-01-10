@@ -360,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const defaultTeams = [
           { name: "Roman Gladiators", city: "Rome", division: "NFC_D1" },
           { name: "Miami Gators", city: "Miami", division: "NFC_D1" },
-          { name: "Alaska Ice Dragons", city: "Alaska", division: "AFC_D2" },
+          { name: "Navada Nighthawks", city: "Navada", division: "AFC_D2" },
           { name: "New York Cobras", city: "New York", division: "AFC_D1" },
           { name: "Jacksonville Ironbacks", city: "Jacksonville", division: "NFC_D2" },
           { name: "Tampa Bay Buccaneers", city: "Tampa Bay", division: "NFC_D2" },

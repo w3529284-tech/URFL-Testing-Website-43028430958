@@ -381,39 +381,6 @@ export default function GameDetail() {
           {/* Main Content Area */}
           <div className="xl:col-span-2 space-y-12">
             
-            {/* Live Field Card */}
-            {game.isLive && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-black italic uppercase tracking-tight flex items-center gap-3">
-                  <div className="w-1.5 h-8 bg-primary rounded-full" />
-                  Live Broadcast <span className="text-muted-foreground/30 ml-2">Real-time Data</span>
-                </h2>
-                <Card className="p-8 bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[40px] overflow-hidden relative">
-                  <div className="relative z-10 space-y-8">
-                    <FootballField 
-                      plays={plays}
-                      team1={game.team1}
-                      team2={game.team2}
-                      team1Score={game.team1Score || 0}
-                      team2Score={game.team2Score || 0}
-                      isAdmin={(currentUser as any)?.role === 'admin'}
-                      game={game}
-                      onPositionChange={async (pos) => console.log("[DETAIL] Ball position changed callback:", pos)}
-                    />
-                    
-                    {game.lastPlay && (
-                      <div className="p-6 bg-primary/5 rounded-[32px] border border-primary/10 group hover:bg-primary/10 transition-all duration-500">
-                        <div className="flex items-center gap-3 mb-3">
-                          <Activity className="w-4 h-4 text-primary animate-pulse" />
-                          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Last Play Highlight</span>
-                        </div>
-                        <p className="text-xl font-medium leading-relaxed italic text-foreground/90">{game.lastPlay}</p>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              </div>
-            )}
 
             {/* Play-by-Play List */}
             {plays.length > 0 && (

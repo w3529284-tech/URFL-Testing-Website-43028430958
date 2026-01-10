@@ -90,20 +90,7 @@ export function GameCard({ game, onClick }: GameCardProps) {
                  {game.gameTime ? formatInTimeZone(new Date(game.gameTime), "America/New_York", "h:mm a 'EST'") : "Time TBD"}
                </p>
              </div>
-          ) : game.streamLink && (
-            <Button 
-              size="sm" 
-              className="w-full bg-primary/10 hover:bg-primary text-primary hover:text-white border-none font-black uppercase tracking-widest text-[10px] h-10 rounded-2xl transition-all duration-500"
-              onClick={(e) => {
-                e.stopPropagation();
-                const url = game.streamLink!.startsWith('http') ? game.streamLink! : `https://${game.streamLink}`;
-                window.open(url, '_blank');
-              }}
-            >
-              <Video className="w-3.5 h-3.5 mr-2" />
-              Watch Live Intel
-            </Button>
-          )}
+          ) : null}
           {game.location && (
             <p className="text-[9px] font-black text-muted-foreground/20 uppercase tracking-[0.3em]">{game.location}</p>
           )}
