@@ -132,14 +132,14 @@ export default function Betting() {
       <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
-            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1.5 text-[11px] font-black uppercase tracking-widest">
+            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1.5 text-[11px] font-black uppercase tracking-widest w-fit">
               <Coins className="w-3.5 h-3.5 mr-2" />
               Fan Betting
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-[0.9] text-foreground">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-[0.9] text-foreground">
               Place Your <span className="text-primary">Bets</span>
             </h1>
-            <p className="text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
               Wager your coins on Season 2 matchups and climb the global fan leaderboard.
             </p>
           </div>
@@ -235,7 +235,7 @@ export default function Betting() {
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {[game.team1, game.team2].map((team) => {
                             const odds = getOdds(game, team);
                             const active = gameBet?.team === team;
@@ -244,11 +244,11 @@ export default function Betting() {
                                 key={team}
                                 variant="ghost"
                                 onClick={() => handleSelectTeam(game.id, team)}
-                                className={`h-32 flex flex-col gap-3 rounded-[32px] border transition-all ${
+                                className={`h-24 sm:h-32 flex flex-col gap-2 sm:gap-3 rounded-[24px] sm:rounded-[32px] border transition-all ${
                                   active ? "bg-primary border-primary text-primary-foreground scale-105 shadow-xl shadow-primary/20" : "bg-white/5 border-white/5 hover:bg-white/10"
                                 }`}
                               >
-                                <span className="text-lg font-black italic uppercase tracking-tight">{team}</span>
+                                <span className="text-base sm:text-lg font-black italic uppercase tracking-tight break-words px-2">{team}</span>
                                 <Badge variant={active ? "secondary" : "outline"} className="text-[9px] font-black uppercase tracking-widest">{odds.toFixed(2)}x</Badge>
                               </Button>
                             );
