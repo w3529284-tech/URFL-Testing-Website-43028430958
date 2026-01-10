@@ -286,7 +286,7 @@ export default function Standings() {
                       <div className="overflow-x-auto">
                         <table className="w-full text-left">
                           <thead>
-                            <tr className="border-b border-border/40 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground bg-white/5">
+                            <tr className="border-b border-border/40 text-[12px] font-black uppercase tracking-[0.2em] text-white bg-white/5">
                               <th className="px-6 py-4 w-16 text-center">#</th>
                               <th className="px-6 py-4">Team</th>
                               <th className="px-6 py-4 text-center">W-L</th>
@@ -304,31 +304,31 @@ export default function Standings() {
                                 onDrop={(e) => handleDrop(e, entry.id)}
                                 className={`group hover:bg-white/5 transition-colors relative ${dropZone?.targetId === entry.id ? 'bg-primary/5' : ''}`}
                               >
-                                <td className="px-6 py-5 text-center font-black italic text-lg text-muted-foreground/30">
+                                <td className="px-6 py-5 text-center font-black italic text-xl text-white/40">
                                   {isAdmin ? (
                                     <div className="flex flex-col items-center gap-1">
-                                      <span className="text-xs not-italic">{idx + 1}</span>
-                                      <GripVertical className="w-4 h-4 mx-auto opacity-0 group-hover:opacity-100 transition-opacity cursor-grab" />
+                                      <span className="text-sm not-italic text-white">{idx + 1}</span>
+                                      <GripVertical className="w-4 h-4 mx-auto opacity-0 group-hover:opacity-100 transition-opacity cursor-grab text-white" />
                                     </div>
-                                  ) : idx + 1}
+                                  ) : <span className="text-white">{idx + 1}</span>}
                                 </td>
                                 <td className="px-6 py-5">
                                   <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
                                       <img src={TEAMS[entry.team as keyof typeof TEAMS]} className="w-full h-full object-contain drop-shadow-lg" />
                                     </div>
-                                    <span className="font-black italic uppercase tracking-tight text-sm">{entry.team}</span>
+                                    <span className="font-black italic uppercase tracking-tight text-base text-white">{entry.team}</span>
                                   </div>
                                 </td>
                                 <td className="px-6 py-5 text-center">
                                   {isAdmin ? (
                                     <div className="flex items-center justify-center gap-2">
-                                      <Input type="number" value={entry.wins} onChange={(e) => updateEntry(entry.id, "wins", parseInt(e.target.value) || 0)} className="w-12 h-8 text-center bg-white/5 border-none font-bold p-0" />
-                                      <span className="text-muted-foreground opacity-30">/</span>
-                                      <Input type="number" value={entry.losses} onChange={(e) => updateEntry(entry.id, "losses", parseInt(e.target.value) || 0)} className="w-12 h-8 text-center bg-white/5 border-none font-bold p-0" />
+                                      <Input type="number" value={entry.wins} onChange={(e) => updateEntry(entry.id, "wins", parseInt(e.target.value) || 0)} className="w-12 h-8 text-center bg-white/5 border-none font-bold p-0 text-white" />
+                                      <span className="text-white opacity-30">/</span>
+                                      <Input type="number" value={entry.losses} onChange={(e) => updateEntry(entry.id, "losses", parseInt(e.target.value) || 0)} className="w-12 h-8 text-center bg-white/5 border-none font-bold p-0 text-white" />
                                     </div>
                                   ) : (
-                                    <span className="font-black tabular-nums">{entry.wins}-{entry.losses}</span>
+                                    <span className="font-black tabular-nums text-lg text-white">{entry.wins}-{entry.losses}</span>
                                   )}
                                 </td>
                                 <td className="px-6 py-5 text-center">
@@ -344,10 +344,10 @@ export default function Standings() {
                                         delete newEditingPD[entry.id];
                                         setEditingPD(newEditingPD);
                                       }}
-                                      className="w-14 h-8 mx-auto text-center bg-white/5 border-none font-bold p-0"
+                                      className="w-14 h-8 mx-auto text-center bg-white/5 border-none font-bold p-0 text-white"
                                     />
                                   ) : (
-                                    <span className={`font-bold tabular-nums text-xs ${entry.pointDifferential! >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    <span className={`font-bold tabular-nums text-sm ${entry.pointDifferential! >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                       {entry.pointDifferential! > 0 ? '+' : ''}{entry.pointDifferential}
                                     </span>
                                   )}
