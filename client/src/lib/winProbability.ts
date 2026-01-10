@@ -81,6 +81,7 @@ function calculateScheduleStrength(
     }
   });
   
+  // Normalize SOS between 0 and 1
   return totalOpponentWinPct / completedGames.length;
 }
 
@@ -120,46 +121,34 @@ export function calculateWinProbability(
     const team2Analysis = analyzeTeam(game.team2, standings!, games, rankings);
 
     const totalTeams = standings!.length;
+    // Ranking Score (normalized 0 to 1)
     const team1RankScore = (totalTeams - team1Analysis.ranking + 1) / totalTeams;
     const team2RankScore = (totalTeams - team2Analysis.ranking + 1) / totalTeams;
     const rankingDiff = team1RankScore - team2RankScore;
-    const rankingImpact = rankingDiff * 40;
+    const rankingImpact = rankingDiff * 25; // Weighted 25%
 
+    // Point Differential Score (normalized)
     const pdDifference = team1Analysis.pointDifferential - team2Analysis.pointDifferential;
     const cappedPdDiff = Math.max(-200, Math.min(200, pdDifference));
-    const pdImpact = (cappedPdDiff / 30) * 25;
+    const pdImpact = (cappedPdDiff / 200) * 25; // Weighted 25%
 
+    // Record Score (normalized)
     const winPctDiff = team1Analysis.winPercentage - team2Analysis.winPercentage;
-    const recordImpact = winPctDiff * 50;
+    const recordImpact = winPctDiff * 25; // Weighted 25%
 
+    // Schedule Strength Score (normalized)
     const team1SOS = team1Analysis.scheduleStrength;
     const team2SOS = team2Analysis.scheduleStrength;
-
     let sosImpact = 0;
     if (team1SOS >= 0 && team2SOS >= 0) {
       const sosDiff = team1SOS - team2SOS;
-      sosImpact = sosDiff * 20;
+      sosImpact = sosDiff * 25; // Weighted 25%
     }
 
-    const hasGames1 = team1Analysis.totalGamesPlayed > 0;
-    const hasGames2 = team2Analysis.totalGamesPlayed > 0;
-
-    if (hasGames1 && hasGames2) {
-      probability += rankingImpact * 0.40;
-      probability += recordImpact * 0.35;
-      probability += pdImpact * 0.25;
-      probability += sosImpact * 0.30;
-    } else if (hasGames1 || hasGames2) {
-      probability += rankingImpact * 0.50;
-      probability += pdImpact * 0.40;
-      probability += recordImpact * 0.40;
-    } else {
-      probability += rankingImpact * 0.70;
-      probability += pdImpact * 0.50;
-    }
+    probability = 50 + rankingImpact + pdImpact + recordImpact + sosImpact;
   }
 
-  // Score impact ALWAYS applies if there is a score
+  // Live game score impact
   const scoreDifference = (game.team1Score || 0) - (game.team2Score || 0);
   const isScheduled = game.quarter === "Scheduled" || !game.quarter;
 
@@ -175,21 +164,15 @@ export function calculateWinProbability(
 
     const quarterWeight = quarterMap[game.quarter || "Scheduled"] || (isScheduled ? 0.1 : 0.5);
     
-    // High sensitivity score impact
-    // A 14 point lead should be very strong
     const baseScoreImpact = (scoreDifference / 7) * 35; 
-    
-    // Blowout multiplier
     const blowoutMultiplier = Math.abs(scoreDifference) > 14 ? 1.8 : 1.0;
     const scoreImpact = baseScoreImpact * blowoutMultiplier;
     
     const weightedScoreProb = 50 + scoreImpact;
-    
     probability = (probability * (1 - quarterWeight)) + (weightedScoreProb * quarterWeight);
   }
 
   probability = Math.max(1, Math.min(99, Math.round(probability)));
-
   return team === "team1" ? probability : 100 - probability;
 }
 
@@ -296,17 +279,8 @@ export function getWinProbabilityFactors(
                    team2Analysis.pointDifferential > team1Analysis.pointDifferential ? game.team2 : "Even"
       },
       schedule: (() => {
-        if (team1Analysis.scheduleStrength < 0 || team2Analysis.scheduleStrength < 0) {
-          return {
-            team1SOS: -1,
-            team2SOS: -1,
-            advantage: "Even"
-          };
-        }
-        
-        const totalSOS = team1Analysis.scheduleStrength + team2Analysis.scheduleStrength;
-        const team1SOS = totalSOS > 0 ? Math.round((team1Analysis.scheduleStrength / totalSOS) * 100) : 50;
-        const team2SOS = totalSOS > 0 ? Math.round((team2Analysis.scheduleStrength / totalSOS) * 100) : 50;
+        const team1SOS = Math.round(team1Analysis.scheduleStrength * 100);
+        const team2SOS = Math.round(team2Analysis.scheduleStrength * 100);
         
         return {
           team1SOS,
