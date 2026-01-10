@@ -106,8 +106,9 @@ export function Header() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="xl:hidden pb-4 pt-2 space-y-1 border-t border-primary/10 animate-in slide-in-from-top-2 duration-200">
-            {navItems.map((item) => {
+          <div className="xl:hidden pb-4 pt-2 space-y-1 border-t border-primary/10 animate-in slide-in-from-top-2 duration-200 bg-background/95 backdrop-blur-md">
+            <div className="max-h-[70vh] overflow-y-auto px-2">
+              {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
               return (
@@ -124,8 +125,9 @@ export function Header() {
                 </Link>
               );
             })}
+            </div>
             
-            <div className="border-t border-primary/10 pt-3 mt-3 space-y-1">
+            <div className="border-t border-primary/10 pt-3 mt-3 px-2 space-y-1">
               {isAuthenticated && (
                 <Link href="/admin" data-testid="link-mobile-admin">
                   <Button
