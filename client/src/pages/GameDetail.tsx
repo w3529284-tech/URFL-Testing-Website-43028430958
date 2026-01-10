@@ -513,8 +513,10 @@ export default function GameDetail() {
               <div className="flex-1 min-h-0 relative z-10">
                 <ChatComponent 
                   gameId={gameId}
-                  initialMessages={chatMessages}
+                  messages={chatMessages}
                   onSendMessage={handleSendMessage}
+                  username={user?.username}
+                  isAuthenticated={!!user}
                 />
               </div>
             </Card>
