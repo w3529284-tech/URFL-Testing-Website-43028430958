@@ -311,10 +311,10 @@ export default function Standings() {
                                   <td className="px-6 py-5 text-center font-black italic text-xl text-white/40">
                                     {isAdmin ? (
                                       <div className="flex flex-col items-center gap-1">
-                                        <span className="text-sm not-italic text-white">{startIndex + idx + 1}</span>
+                                        <span className="text-sm not-italic text-white">{idx + 1}</span>
                                         <GripVertical className="w-4 h-4 mx-auto opacity-0 group-hover:opacity-100 transition-opacity cursor-grab text-white" />
                                       </div>
-                                    ) : <span className="text-white">{startIndex + idx + 1}</span>}
+                                    ) : <span className="text-white">{idx + 1}</span>}
                                   </td>
                                   <td className="px-6 py-5">
                                     <div className="flex items-center gap-4">

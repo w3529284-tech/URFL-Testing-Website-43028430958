@@ -296,13 +296,16 @@ export function getWinProbabilityFactors(
   const standing1 = standings.find(s => s.team === game.team1);
   const standing2 = standings.find(s => s.team === game.team2);
 
+  const team1RankStr = getConferenceRanking(game.team1, standings);
+  const team2RankStr = getConferenceRanking(game.team2, standings);
+
   return {
     team1: team1Analysis,
     team2: team2Analysis,
     factors: {
       ranking: {
-        team1Rank: getConferenceRanking(game.team1, standings),
-        team2Rank: getConferenceRanking(game.team2, standings),
+        team1Rank: team1RankStr,
+        team2Rank: team2RankStr,
         advantage: team1Analysis.ranking < team2Analysis.ranking ? game.team1 :
                    team2Analysis.ranking < team1Analysis.ranking ? game.team2 : "Even"
       },
