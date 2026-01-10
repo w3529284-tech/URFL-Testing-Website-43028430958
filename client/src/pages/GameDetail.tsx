@@ -337,7 +337,6 @@ export default function GameDetail() {
                   <h2 className={`text-3xl md:text-5xl font-black italic uppercase tracking-tighter ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary' : 'text-foreground'}`}>
                     {game.team2}
                   </h2>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Away Team</p>
                 </div>
               </div>
 
@@ -376,7 +375,6 @@ export default function GameDetail() {
                   <h2 className={`text-3xl md:text-5xl font-black italic uppercase tracking-tighter ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary' : 'text-foreground'}`}>
                     {game.team1}
                   </h2>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Home Team</p>
                 </div>
               </div>
 

@@ -180,35 +180,30 @@ export function calculateWinProbability(
       "Q2": 0.45,
       "Q3": 0.7,
       "Q4": 0.9,
-      "Scheduled": 0.05,
+      "FINAL": 1.0,
     };
 
-    const quarterWeight = quarterMap[game.quarter] || 0.05;
+    const quarterWeight = quarterMap[game.quarter] || 0.5;
 
-    // Calculate score impact - high sensitivity for live scores
-    const baseScoreImpact = (scoreDifference / 3) * 15;
+    // Calculate score impact - high sensitivity
+    // A 7-point lead should be significant
+    const scoreImpact = (scoreDifference / 7) * 25;
     
-    // Slight boost for significant leads (>14 points)
+    // Blowout multiplier for leads over 14 points
     const blowoutMultiplier = Math.abs(scoreDifference) > 14 ? 1.5 : 1.0;
-    const scoreImpact = baseScoreImpact * blowoutMultiplier;
+    const finalScoreImpact = scoreImpact * blowoutMultiplier;
 
-    // Moderate quarter weight adjustment for large score differentials
-    let adjustedQuarterWeight = quarterWeight;
-    if (Math.abs(scoreDifference) > 21) {
-      adjustedQuarterWeight = Math.min(0.95, quarterWeight + 0.35);
-    } else if (Math.abs(scoreDifference) > 14) {
-      adjustedQuarterWeight = Math.min(0.85, quarterWeight + 0.25);
-    } else if (Math.abs(scoreDifference) > 7) {
-      adjustedQuarterWeight = Math.min(0.75, quarterWeight + 0.15);
-    }
-
-    const preGameWeight = 1 - adjustedQuarterWeight;
-    probability = (probability * preGameWeight) + (50 + scoreImpact) * adjustedQuarterWeight;
-  } else if (game.quarter === "Scheduled") {
+    // Quarter progress increases the weight of the current score
+    const totalWeight = Math.min(0.99, quarterWeight + (Math.abs(scoreDifference) > 21 ? 0.2 : 0));
+    
+    const preGameWeight = 1 - totalWeight;
+    probability = (probability * preGameWeight) + (50 + finalScoreImpact) * totalWeight;
+  } else {
+    // For Scheduled or unspecified quarter, score still counts if it exists
     const scoreDifference = (game.team1Score || 0) - (game.team2Score || 0);
     if (scoreDifference !== 0) {
-      const scoreImpact = (scoreDifference / 3) * 15;
-      const weight = 0.15; // 15% weight for score even if scheduled
+      const scoreImpact = (scoreDifference / 7) * 20;
+      const weight = 0.3; // 30% weight for score even if scheduled
       probability = (probability * (1 - weight)) + (50 + scoreImpact) * weight;
     }
   }
