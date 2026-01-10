@@ -261,10 +261,10 @@ export default function Betting() {
                           return (
                             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/5">
                               {[
-                                { label: "Ranking", team1: analysis.factors.ranking.team1Rank, team2: analysis.factors.ranking.team2Rank, icon: Trophy },
-                                { label: "Record", team1: analysis.factors.record.team1Record, team2: analysis.factors.record.team2Record, icon: Target },
-                                { label: "Points", team1: (analysis.factors.pointDiff.team1PD > 0 ? "+" : "") + analysis.factors.pointDiff.team1PD, team2: (analysis.factors.pointDiff.team2PD > 0 ? "+" : "") + analysis.factors.pointDiff.team2PD, icon: BarChart3 },
-                                { label: "Strength", team1: analysis.factors.schedule.team1SOS + "%", team2: analysis.factors.schedule.team2SOS + "%", icon: Zap },
+                                { label: "Ranking", team1: analysis.factors.ranking.team1Rank, team2: analysis.factors.ranking.team2Rank, icon: Trophy, key: 'ranking' },
+                                { label: "Record", team1: analysis.factors.record.team1Record, team2: analysis.factors.record.team2Record, icon: Target, key: 'record' },
+                                { label: "Points", team1: (analysis.factors.pointDiff.team1PD > 0 ? "+" : "") + analysis.factors.pointDiff.team1PD, team2: (analysis.factors.pointDiff.team2PD > 0 ? "+" : "") + analysis.factors.pointDiff.team2PD, icon: BarChart3, key: 'pointDiff' },
+                                { label: "Strength", team1: analysis.factors.schedule.team1SOS + "%", team2: analysis.factors.schedule.team2SOS + "%", icon: Zap, key: 'schedule' },
                               ].map((factor, i) => (
                                 <div key={i} className="bg-white/5 rounded-2xl p-3 flex flex-col gap-1">
                                   <div className="flex items-center gap-1.5 opacity-40">
@@ -272,11 +272,11 @@ export default function Betting() {
                                     <span className="text-[8px] font-black uppercase tracking-widest">{factor.label}</span>
                                   </div>
                                   <div className="flex justify-between items-center text-[10px] font-black italic">
-                                    <span className={analysis.factors[Object.keys(analysis.factors)[i] as keyof typeof analysis.factors].advantage === game.team1 ? "text-primary" : "text-muted-foreground"}>
+                                    <span className={analysis.factors[factor.key as keyof typeof analysis.factors].advantage === game.team1 ? "text-primary" : "text-white/60"}>
                                       {factor.team1}
                                     </span>
                                     <span className="text-white/10 not-italic mx-1">|</span>
-                                    <span className={analysis.factors[Object.keys(analysis.factors)[i] as keyof typeof analysis.factors].advantage === game.team2 ? "text-primary" : "text-muted-foreground"}>
+                                    <span className={analysis.factors[factor.key as keyof typeof analysis.factors].advantage === game.team2 ? "text-primary" : "text-white/60"}>
                                       {factor.team2}
                                     </span>
                                   </div>
