@@ -180,25 +180,26 @@ export function calculateWinProbability(
       "Q2": 0.45,
       "Q3": 0.7,
       "Q4": 0.9,
+      "Scheduled": 0.05,
     };
 
-    const quarterWeight = quarterMap[game.quarter] || 0.5;
+    const quarterWeight = quarterMap[game.quarter] || 0.05;
 
-    // Calculate score impact - moderate sensitivity
-    const baseScoreImpact = (scoreDifference / 7) * 10;
+    // Calculate score impact - high sensitivity for live scores
+    const baseScoreImpact = (scoreDifference / 3) * 15;
     
-    // Slight boost for significant leads (>21 points)
-    const blowoutMultiplier = Math.abs(scoreDifference) > 21 ? 1.3 : 1.0;
+    // Slight boost for significant leads (>14 points)
+    const blowoutMultiplier = Math.abs(scoreDifference) > 14 ? 1.5 : 1.0;
     const scoreImpact = baseScoreImpact * blowoutMultiplier;
 
     // Moderate quarter weight adjustment for large score differentials
     let adjustedQuarterWeight = quarterWeight;
-    if (Math.abs(scoreDifference) > 35) {
+    if (Math.abs(scoreDifference) > 21) {
+      adjustedQuarterWeight = Math.min(0.85, quarterWeight + 0.3);
+    } else if (Math.abs(scoreDifference) > 14) {
       adjustedQuarterWeight = Math.min(0.75, quarterWeight + 0.2);
-    } else if (Math.abs(scoreDifference) > 28) {
-      adjustedQuarterWeight = Math.min(0.65, quarterWeight + 0.15);
-    } else if (Math.abs(scoreDifference) > 21) {
-      adjustedQuarterWeight = Math.min(0.60, quarterWeight + 0.1);
+    } else if (Math.abs(scoreDifference) > 7) {
+      adjustedQuarterWeight = Math.min(0.65, quarterWeight + 0.1);
     }
 
     const preGameWeight = 1 - adjustedQuarterWeight;

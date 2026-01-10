@@ -243,7 +243,7 @@ export default function GameDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/games", gameId] });
-      toast({ title: "Quarter Updated", description: `Game is now in ${game.quarter}` });
+      toast({ title: "Quarter Updated", description: "Game state updated successfully" });
     },
   });
 
