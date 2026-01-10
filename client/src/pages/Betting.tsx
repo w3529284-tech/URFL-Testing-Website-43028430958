@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import { calculateWinProbability, calculateOdds } from "@/lib/winProbability";
+import { calculateWinProbability, calculateOdds, getWinProbabilityFactors } from "@/lib/winProbability";
 import type { Game, Standings } from "@shared/schema";
-import { AlertCircle, TrendingUp, Clock, Coins, X, Zap, Search, Trophy, Target, PlayCircle } from "lucide-react";
+import { AlertCircle, TrendingUp, Clock, Coins, X, Zap, Search, Trophy, Target, PlayCircle, BarChart3 } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -248,12 +248,43 @@ export default function Betting() {
                                   active ? "bg-primary border-primary text-primary-foreground scale-105 shadow-xl shadow-primary/20" : "bg-white/5 border-white/5 hover:bg-white/10"
                                 }`}
                               >
-                                <span className="text-base sm:text-lg font-black italic uppercase tracking-tight break-words px-2">{team}</span>
+                                <span className="text-base sm:text-lg font-black italic uppercase tracking-tight break-words px-2 text-center">{team}</span>
                                 <Badge variant={active ? "secondary" : "outline"} className="text-[9px] font-black uppercase tracking-widest">{odds.toFixed(2)}x</Badge>
                               </Button>
                             );
                           })}
                         </div>
+
+                        {(() => {
+                          const analysis = getWinProbabilityFactors(game, standings, allGames);
+                          if (!analysis) return null;
+                          return (
+                            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/5">
+                              {[
+                                { label: "Ranking", team1: analysis.factors.ranking.team1Rank, team2: analysis.factors.ranking.team2Rank, icon: Trophy },
+                                { label: "Record", team1: analysis.factors.record.team1Record, team2: analysis.factors.record.team2Record, icon: Target },
+                                { label: "Points", team1: (analysis.factors.pointDiff.team1PD > 0 ? "+" : "") + analysis.factors.pointDiff.team1PD, team2: (analysis.factors.pointDiff.team2PD > 0 ? "+" : "") + analysis.factors.pointDiff.team2PD, icon: BarChart3 },
+                                { label: "Strength", team1: analysis.factors.schedule.team1SOS + "%", team2: analysis.factors.schedule.team2SOS + "%", icon: Zap },
+                              ].map((factor, i) => (
+                                <div key={i} className="bg-white/5 rounded-2xl p-3 flex flex-col gap-1">
+                                  <div className="flex items-center gap-1.5 opacity-40">
+                                    <factor.icon className="w-2.5 h-2.5" />
+                                    <span className="text-[8px] font-black uppercase tracking-widest">{factor.label}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center text-[10px] font-black italic">
+                                    <span className={analysis.factors[Object.keys(analysis.factors)[i] as keyof typeof analysis.factors].advantage === game.team1 ? "text-primary" : "text-muted-foreground"}>
+                                      {factor.team1}
+                                    </span>
+                                    <span className="text-white/10 not-italic mx-1">|</span>
+                                    <span className={analysis.factors[Object.keys(analysis.factors)[i] as keyof typeof analysis.factors].advantage === game.team2 ? "text-primary" : "text-muted-foreground"}>
+                                      {factor.team2}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
 
                         {gameBet && (
                           <div className="p-6 bg-primary/10 rounded-[32px] border border-primary/20 space-y-4 animate-in fade-in slide-in-from-top-4">
