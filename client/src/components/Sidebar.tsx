@@ -36,139 +36,121 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 export function Sidebar() {
   const [location] = useLocation();
   const { isAuthenticated, user } = useAuth();
-  const { collapsed, setCollapsed } = useSidebar();
   const isAdmin = isAuthenticated && (user as any)?.role === "admin";
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
-    { path: "/scores", label: "Live Scores", icon: Zap },
+    { path: "/scores", label: "Scores", icon: Zap },
     { path: "/schedule", label: "Schedule", icon: Calendar },
     { path: "/playoffs", label: "Playoffs", icon: Trophy },
     { path: "/standings", label: "Standings", icon: BarChart3 },
     { path: "/teams", label: "Teams", icon: Shirt },
-    { path: "/previous-weeks", label: "Archives", icon: Calendar },
     { path: "/news", label: "News", icon: Newspaper },
     { path: "/betting", label: "Betting", icon: Target },
-    { path: "/update-planner", label: "Update Planner", icon: Clock },
+  ];
+
+  const secondaryItems = [
+    { path: "/previous-weeks", label: "Archives", icon: Clock },
+    { path: "/update-planner", label: "Planner", icon: Clock },
     { path: "/partners", label: "Partners", icon: Users },
-    { path: "/social", label: "Social", icon: Users },
     { path: "/settings", label: "Settings", icon: Settings },
-    { path: "/changelogs", label: "Updates", icon: BookOpen },
   ];
 
   return (
-    <>
-      <aside 
-        className={`fixed left-0 top-0 h-full bg-card/50 backdrop-blur-xl text-sidebar-foreground z-50 border-r border-border/50 transition-all duration-300 ease-in-out hidden md:flex flex-col ${
-          collapsed ? 'w-20' : 'w-64'
-        }`}
-      >
-        <div className="relative p-6">
-          <Link href="/">
-            <div className={`flex items-center gap-3 cursor-pointer group ${collapsed ? 'justify-center' : ''}`}>
-              <div className="relative">
-                <div className="absolute -inset-1 bg-primary/20 blur rounded-full group-hover:bg-primary/30 transition-all" />
-                <Zap className="relative w-8 h-8 text-primary fill-primary/10" />
-              </div>
-              {!collapsed && (
-                <div>
-                  <h1 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors uppercase italic leading-none">URFL</h1>
-                  <p className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase mt-1">Fan Hub</p>
-                </div>
-              )}
+    <header className="fixed top-0 left-0 right-0 h-16 bg-background/60 backdrop-blur-2xl border-b border-border/40 z-[100] transition-all duration-300">
+      <div className="max-w-screen-2xl mx-auto h-full px-4 md:px-8 flex items-center justify-between gap-4">
+        {/* Logo Section */}
+        <Link href="/">
+          <div className="flex items-center gap-3 cursor-pointer group">
+            <div className="relative">
+              <div className="absolute -inset-1 bg-primary/20 blur-md rounded-full group-hover:bg-primary/40 transition-all duration-500" />
+              <Zap className="relative w-7 h-7 text-primary fill-primary/10 transition-transform group-hover:scale-110 duration-300" />
             </div>
-          </Link>
-        </div>
+            <div className="hidden sm:block">
+              <h1 className="text-xl font-black tracking-tighter group-hover:text-primary transition-colors uppercase italic leading-none">URFL</h1>
+            </div>
+          </div>
+        </Link>
 
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-          <nav className="space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location === item.path;
-              return (
-                <Link key={item.path} href={item.path}>
-                  <Button
-                    variant="ghost"
-                    className={`w-full font-bold uppercase tracking-wide text-[11px] transition-all duration-200 ${
-                      collapsed ? 'justify-center px-0' : 'justify-start px-4'
-                    } ${
-                      isActive 
-                        ? 'bg-primary/10 text-primary border-r-2 border-primary rounded-none' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${collapsed ? '' : 'mr-4'} flex-shrink-0 ${isActive ? 'text-primary' : ''}`} />
-                    {!collapsed && <span>{item.label}</span>}
-                  </Button>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {isAdmin && (
-            <div className="space-y-1">
-              {!collapsed && (
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 px-4">Admin Control</p>
-              )}
-              <Link href="/admin">
+        {/* Main Navigation - Desktop Only */}
+        <nav className="hidden lg:flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/5">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.path;
+            return (
+              <Link key={item.path} href={item.path}>
                 <Button
                   variant="ghost"
-                  className={`w-full font-bold uppercase tracking-wide text-[11px] transition-all duration-200 ${
-                    collapsed ? 'justify-center px-0' : 'justify-start px-4'
-                  } ${
-                    location === '/admin'
-                      ? 'bg-accent/10 text-accent border-r-2 border-accent rounded-none'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                  className={`h-9 px-4 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/10'
                   }`}
                 >
-                  <Shield className={`w-4 h-4 ${collapsed ? '' : 'mr-4'} flex-shrink-0`} />
-                  {!collapsed && <span>Admin Dashboard</span>}
+                  <Icon className="w-3.5 h-3.5 mr-2" />
+                  {item.label}
                 </Button>
               </Link>
-            </div>
-          )}
-        </div>
+            );
+          })}
+        </nav>
 
-        <div className="relative p-4 border-t border-border/50 space-y-2 bg-card/30">
-          {isAuthenticated ? (
-            <a href="/api/logout">
+        {/* Actions Section */}
+        <div className="flex items-center gap-2">
+          {/* Secondary Nav Dropdown */}
+          <div className="hidden sm:flex items-center gap-2 mr-2 pr-2 border-r border-border/40">
+            {secondaryItems.slice(0, 2).map((item) => (
+              <Link key={item.path} href={item.path}>
+                <Button variant="ghost" size="icon" className="w-9 h-9 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-xl">
+                  <item.icon className="w-4 h-4" />
+                </Button>
+              </Link>
+            ))}
+          </div>
+
+          {isAdmin && (
+            <Link href="/admin">
               <Button
-                variant="ghost"
-                className={`w-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 font-bold uppercase tracking-wide text-[11px] ${
-                  collapsed ? 'justify-center px-0' : 'justify-start px-4'
+                variant="outline"
+                className={`h-9 px-4 font-black uppercase tracking-widest text-[9px] rounded-xl border-accent/20 text-accent hover:bg-accent/5 ${
+                  location === '/admin' ? 'bg-accent/10 border-accent/40' : ''
                 }`}
               >
-                <LogOut className={`w-4 h-4 ${collapsed ? '' : 'mr-4'}`} />
-                {!collapsed && <span>Logout</span>}
+                <Shield className="w-3.5 h-3.5 mr-2" />
+                Admin
               </Button>
-            </a>
+            </Link>
+          )}
+
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <Link href="/settings">
+                <Button variant="ghost" size="icon" className="w-9 h-9 rounded-xl hover:bg-white/5">
+                  <Settings className="w-4 h-4 text-muted-foreground" />
+                </Button>
+              </Link>
+              <a href="/api/logout">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-9 h-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </a>
+            </div>
           ) : (
             <a href="/login">
               <Button
-                variant="ghost"
-                className={`w-full text-muted-foreground hover:text-primary hover:bg-primary/5 font-bold uppercase tracking-wide text-[11px] ${
-                  collapsed ? 'justify-center px-0' : 'justify-start px-4'
-                }`}
+                className="h-9 px-6 bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
               >
-                <LogIn className={`w-4 h-4 ${collapsed ? '' : 'mr-4'}`} />
-                {!collapsed && <span>Login</span>}
+                Login
               </Button>
             </a>
           )}
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-full text-muted-foreground hover:text-foreground transition-colors mt-2"
-          >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-            {!collapsed && <span className="ml-2 text-[10px] font-bold uppercase tracking-widest">Collapse</span>}
-          </Button>
         </div>
-      </aside>
-      <MobileNav navItems={navItems} isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
-    </>
+      </div>
+    </header>
   );
 }
 
@@ -176,28 +158,26 @@ function MobileNav({ navItems, isAuthenticated, isAdmin }: { navItems: Array<{ p
   const [location] = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border/50 z-50 md:hidden safe-area-bottom">
-      <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex items-center h-16 px-4 gap-2 min-w-min">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.path;
-            return (
-              <Link key={item.path} href={item.path}>
-                <button
-                  className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 ${
-                    isActive 
-                      ? 'bg-primary/10 text-primary' 
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-[9px] mt-1 font-black uppercase tracking-tighter leading-none">{item.label.split(' ')[0]}</span>
-                </button>
-              </Link>
-            );
-          })}
-        </div>
+    <nav className="fixed bottom-4 left-4 right-4 h-16 bg-background/80 backdrop-blur-2xl border border-border/40 rounded-2xl z-[100] lg:hidden shadow-2xl overflow-hidden">
+      <div className="flex items-center justify-around h-full px-2">
+        {navItems.slice(0, 5).map((item) => {
+          const Icon = item.icon;
+          const isActive = location === item.path;
+          return (
+            <Link key={item.path} href={item.path}>
+              <button
+                className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all ${
+                  isActive 
+                    ? 'text-primary' 
+                    : 'text-muted-foreground'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${isActive ? 'fill-primary/20' : ''}`} />
+                <span className="text-[8px] mt-1 font-black uppercase tracking-widest">{item.label}</span>
+              </button>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );
