@@ -647,6 +647,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(playerStats).orderBy(desc(playerStats.week));
   }
 
+  async getPlayerStatsByWeek(week: number): Promise<PlayerStats[]> {
+    return await db.select().from(playerStats).where(eq(playerStats.week, week));
+  }
+
   async createPlayerStats(statsData: InsertPlayerStats): Promise<PlayerStats> {
     const [stats] = await db.insert(playerStats).values(cleanObject(statsData) as InsertPlayerStats).returning();
     return stats;
@@ -659,30 +663,30 @@ export class DatabaseStorage implements IStorage {
   async upsertUpdatePlan(planData: InsertUpdatePlan): Promise<UpdatePlan> {
     const cleanData = cleanObject(planData);
     const existing = await db.select().from(updatePlans).where(eq(updatePlans.updateDate, cleanData.updateDate as string));
-
+    
     if (existing.length > 0) {
-      const [plan] = await db
+      const [updated] = await db
         .update(updatePlans)
-        .set({ updatedAt: new Date() })
-        .where(eq(updatePlans.updateDate, cleanData.updateDate as string))
+        .set(cleanData)
+        .where(eq(updatePlans.id, existing[0].id))
         .returning();
-      return plan;
+      return updated;
     }
-
-    const [plan] = await db.insert(updatePlans).values(cleanData as InsertUpdatePlan).returning();
-    return plan;
+    
+    const [created] = await db.insert(updatePlans).values(cleanData as InsertUpdatePlan).returning();
+    return created;
   }
 
-  async deleteUpdatePlan(date: string): Promise<void> {
-    await db.delete(updatePlans).where(eq(updatePlans.updateDate, date));
+  async deleteUpdatePlan(id: string): Promise<void> {
+    await db.delete(updatePlans).where(eq(updatePlans.id, id));
   }
 
   async getAllTeams(): Promise<Team[]> {
-    return await db.select().from(teams);
+    return await db.select().from(teams).orderBy(teams.name);
   }
 
   async getTeamPlayers(teamId: string): Promise<Player[]> {
-    return await db.select().from(players).where(eq(players.teamId, teamId));
+    return await db.select().from(players).where(eq(players.teamId, teamId)).orderBy(players.name);
   }
 
   async createTeam(teamData: InsertTeam): Promise<Team> {
@@ -710,7 +714,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserBalance(userId: string): Promise<number> {
-    const user = await this.getUser(userId);
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
     return user?.coins ?? 0;
   }
 
