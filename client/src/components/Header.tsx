@@ -27,7 +27,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-primary/20 bg-background/95 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="mx-auto px-4 w-full">
         <div className="flex h-16 items-center justify-between gap-2 md:gap-4">
           <Link href="/" data-testid="link-home" className="flex-shrink-0 group">
             <div className="flex items-center gap-1 md:gap-2">
