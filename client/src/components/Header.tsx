@@ -19,15 +19,15 @@ export function Header() {
     { path: "/previous-weeks", label: "Archives", icon: Calendar },
     { path: "/news", label: "News", icon: Newspaper },
     { path: "/betting", label: "Betting", icon: Target },
-    { path: "/changelogs", label: "Updates", icon: BookOpen },
     { path: "/partners", label: "Partners", icon: Users },
+    { path: "/changelogs", label: "Updates", icon: BookOpen },
     { path: "/admin", label: "Admin", icon: Shield },
     { path: "/api/logout", label: "Logout", icon: X },
   ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-primary/20 bg-background/95 backdrop-blur-md">
-      <div className="px-4 w-full">
+      <div className="w-full pl-0 pr-4">
         <div className="flex h-16 items-center justify-start gap-2 md:gap-4">
           <Link href="/" data-testid="link-home" className="flex-shrink-0 group mr-4">
             <div className="flex items-center gap-1 md:gap-2">
