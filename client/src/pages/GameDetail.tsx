@@ -309,6 +309,8 @@ export default function GameDetail() {
   const team1Percent = calculateWinProbability(game, "team1", standings, allGames);
   const team2Percent = calculateWinProbability(game, "team2", standings, allGames);
 
+  const team1Factors = standings ? getWinProbabilityFactors(game, standings, allGames) : null;
+
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
       <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
@@ -462,10 +464,29 @@ export default function GameDetail() {
                       <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
                         <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${stat.percent}%` }} />
                       </div>
-                      <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Ranking</span>
-                        <span className="text-sm font-black italic">{getConferenceRanking(stat.team, standings || [])}</span>
-                      </div>
+
+                      {team1Factors && (
+                        <div className="space-y-4 pt-4 border-t border-white/5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-4 bg-primary rounded-full" />
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/70">Factor Breakdown</h4>
+                          </div>
+                          <div className="grid grid-cols-1 gap-2">
+                            {[
+                              { label: "Ranking", team1: team1Factors.factors.ranking.team1Rank, team2: team1Factors.factors.ranking.team2Rank, key: 'ranking' },
+                              { label: "Record", team1: team1Factors.factors.record.team1Record, team2: team1Factors.factors.record.team2Record, key: 'record' },
+                              { label: "Point Diff", team1: (team1Factors.factors.pointDiff.team1PD > 0 ? "+" : "") + team1Factors.factors.pointDiff.team1PD, team2: (team1Factors.factors.pointDiff.team2PD > 0 ? "+" : "") + team1Factors.factors.pointDiff.team2PD, key: 'pointDiff' },
+                              { label: "Schedule", team1: team1Factors.factors.schedule.team1SOS + "%", team2: team1Factors.factors.schedule.team2SOS + "%", key: 'schedule' },
+                            ].map((factor, idx) => (
+                              <div key={idx} className="flex justify-between items-center p-3 bg-white/5 rounded-2xl border border-white/5">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{factor.label}</span>
+                                <span className="text-sm font-black italic">{stat.team === game.team1 ? factor.team1 : factor.team2}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <Button 
                         onClick={() => voteMutation.mutate(stat.team)} 
                         disabled={voteMutation.isPending || !!predictions?.find(p => p.userId === user?.id)}
