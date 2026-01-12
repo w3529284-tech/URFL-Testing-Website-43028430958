@@ -15,7 +15,7 @@ import { TEAMS } from "@/lib/teams";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { calculateWinProbability, getConferenceRanking } from "@/lib/winProbability";
+import { calculateWinProbability, getConferenceRanking, getWinProbabilityFactors } from "@/lib/winProbability";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
