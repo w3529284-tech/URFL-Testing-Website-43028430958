@@ -265,7 +265,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createGame(gameData: InsertGame): Promise<Game> {
-    const [game] = await db.insert(games).values(cleanObject(gameData) as InsertGame).returning();
+    const cleanData = cleanObject(gameData);
+    if (cleanData.season === undefined || cleanData.season === null) {
+      cleanData.season = 2;
+    }
+    const [game] = await db.insert(games).values(cleanData as InsertGame).returning();
     return game;
   }
 
