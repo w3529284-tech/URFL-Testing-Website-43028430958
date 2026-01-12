@@ -126,8 +126,8 @@ export function Sidebar() {
       </div>
       
       {/* Mobile Horizontal Scroll Nav - Bottom of Header */}
-      <nav className="lg:hidden flex items-center overflow-x-auto no-scrollbar border-t border-border/50 bg-background/50 backdrop-blur-md h-12 px-4 gap-1">
-        <div className="flex items-center gap-1 min-w-max">
+      <nav className="lg:hidden flex items-center overflow-x-auto no-scrollbar border-t border-border/50 bg-background/50 backdrop-blur-md h-16 px-4 gap-1">
+        <div className="flex items-center gap-2 min-w-max">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
@@ -135,13 +135,13 @@ export function Sidebar() {
               <Link key={item.path} href={item.path}>
                 <Button
                   variant="ghost"
-                  className={`h-8 px-3 font-bold uppercase tracking-wider text-[10px] rounded-lg transition-all flex-shrink-0 ${
+                  className={`h-12 px-5 font-bold uppercase tracking-wider text-[12px] rounded-xl transition-all flex-shrink-0 ${
                     isActive 
-                      ? 'text-primary bg-primary/10' 
+                      ? 'text-primary bg-primary/10 border border-primary/20' 
                       : 'text-muted-foreground'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5 mr-1.5" />
+                  <Icon className="w-5 h-5 mr-2" />
                   {item.label}
                 </Button>
               </Link>

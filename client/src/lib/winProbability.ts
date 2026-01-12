@@ -195,10 +195,7 @@ export function getConferenceRanking(teamName: string, standings?: Standings[]):
     return "N/A";
   }
 
-  const conference = teamStanding.division.startsWith("AFC") ? "AFC" : "NFC";
-  const conferenceTeams = standings.filter(s => s.division.startsWith(conference));
-
-  const sortedTeams = [...conferenceTeams].sort((a, b) => {
+  const allTeams = [...standings].sort((a, b) => {
     if (a.manualOrder !== null && b.manualOrder !== null && 
         a.manualOrder !== undefined && b.manualOrder !== undefined) {
       return a.manualOrder - b.manualOrder;
@@ -219,11 +216,11 @@ export function getConferenceRanking(teamName: string, standings?: Standings[]):
     return bPD - aPD;
   });
 
-  const rank = sortedTeams.findIndex(s => s.team === teamName) + 1;
-  const ordinals = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
+  const rank = allTeams.findIndex(s => s.team === teamName) + 1;
+  const ordinals = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th", "13th", "14th", "15th", "16th"];
   const ordinal = ordinals[rank - 1] || `${rank}th`;
 
-  return `${ordinal} in ${conference}`;
+  return `${ordinal} Overall`;
 }
 
 export function getWinProbabilityFactors(
