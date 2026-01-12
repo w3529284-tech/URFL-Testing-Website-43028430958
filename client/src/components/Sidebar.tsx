@@ -64,29 +64,27 @@ export function Sidebar() {
           </div>
         </Link>
 
-        {/* Navigation */}
-        <nav className="flex-1 lg:flex-none flex items-center overflow-x-auto lg:overflow-visible no-scrollbar gap-1 pr-4 lg:pr-0">
-          <div className="flex items-center gap-1 min-w-max lg:min-w-0">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location === item.path;
-              return (
-                <Link key={item.path} href={item.path}>
-                  <Button
-                    variant="ghost"
-                    className={`h-9 px-4 font-bold uppercase tracking-wider text-[11px] rounded-lg transition-all flex-shrink-0 lg:flex-shrink ${
-                      isActive 
-                        ? 'text-primary bg-primary/10' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </Button>
-                </Link>
-              );
-            })}
-          </div>
+        {/* Navigation - Desktop Only */}
+        <nav className="hidden lg:flex items-center gap-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.path;
+            return (
+              <Link key={item.path} href={item.path}>
+                <Button
+                  variant="ghost"
+                  className={`h-9 px-4 font-bold uppercase tracking-wider text-[11px] rounded-lg transition-all ${
+                    isActive 
+                      ? 'text-primary bg-primary/10' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {item.label}
+                </Button>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Actions Section */}
@@ -126,6 +124,31 @@ export function Sidebar() {
           )}
         </div>
       </div>
+      
+      {/* Mobile Horizontal Scroll Nav - Bottom of Header */}
+      <nav className="lg:hidden flex items-center overflow-x-auto no-scrollbar border-t border-border/50 bg-background/50 backdrop-blur-md h-12 px-4 gap-1">
+        <div className="flex items-center gap-1 min-w-max">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.path;
+            return (
+              <Link key={item.path} href={item.path}>
+                <Button
+                  variant="ghost"
+                  className={`h-8 px-3 font-bold uppercase tracking-wider text-[10px] rounded-lg transition-all flex-shrink-0 ${
+                    isActive 
+                      ? 'text-primary bg-primary/10' 
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5 mr-1.5" />
+                  {item.label}
+                </Button>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </header>
   );
 }
