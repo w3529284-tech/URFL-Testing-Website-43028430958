@@ -475,7 +475,7 @@ export default function GameDetail() {
                             {[
                               { label: "Ranking", team1: team1Factors.factors.ranking.team1Rank, team2: team1Factors.factors.ranking.team2Rank, key: 'ranking' },
                               { label: "Record", team1: team1Factors.factors.record.team1Record, team2: team1Factors.factors.record.team2Record, key: 'record' },
-                              { label: "Point Diff", team1: (team1Factors.factors.pointDiff.team1PD > 0 ? "+" : "") + team1Factors.factors.pointDiff.team1PD, team2: (team1Factors.factors.pointDiff.team2PD > 0 ? "+" : "") + team1Factors.factors.pointDiff.team2PD, key: 'pointDiff' },
+                              { label: "Point Diff", team1: (standings?.find(s => s.team === game.team1)?.pointDifferential || 0) > 0 ? `+${standings?.find(s => s.team === game.team1)?.pointDifferential}` : standings?.find(s => s.team === game.team1)?.pointDifferential || 0, team2: (standings?.find(s => s.team === game.team2)?.pointDifferential || 0) > 0 ? `+${standings?.find(s => s.team === game.team2)?.pointDifferential}` : standings?.find(s => s.team === game.team2)?.pointDifferential || 0, key: 'pointDiff' },
                               { label: "Schedule", team1: team1Factors.factors.schedule.team1SOS + "%", team2: team1Factors.factors.schedule.team2SOS + "%", key: 'schedule' },
                             ].map((factor, idx) => (
                               <div key={idx} className="flex justify-between items-center p-3 bg-white/5 rounded-2xl border border-white/5">

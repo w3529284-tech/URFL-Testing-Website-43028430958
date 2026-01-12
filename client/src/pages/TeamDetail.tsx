@@ -173,36 +173,57 @@ export default function TeamDetail() {
             ))}
           </TabsList>
 
-          <TabsContent value="roster" className="space-y-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                { label: "Quarterbacks", players: qbPlayers, icon: Zap },
-                { label: "Running Backs", players: rbPlayers, icon: Target },
-                { label: "Wide Receivers", players: wrPlayers, icon: BarChart3 },
-                { label: "Defense", players: defPlayers, icon: Shield },
-                { label: "Special Teams", players: kPlayers, icon: Footprints },
-              ].filter(cat => cat.players.length > 0).map((cat, i) => (
-                <Card key={i} className="p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[40px] relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
-                    <cat.icon className="w-24 h-24" />
-                  </div>
-                  <h3 className="text-xl font-black italic uppercase tracking-tighter mb-6 flex items-center gap-3">
-                    <div className="w-1 h-6 bg-primary rounded-full" />
-                    {cat.label}
-                  </h3>
-                  <div className="space-y-4">
-                    {cat.players.map((player) => (
-                      <div key={player.id} className="flex justify-between items-center p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-colors">
-                        <div>
-                          <p className="font-black uppercase tracking-tight">{player.name}</p>
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">#{player.number || '00'}</p>
+          <TabsContent value="schedule" className="space-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {games
+                .filter(g => g.team1 === teamName || g.team2 === teamName)
+                .sort((a, b) => b.week - a.week)
+                .map((game) => {
+                  const isTeam1 = game.team1 === teamName;
+                  const opponent = isTeam1 ? game.team2 : game.team1;
+                  const teamScore = isTeam1 ? game.team1Score : game.team2Score;
+                  const opponentScore = isTeam1 ? game.team2Score : game.team1Score;
+                  const isWinner = teamScore! > opponentScore!;
+                  const isDraw = teamScore === opponentScore;
+
+                  return (
+                    <Card key={game.id} className="p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[40px] relative overflow-hidden group">
+                      <div className="relative z-10 flex items-center justify-between gap-6">
+                        <div className="flex items-center gap-6">
+                          <div className="relative w-16 h-16 flex items-center justify-center bg-white/5 rounded-2xl border border-white/5">
+                            {TEAMS[opponent as keyof typeof TEAMS] ? (
+                              <img src={TEAMS[opponent as keyof typeof TEAMS]} alt={opponent} className="w-10 h-10 object-contain" />
+                            ) : (
+                              <Trophy className="w-6 h-6 text-muted-foreground/20" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Week {game.week} vs</p>
+                            <h4 className="text-xl font-black italic uppercase tracking-tighter">{opponent}</h4>
+                          </div>
                         </div>
-                        <Badge variant="outline" className="border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest rounded-full">{player.position}</Badge>
+                        <div className="text-right space-y-2">
+                          <Badge className={`px-3 py-1 rounded-full font-black uppercase tracking-widest text-[9px] ${
+                            !game.isFinal ? 'bg-white/10 text-muted-foreground' :
+                            isWinner ? 'bg-primary/20 text-primary' : 
+                            isDraw ? 'bg-white/10 text-white' : 'bg-destructive/20 text-destructive'
+                          }`}>
+                            {!game.isFinal ? 'Scheduled' : isWinner ? 'Winner' : isDraw ? 'Draw' : 'Loss'}
+                          </Badge>
+                          <p className="text-2xl font-black italic tabular-nums">
+                            {teamScore} - {opponentScore}
+                          </p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </Card>
-              ))}
+                    </Card>
+                  );
+                })}
+              {games.filter(g => g.team1 === teamName || g.team2 === teamName).length === 0 && (
+                <div className="col-span-full py-20 text-center space-y-4">
+                  <Calendar className="w-12 h-12 text-muted-foreground/20 mx-auto" />
+                  <p className="text-muted-foreground font-medium uppercase tracking-widest text-[10px]">No game history found for this team</p>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
