@@ -57,24 +57,24 @@ export function Sidebar() {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-background/60 backdrop-blur-2xl border-b border-border/40 z-[100] transition-all duration-300">
-      <div className="max-w-screen-2xl mx-auto h-full px-4 md:px-8 flex items-center justify-between gap-4">
-        {/* Logo Section */}
-        <Link href="/">
-          <div className="flex items-center gap-3 cursor-pointer group">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-primary/20 blur-md rounded-full group-hover:bg-primary/40 transition-all duration-500" />
-              <Zap className="relative w-7 h-7 text-primary fill-primary/10 transition-transform group-hover:scale-110 duration-300" />
+    <>
+      <aside className="fixed top-0 left-0 bottom-0 w-64 bg-background/60 backdrop-blur-2xl border-r border-border/40 z-[100] hidden lg:flex flex-col transition-all duration-300">
+        <div className="p-6 flex flex-col h-full gap-8">
+          {/* Logo Section */}
+          <Link href="/">
+            <div className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative">
+                <div className="absolute -inset-1 bg-primary/20 blur-md rounded-full group-hover:bg-primary/40 transition-all duration-500" />
+                <Zap className="relative w-7 h-7 text-primary fill-primary/10 transition-transform group-hover:scale-110 duration-300" />
+              </div>
+              <div>
+                <h1 className="text-xl font-black tracking-tighter group-hover:text-primary transition-colors uppercase italic leading-none">URFL</h1>
+              </div>
             </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-black tracking-tighter group-hover:text-primary transition-colors uppercase italic leading-none">URFL</h1>
-            </div>
-          </div>
-        </Link>
+          </Link>
 
-        {/* Main Navigation - Desktop Only */}
-        <div className="hidden lg:flex flex-1 justify-center">
-          <nav className="flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/5 pt-[4px] pb-[4px] pl-[4px] pr-[4px]">
+          {/* Main Navigation */}
+          <nav className="flex flex-col gap-1 flex-1">
             {[...navItems, ...secondaryItems].map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
@@ -82,67 +82,68 @@ export function Sidebar() {
                 <Link key={item.path} href={item.path}>
                   <Button
                     variant="ghost"
-                    className={`h-9 px-4 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all duration-300 ${
+                    className={`w-full justify-start h-10 px-4 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all duration-300 ${
                       isActive 
                         ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' 
                         : 'text-muted-foreground hover:text-foreground hover:bg-white/10'
                     }`}
                   >
-                    <Icon className="w-3.5 h-3.5 mr-2" />
+                    <Icon className="w-3.5 h-3.5 mr-3" />
                     {item.label}
                   </Button>
                 </Link>
               );
             })}
           </nav>
-        </div>
 
-        {/* Actions Section */}
-        <div className="flex items-center gap-2">
-
-          {isAdmin && (
-            <Link href="/admin">
-              <Button
-                variant="outline"
-                className={`h-9 px-4 font-black uppercase tracking-widest text-[9px] rounded-xl border-accent/20 text-accent hover:bg-accent/5 ${
-                  location === '/admin' ? 'bg-accent/10 border-accent/40' : ''
-                }`}
-              >
-                <Shield className="w-3.5 h-3.5 mr-2" />
-                Admin
-              </Button>
-            </Link>
-          )}
-
-          {isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              <Link href="/settings">
-                <Button variant="ghost" size="icon" className="w-9 h-9 rounded-xl hover:bg-white/5">
-                  <Settings className="w-4 h-4 text-muted-foreground" />
+          {/* Actions Section */}
+          <div className="flex flex-col gap-2 pt-4 border-t border-border/40">
+            {isAdmin && (
+              <Link href="/admin">
+                <Button
+                  variant="outline"
+                  className={`w-full justify-start h-10 px-4 font-black uppercase tracking-widest text-[9px] rounded-xl border-accent/20 text-accent hover:bg-accent/5 ${
+                    location === '/admin' ? 'bg-accent/10 border-accent/40' : ''
+                  }`}
+                >
+                  <Shield className="w-3.5 h-3.5 mr-3" />
+                  Admin
                 </Button>
               </Link>
-              <a href="/api/logout">
+            )}
+
+            {isAuthenticated ? (
+              <div className="flex flex-col gap-2">
+                <Link href="/settings">
+                  <Button variant="ghost" className="w-full justify-start h-10 px-4 rounded-xl hover:bg-white/5 text-muted-foreground">
+                    <Settings className="w-4 h-4 mr-3" />
+                    <span className="font-black uppercase tracking-widest text-[10px]">Settings</span>
+                  </Button>
+                </Link>
+                <a href="/api/logout">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start h-10 px-4 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl"
+                  >
+                    <LogOut className="w-4 h-4 mr-3" />
+                    <span className="font-black uppercase tracking-widest text-[10px]">Logout</span>
+                  </Button>
+                </a>
+              </div>
+            ) : (
+              <a href="/login" className="w-full">
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-9 h-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl"
+                  className="w-full h-10 bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
                 >
-                  <LogOut className="w-4 h-4" />
+                  Login
                 </Button>
               </a>
-            </div>
-          ) : (
-            <a href="/login">
-              <Button
-                className="h-9 px-6 bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
-              >
-                Login
-              </Button>
-            </a>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </aside>
+      <MobileNav navItems={navItems} isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
+    </>
   );
 }
 
