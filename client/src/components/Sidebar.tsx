@@ -65,29 +65,27 @@ export function Sidebar() {
         </Link>
 
         {/* Navigation */}
-        <div className="bg-muted/50 p-1 rounded-full border border-border/50 flex items-center">
-          <nav className="flex items-center gap-0.5">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location === item.path;
-              return (
-                <Link key={item.path} href={item.path}>
-                  <Button
-                    variant="ghost"
-                    className={`h-8 px-4 font-bold uppercase tracking-wider text-[10px] rounded-full transition-all ${
-                      isActive 
-                        ? 'text-primary bg-background shadow-sm border border-border/50' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5 mr-2" />
-                    {item.label}
-                  </Button>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+        <nav className="flex items-center gap-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.path;
+            return (
+              <Link key={item.path} href={item.path}>
+                <Button
+                  variant="ghost"
+                  className={`h-9 px-4 font-bold uppercase tracking-wider text-[11px] rounded-lg transition-all ${
+                    isActive 
+                      ? 'text-primary bg-primary/10' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {item.label}
+                </Button>
+              </Link>
+            );
+          })}
+        </nav>
 
         {/* Actions Section */}
         <div className="flex items-center gap-3 ml-auto">
