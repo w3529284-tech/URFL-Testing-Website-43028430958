@@ -173,6 +173,39 @@ export default function TeamDetail() {
             ))}
           </TabsList>
 
+          <TabsContent value="roster" className="space-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                { label: "Quarterbacks", players: qbPlayers, icon: Zap },
+                { label: "Running Backs", players: rbPlayers, icon: Target },
+                { label: "Wide Receivers", players: wrPlayers, icon: BarChart3 },
+                { label: "Defense", players: defPlayers, icon: Shield },
+                { label: "Special Teams", players: kPlayers, icon: Footprints },
+              ].filter(cat => cat.players.length > 0).map((cat, i) => (
+                <Card key={i} className="p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[40px] relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
+                    <cat.icon className="w-24 h-24" />
+                  </div>
+                  <h3 className="text-xl font-black italic uppercase tracking-tighter mb-6 flex items-center gap-3">
+                    <div className="w-1 h-6 bg-primary rounded-full" />
+                    {cat.label}
+                  </h3>
+                  <div className="space-y-4">
+                    {cat.players.map((player) => (
+                      <div key={player.id} className="flex justify-between items-center p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-colors">
+                        <div>
+                          <p className="font-black uppercase tracking-tight">{player.name}</p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">#{player.number || '00'}</p>
+                        </div>
+                        <Badge variant="outline" className="border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest rounded-full">{player.position}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
           <TabsContent value="schedule" className="space-y-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {games
