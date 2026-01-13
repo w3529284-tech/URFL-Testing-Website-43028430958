@@ -748,43 +748,92 @@ function NewsManager() {
 
 function CoinsManager() {
   const { toast } = useToast();
-  const [pickemId, setPickemId] = useState("");
-  const [winner, setWinner] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [amount, setAmount] = useState<number>(0);
 
-  const { data: pickems } = useQuery<Pickem[]>({
-    queryKey: ["/api/pickems/all"],
+  const { data: users } = useQuery<User[]>({
+    queryKey: ["/api/users"],
   });
 
-  const settleMutation = useMutation({
-    mutationFn: async (data: { pickemId: string; winner: string }) => {
-      await apiRequest("POST", "/api/pickems/settle", data);
+  const addCoinsMutation = useMutation({
+    mutationFn: async (data: { userId: string; amount: number }) => {
+      await apiRequest("POST", "/api/admin/add-coins", data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pickems/all"] });
-      toast({ title: "Success", description: "Pickem settled and coins awarded" });
-      setPickemId("");
-      setWinner("");
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/balance"] });
+      toast({ title: "Success", description: `Added coins. New balance: ${data.newBalance}` });
+      setAmount(0);
     },
     onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => window.location.href = "/api/login", 500);
-        return;
-      }
-      toast({ title: "Error", description: "Failed to settle pickem", variant: "destructive" });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const removeCoinsMutation = useMutation({
+    mutationFn: async (data: { userId: string; amount: number }) => {
+      await apiRequest("POST", "/api/admin/remove-coins", data);
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/balance"] });
+      toast({ title: "Success", description: `Removed coins. New balance: ${data.newBalance}` });
+      setAmount(0);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Settle Pick'ems</h2>
+        <h2 className="text-2xl font-bold mb-4">Manage User Coins</h2>
         <div className="space-y-4">
-          <p className="text-muted-foreground">Settlement logic will be implemented in the backend API.</p>
+          <div>
+            <Label htmlFor="user-select">Select User</Label>
+            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+              <SelectTrigger id="user-select">
+                <SelectValue placeholder="Select a user" />
+              </SelectTrigger>
+              <SelectContent>
+                {users?.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.username} ({u.coins} coins)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="amount">Amount</Label>
+            <Input
+              id="amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(parseInt(e.target.value) || 0)}
+              placeholder="Enter amount"
+            />
+          </div>
+          <div className="flex gap-4">
+            <Button
+              className="flex-1 gap-2"
+              onClick={() => selectedUserId && amount > 0 && addCoinsMutation.mutate({ userId: selectedUserId, amount })}
+              disabled={addCoinsMutation.isPending || !selectedUserId || amount <= 0}
+            >
+              <Plus className="w-4 h-4" />
+              Add Coins
+            </Button>
+            <Button
+              variant="destructive"
+              className="flex-1 gap-2"
+              onClick={() => selectedUserId && amount > 0 && removeCoinsMutation.mutate({ userId: selectedUserId, amount })}
+              disabled={removeCoinsMutation.isPending || !selectedUserId || amount <= 0}
+            >
+              <Trash2 className="w-4 h-4" />
+              Remove Coins
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
