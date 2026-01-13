@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Game, News as NewsType, Pickem, PickemRules, Changelog, InsertChangelog, StreamRequest, User, Team, Player, Partner } from "@shared/schema";
 import { format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
-import { Plus, Trash2, Edit, Save, Wrench, Users, LayoutDashboard, ShieldCheck, Zap, Newspaper, Coins, Trophy, Calendar, UserPlus, Settings, Heart, Minus } from "lucide-react";
+import { Plus, Trash2, Edit, Save, Wrench, Users, LayoutDashboard, ShieldCheck, Zap, Newspaper, Coins, Trophy, Calendar, UserPlus, Settings, Heart, Minus, FileUp } from "lucide-react";
 import { TEAMS } from "@/lib/teams";
 
 const AVAILABLE_TEAMS = Object.keys(TEAMS);
@@ -26,10 +26,10 @@ export default function AdminDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || (user as any)?.role !== "admin")) {
+    if (!isLoading && (!isAuthenticated || !["admin", "streamer"].includes((user as any)?.role))) {
       toast({
         title: "Unauthorized",
-        description: "Admin access only. Redirecting...",
+        description: "Staff access only. Redirecting...",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -39,23 +39,27 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated, (user as any)?.role, isLoading, toast]);
 
-  if (!isAuthenticated || (user as any)?.role !== "admin") {
+  if (!isAuthenticated || !["admin", "streamer"].includes((user as any)?.role)) {
     return null;
   }
 
+  const role = (user as any)?.role;
+
   const ADMIN_TABS = [
-    { value: "games", label: "Schedule", icon: Calendar },
-    { value: "scores", label: "Scores", icon: Trophy },
-    { value: "news", label: "News", icon: Newspaper },
-    { value: "coins", label: "Coins", icon: Coins },
-    { value: "bracket", label: "Bracket", icon: LayoutDashboard },
-    { value: "changelogs", label: "Logs", icon: Zap },
+    ...(role === "admin" ? [
+      { value: "games", label: "Schedule", icon: Calendar },
+      { value: "scores", label: "Scores", icon: Trophy },
+      { value: "news", label: "News", icon: Newspaper },
+      { value: "coins", label: "Coins", icon: Coins },
+      { value: "bracket", label: "Bracket", icon: LayoutDashboard },
+      { value: "changelogs", label: "Logs", icon: Zap },
+    ] : []),
     { value: "streams", label: "Streams", icon: ShieldCheck },
-    { value: "rosters", label: "Rosters", icon: Users },
-    { value: "player-stats", label: "Stats", icon: Wrench },
-    { value: "users", label: "Users", icon: UserPlus },
-    { value: "partners", label: "Partners", icon: Heart },
-    { value: "settings", label: "Config", icon: Settings },
+    ...(role === "admin" ? [
+      { value: "users", label: "Users", icon: UserPlus },
+      { value: "partners", label: "Partners", icon: Heart },
+      { value: "settings", label: "Config", icon: Settings },
+    ] : []),
   ];
 
   return (
@@ -97,20 +101,26 @@ export default function AdminDashboard() {
 
           <Card className="p-8 md:p-12 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[48px] shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-            <TabsContent value="games" className="mt-0 outline-none">
-              <GamesManager />
-            </TabsContent>
-            <TabsContent value="scores" className="mt-0 outline-none"><ScoresManager /></TabsContent>
-            <TabsContent value="news" className="mt-0 outline-none"><NewsManager /></TabsContent>
-            <TabsContent value="coins" className="mt-0 outline-none"><CoinsManager /></TabsContent>
-            <TabsContent value="bracket" className="mt-0 outline-none"><BracketManager /></TabsContent>
-            <TabsContent value="changelogs" className="mt-0 outline-none"><ChangelogManager /></TabsContent>
+            {role === "admin" && (
+              <>
+                <TabsContent value="games" className="mt-0 outline-none">
+                  <GamesManager />
+                </TabsContent>
+                <TabsContent value="scores" className="mt-0 outline-none"><ScoresManager /></TabsContent>
+                <TabsContent value="news" className="mt-0 outline-none"><NewsManager /></TabsContent>
+                <TabsContent value="coins" className="mt-0 outline-none"><CoinsManager /></TabsContent>
+                <TabsContent value="bracket" className="mt-0 outline-none"><BracketManager /></TabsContent>
+                <TabsContent value="changelogs" className="mt-0 outline-none"><ChangelogManager /></TabsContent>
+              </>
+            )}
             <TabsContent value="streams" className="mt-0 outline-none"><StreamRequestsManager /></TabsContent>
-            <TabsContent value="rosters" className="mt-0 outline-none"><RosterManager /></TabsContent>
-            <TabsContent value="player-stats" className="mt-0 outline-none"><PlayerStatsManager /></TabsContent>
-            <TabsContent value="users" className="mt-0 outline-none"><UsersManager /></TabsContent>
-            <TabsContent value="partners" className="mt-0 outline-none"><PartnersManager /></TabsContent>
-            <TabsContent value="settings" className="mt-0 outline-none"><SettingsManager /></TabsContent>
+            {role === "admin" && (
+              <>
+                <TabsContent value="users" className="mt-0 outline-none"><UsersManager /></TabsContent>
+                <TabsContent value="partners" className="mt-0 outline-none"><PartnersManager /></TabsContent>
+                <TabsContent value="settings" className="mt-0 outline-none"><SettingsManager /></TabsContent>
+              </>
+            )}
           </Card>
         </Tabs>
       </div>
@@ -575,30 +585,30 @@ function ScoresManager() {
           {games?.filter(game => filterWeek === "all" || game.week === parseInt(filterWeek)).map((game) => (
             <Card key={game.id} className="p-4" data-testid={`score-card-${game.id}`}>
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{game.team2} vs {game.team1}</p>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="w-full sm:w-auto">
+                    <p className="font-semibold text-lg">{game.team2} vs {game.team1}</p>
                     <Badge variant={game.isFinal ? "secondary" : game.isLive ? "default" : "outline"}>
                       {game.isFinal ? "FINAL" : game.isLive ? "LIVE" : "SCHEDULED"}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-center">
-                      <Label className="text-xs uppercase text-muted-foreground">{game.team2}</Label>
+                  <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                    <div className="text-center flex-1 sm:flex-none">
+                      <Label className="text-[10px] uppercase text-muted-foreground block mb-1 truncate max-w-[80px] mx-auto">{game.team2}</Label>
                       <Input
                         type="number"
-                        className="w-16 text-center"
+                        className="w-full sm:w-16 text-center h-10 px-2"
                         value={game.team2Score ?? 0}
                         onChange={(e) => updateMutation.mutate({ id: game.id, data: { team2Score: parseInt(e.target.value) } })}
                         data-testid={`team2Score-${game.id}`}
                       />
                     </div>
-                    <span className="font-bold">-</span>
-                    <div className="text-center">
-                      <Label className="text-xs uppercase text-muted-foreground">{game.team1}</Label>
+                    <span className="font-bold self-end pb-2">-</span>
+                    <div className="text-center flex-1 sm:flex-none">
+                      <Label className="text-[10px] uppercase text-muted-foreground block mb-1 truncate max-w-[80px] mx-auto">{game.team1}</Label>
                       <Input
                         type="number"
-                        className="w-16 text-center"
+                        className="w-full sm:w-16 text-center h-10 px-2"
                         value={game.team1Score ?? 0}
                         onChange={(e) => updateMutation.mutate({ id: game.id, data: { team1Score: parseInt(e.target.value) } })}
                         data-testid={`team1Score-${game.id}`}
@@ -838,34 +848,38 @@ function CoinsManager() {
 
 function BracketManager() {
   const { toast } = useToast();
-  const [imageUrl, setImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const { data: images } = useQuery<any[]>({
     queryKey: ["/api/bracket-images"],
   });
 
-  const createMutation = useMutation({
-    mutationFn: async (data: { imageUrl: string }) => {
-      await apiRequest("POST", "/api/bracket-images", data);
-    },
-    onSuccess: () => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/upload-bracket", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      await apiRequest("POST", "/api/bracket-images", { imageUrl: data.url });
       queryClient.invalidateQueries({ queryKey: ["/api/bracket-images"] });
-      toast({ title: "Success", description: "Bracket image added" });
-      setImageUrl("");
-    },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => window.location.href = "/api/login", 500);
-        return;
-      }
-      toast({ title: "Error", description: "Failed to add image", variant: "destructive" });
-    },
-  });
+      toast({ title: "Success", description: "Bracket image uploaded" });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -892,22 +906,33 @@ function BracketManager() {
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Add Bracket Image</h2>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            createMutation.mutate({ imageUrl });
-          }}
-          className="space-y-4"
-        >
+        <h2 className="text-2xl font-bold mb-4">Upload Bracket Image</h2>
+        <div className="space-y-4">
           <div>
-            <Label htmlFor="bracket-url">Image URL</Label>
-            <Input id="bracket-url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} required data-testid="input-bracket-url" />
+            <Label htmlFor="bracket-file">Choose Image File</Label>
+            <div className="flex items-center gap-4">
+              <Input 
+                id="bracket-file" 
+                type="file" 
+                accept="image/*"
+                onChange={handleFileUpload}
+                disabled={uploading}
+                className="hidden"
+                data-testid="input-bracket-file" 
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('bracket-file')?.click()}
+                disabled={uploading}
+                className="w-full gap-2"
+              >
+                <FileUp className="w-4 h-4" />
+                {uploading ? "Uploading..." : "Select Bracket Image"}
+              </Button>
+            </div>
           </div>
-          <Button type="submit" className="w-full" disabled={createMutation.isPending} data-testid="button-add-bracket">
-            Add Image
-          </Button>
-        </form>
+        </div>
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -943,6 +968,23 @@ function ChangelogManager() {
   const { data: logs } = useQuery<Changelog[]>({
     queryKey: ["/api/changelogs"],
   });
+
+  const latestVersion = logs && logs.length > 0 ? logs[0].version : "1.0.0";
+
+  useEffect(() => {
+    if (logs && logs.length > 0) {
+      const latest = logs[0].version;
+      const parts = latest.split('.').map(Number);
+      if (parts.length === 3 && !isNaN(parts[2])) {
+        parts[2] += 1;
+        setVersion(parts.join('.'));
+      } else {
+        setVersion(latest + ".1");
+      }
+    } else {
+      setVersion("1.0.0");
+    }
+  }, [logs]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertChangelog) => {
@@ -1345,22 +1387,32 @@ function UsersManager() {
       <h2 className="text-2xl font-bold mb-6">User Management</h2>
       <div className="space-y-4">
         {users?.map((u) => (
-          <div key={u.id} className="flex items-center justify-between p-4 border rounded-md" data-testid={`user-row-${u.id}`}>
-            <div>
-              <p className="font-bold">{u.username}</p>
-              <p className="text-sm text-muted-foreground">Coins: {u.coins}</p>
+          <div key={u.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-md gap-4" data-testid={`user-row-${u.id}`}>
+            <div className="space-y-1">
+              <p className="font-bold text-lg">{u.username}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm text-muted-foreground">
+                <p>ID: <span className="text-foreground font-mono text-[10px]">{u.id}</span></p>
+                <p>Role: <Badge variant="outline" className="capitalize">{u.role || "user"}</Badge></p>
+                <p>Coins: <span className="text-foreground">{u.coins || 0}</span></p>
+                <p>Created: <span className="text-foreground">{u.createdAt ? format(new Date(u.createdAt), "MMM d, yyyy") : "N/A"}</span></p>
+              </div>
             </div>
-            <Select value={u.role || "user"} onValueChange={(role) => updateRoleMutation.mutate({ id: u.id, role })}>
-              <SelectTrigger className="w-32" data-testid={`select-role-${u.id}`}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground sm:hidden">Change Role</Label>
+              <Select value={u.role || "user"} onValueChange={(role) => updateRoleMutation.mutate({ id: u.id, role })}>
+                <SelectTrigger className="w-full sm:w-40" data-testid={`select-role-${u.id}`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">User</SelectItem>
+                  <SelectItem value="streamer">Streamer</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         ))}
+        {users?.length === 0 && <p className="text-center text-muted-foreground">No users found</p>}
       </div>
     </Card>
   );
@@ -1460,7 +1512,14 @@ function SettingsManager() {
     queryKey: ["/api/settings/breaking-news"],
   });
 
-  const [newsMessage, setNewsMessage] = useState(breakingNews?.message || "");
+  const [newsMessage, setNewsMessage] = useState("");
+  const [duration, setDuration] = useState("60");
+
+  useEffect(() => {
+    if (breakingNews?.message) {
+      setNewsMessage(breakingNews.message);
+    }
+  }, [breakingNews]);
 
   const toggleMaintenanceMutation = useMutation({
     mutationFn: async (enabled: boolean) => {
@@ -1509,10 +1568,25 @@ function SettingsManager() {
               data-testid="input-breaking-news"
             />
           </div>
+          <div>
+            <Label htmlFor="breaking-news-duration">Duration (Minutes)</Label>
+            <Input
+              id="breaking-news-duration"
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="e.g. 60"
+              data-testid="input-breaking-news-duration"
+            />
+          </div>
           <div className="flex gap-2">
             <Button
-              onClick={() => updateBreakingNewsMutation.mutate({ message: newsMessage, active: true })}
-              disabled={updateBreakingNewsMutation.isPending}
+              onClick={() => updateBreakingNewsMutation.mutate({ 
+                message: newsMessage, 
+                active: true,
+                durationMinutes: parseInt(duration) || 60
+              })}
+              disabled={updateBreakingNewsMutation.isPending || !newsMessage}
               data-testid="button-activate-breaking-news"
             >
               Activate Alert
@@ -1529,6 +1603,12 @@ function SettingsManager() {
               Deactivate
             </Button>
           </div>
+          {breakingNews?.active && (
+            <p className="text-xs text-muted-foreground animate-pulse">
+              Current Alert: "{breakingNews.message}" 
+              {breakingNews.expiresAt && ` (Expires: ${new Date(breakingNews.expiresAt).toLocaleTimeString()})`}
+            </p>
+          )}
         </div>
       </Card>
     </div>

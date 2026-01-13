@@ -25,8 +25,48 @@ import {
 import { playerStats, gamePlays, players, teams } from "@shared/schema";
 import { db } from "./db";
 
+import express from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
+
+  // Configure multer for file uploads
+  const storage_disk = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadPath = path.join(process.cwd(), "dist/public/uploads");
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
+      cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+  });
+  const upload = multer({ storage: storage_disk });
+
+  // Serve uploads statically
+  app.use("/uploads", express.static(path.join(process.cwd(), "dist/public/uploads")));
+
+  app.post("/api/admin/upload-bracket", isAuthenticated, upload.single("file"), async (req: any, res) => {
+    try {
+      if (req.session?.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      const url = `/uploads/${req.file.filename}`;
+      res.json({ url });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Upload failed" });
+    }
+  });
 
   // Note: /api/auth/user is handled in simpleAuth.ts
 
@@ -1022,6 +1062,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      console.log(`[API] GET /api/settings/breaking-news: message="${message}", active=${isActive}, expiresAt=${expiresAt}`);
+      
       res.json({ 
         message: message || "",
         active: isActive,
@@ -1041,6 +1083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { message, active, durationMinutes } = req.body;
+      console.log(`[API] POST /api/settings/breaking-news: body=`, JSON.stringify(req.body));
       
       await storage.setSetting("breaking_news_message", message || "");
       await storage.setSetting("breaking_news_active", active ? "true" : "false");
@@ -1253,13 +1296,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (play[0].pointsAdded > 0) {
         const game = await storage.getGame(req.params.gameId);
         if (game) {
+          const currentTeam1Score = game.team1Score ?? 0;
+          const currentTeam2Score = game.team2Score ?? 0;
+          
           if (play[0].team === game.team1) {
             await storage.updateGame(req.params.gameId, {
-              team1Score: game.team1Score + play[0].pointsAdded,
+              team1Score: (currentTeam1Score as number) + play[0].pointsAdded,
             });
           } else if (play[0].team === game.team2) {
             await storage.updateGame(req.params.gameId, {
-              team2Score: game.team2Score + play[0].pointsAdded,
+              team2Score: (currentTeam2Score as number) + play[0].pointsAdded,
             });
           }
         }
