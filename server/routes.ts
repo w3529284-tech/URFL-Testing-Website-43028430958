@@ -1227,9 +1227,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only admins can create partners" });
       }
 
-      const imageUrl = req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl;
+      // Handle null/undefined values and ensure they are strings if present
+      const name = req.body.name;
+      const quote = req.body.quote;
+
+      const imageUrl = req.file ? `/uploads/${req.file.filename}` : (req.body.imageUrl || null);
+      
       const partnerData = insertPartnersSchema.parse({
-        ...req.body,
+        name,
+        quote,
         imageUrl,
       });
 
