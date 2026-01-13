@@ -966,6 +966,8 @@ function ChangelogManager() {
   const [status, setStatus] = useState("NEW");
   const [changes, setChanges] = useState("");
 
+  const STATUS_OPTIONS = ["NEW", "IMPROVED", "FIXED", "DESIGN"];
+
   const { data: logs } = useQuery<Changelog[]>({
     queryKey: ["/api/changelogs"],
   });
@@ -1035,6 +1037,21 @@ function ChangelogManager() {
           <div>
             <Label htmlFor="version">Version</Label>
             <Input id="version" value={version} onChange={(e) => setVersion(e.target.value)} required placeholder="e.g. 1.2.0" data-testid="input-changelog-version" />
+          </div>
+          <div>
+            <Label>Status Tags</Label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {STATUS_OPTIONS.map((s) => (
+                <Badge
+                  key={s}
+                  variant={status === s ? "default" : "outline"}
+                  className="cursor-pointer uppercase font-black text-[10px] tracking-widest px-3 py-1"
+                  onClick={() => setStatus(s)}
+                >
+                  {s}
+                </Badge>
+              ))}
+            </div>
           </div>
           <div>
             <Label htmlFor="log-title">Title</Label>
