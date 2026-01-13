@@ -751,7 +751,7 @@ function CoinsManager() {
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
 
-  const { data: users } = useQuery<User[]>({
+  const { data: users, isLoading, error } = useQuery<User[]>({
     queryKey: ["/api/users/all"],
   });
 
@@ -790,50 +790,65 @@ function CoinsManager() {
       <Card className="p-6">
         <h2 className="text-2xl font-bold mb-4">Manage User Coins</h2>
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="user-select">Select User</Label>
-            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-              <SelectTrigger id="user-select" data-testid="user-select-trigger">
-                <SelectValue placeholder="Select a user" />
-              </SelectTrigger>
-              <SelectContent>
-                {users?.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>
-                    {u.username} ({u.coins} coins)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="amount">Amount</Label>
-            <Input
-              id="amount"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(parseInt(e.target.value) || 0)}
-              placeholder="Enter amount"
-            />
-          </div>
-          <div className="flex gap-4">
-            <Button
-              className="flex-1 gap-2"
-              onClick={() => selectedUserId && amount > 0 && addCoinsMutation.mutate({ userId: selectedUserId, amount })}
-              disabled={addCoinsMutation.isPending || !selectedUserId || amount <= 0}
-            >
-              <Plus className="w-4 h-4" />
-              Add Coins
-            </Button>
-            <Button
-              variant="destructive"
-              className="flex-1 gap-2"
-              onClick={() => selectedUserId && amount > 0 && removeCoinsMutation.mutate({ userId: selectedUserId, amount })}
-              disabled={removeCoinsMutation.isPending || !selectedUserId || amount <= 0}
-            >
-              <Trash2 className="w-4 h-4" />
-              Remove Coins
-            </Button>
-          </div>
+          {isLoading ? (
+            <div className="text-center p-4">Loading users...</div>
+          ) : error ? (
+            <div className="text-center p-4 text-destructive">Error loading users: {(error as Error).message}</div>
+          ) : (
+            <>
+              <div>
+                <Label htmlFor="user-select">Select User</Label>
+                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                  <SelectTrigger id="user-select" data-testid="user-select-trigger" className="w-full">
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Users</SelectLabel>
+                      {users && users.length > 0 ? (
+                        users.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.username} ({u.coins || 0} coins)
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="none" disabled>No users found</SelectItem>
+                      )}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(parseInt(e.target.value) || 0)}
+                  placeholder="Enter amount"
+                />
+              </div>
+              <div className="flex gap-4">
+                <Button
+                  className="flex-1 gap-2"
+                  onClick={() => selectedUserId && amount > 0 && addCoinsMutation.mutate({ userId: selectedUserId, amount })}
+                  disabled={addCoinsMutation.isPending || !selectedUserId || amount <= 0}
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Coins
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1 gap-2"
+                  onClick={() => selectedUserId && amount > 0 && removeCoinsMutation.mutate({ userId: selectedUserId, amount })}
+                  disabled={removeCoinsMutation.isPending || !selectedUserId || amount <= 0}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Remove Coins
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </Card>
     </div>
