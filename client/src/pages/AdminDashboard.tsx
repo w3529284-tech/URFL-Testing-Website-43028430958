@@ -793,10 +793,10 @@ function CoinsManager() {
           <div>
             <Label htmlFor="user-select">Select User</Label>
             <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-              <SelectTrigger id="user-select">
+              <SelectTrigger id="user-select" data-testid="user-select-trigger">
                 <SelectValue placeholder="Select a user" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent portal={false}>
                 {users?.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
                     {u.username} ({u.coins} coins)
