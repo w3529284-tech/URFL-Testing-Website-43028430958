@@ -963,10 +963,18 @@ function ChangelogManager() {
   const [version, setVersion] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("NEW");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(["NEW"]);
   const [changes, setChanges] = useState("");
 
   const STATUS_OPTIONS = ["NEW", "IMPROVED", "FIXED", "DESIGN"];
+
+  const toggleStatus = (s: string) => {
+    setSelectedStatuses(prev => 
+      prev.includes(s) 
+        ? prev.filter(item => item !== s) 
+        : [...prev, s]
+    );
+  };
 
   const { data: logs } = useQuery<Changelog[]>({
     queryKey: ["/api/changelogs"],
@@ -1027,7 +1035,7 @@ function ChangelogManager() {
               version,
               title,
               description,
-              status: JSON.stringify([status]),
+              status: JSON.stringify(selectedStatuses),
               changes: JSON.stringify(changes.split('\n').filter(c => c.trim())),
               date: format(new Date(), "yyyy-MM-dd")
             });
@@ -1039,14 +1047,14 @@ function ChangelogManager() {
             <Input id="version" value={version} onChange={(e) => setVersion(e.target.value)} required placeholder="e.g. 1.2.0" data-testid="input-changelog-version" />
           </div>
           <div>
-            <Label>Status Tags</Label>
+            <Label>Status Tags (Select Multiple)</Label>
             <div className="flex flex-wrap gap-2 mt-2">
               {STATUS_OPTIONS.map((s) => (
                 <Badge
                   key={s}
-                  variant={status === s ? "default" : "outline"}
+                  variant={selectedStatuses.includes(s) ? "default" : "outline"}
                   className="cursor-pointer uppercase font-black text-[10px] tracking-widest px-3 py-1"
-                  onClick={() => setStatus(s)}
+                  onClick={() => toggleStatus(s)}
                 >
                   {s}
                 </Badge>
