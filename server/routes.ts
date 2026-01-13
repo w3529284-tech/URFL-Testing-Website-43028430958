@@ -543,14 +543,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/bracket-image", isAuthenticated, async (req, res) => {
+  app.get("/api/bracket-images", async (req, res) => {
     try {
-      const validated = insertBracketImageSchema.parse(req.body);
-      const image = await storage.upsertBracketImage(validated);
+      // In the new system, we treat bracketImages as a collection of all historical brackets
+      const images = await storage.getBracketImages();
+      res.json(images);
+    } catch (error) {
+      console.error("Error fetching bracket images:", error);
+      res.status(500).json({ message: "Failed to fetch bracket images" });
+    }
+  });
+
+  app.post("/api/bracket-images", isAuthenticated, async (req: any, res) => {
+    try {
+      const role = req.session?.role;
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can add bracket images" });
+      }
+      
+      // Create record in bracket_images collection
+      const image = await storage.createBracketImage(req.body);
+      
+      // Also update the singleton 'bracket-image' used by the playoffs page
+      await storage.upsertBracketImage({ imageUrl: req.body.imageUrl });
+      
       res.json(image);
     } catch (error) {
-      console.error("Error updating bracket image:", error);
-      res.status(400).json({ message: "Failed to update bracket image" });
+      console.error("Error creating bracket image:", error);
+      res.status(400).json({ message: "Failed to create bracket image" });
+    }
+  });
+
+  app.delete("/api/bracket-images/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const role = req.session?.role;
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can delete bracket images" });
+      }
+      await storage.deleteBracketImage(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting bracket image:", error);
+      res.status(400).json({ message: "Failed to delete bracket image" });
     }
   });
 

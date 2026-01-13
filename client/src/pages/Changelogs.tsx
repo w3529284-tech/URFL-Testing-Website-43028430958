@@ -78,7 +78,7 @@ export default function Changelogs() {
                     <div className="space-y-4">
                       <div className="flex items-center gap-4">
                         <h2 className="text-4xl font-black italic uppercase tracking-tighter text-primary" data-testid={`text-version-${changelog.version}`}>
-                          v{changelog.version}
+                          {changelog.version}
                         </h2>
                         <div className="flex flex-wrap gap-2">
                           {parseStatuses(changelog.status).map((s) => (
