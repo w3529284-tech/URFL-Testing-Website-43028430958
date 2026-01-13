@@ -796,7 +796,7 @@ function CoinsManager() {
               <SelectTrigger id="user-select" data-testid="user-select-trigger">
                 <SelectValue placeholder="Select a user" />
               </SelectTrigger>
-              <SelectContent portal={false}>
+              <SelectContent>
                 {users?.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
                     {u.username} ({u.coins} coins)
