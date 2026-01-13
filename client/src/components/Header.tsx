@@ -32,25 +32,28 @@ export function Header() {
           <Link href="/" data-testid="link-home" className="flex-shrink-0 group">
             <div className="flex items-center gap-1 md:gap-2">
               <span className="text-xl md:text-2xl font-bold">⚡</span>
-              <h1 className="text-lg md:text-xl lg:text-2xl font-black text-foreground group-hover:text-primary transition-colors px-1 md:px-2 py-1 rounded-lg whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px] xs:max-w-[180px] sm:max-w-none">
+              <h1 className="text-lg md:text-xl font-black text-foreground group-hover:text-primary transition-colors px-1 md:px-2 py-1 rounded-lg whitespace-nowrap">
                 URFL Fan Hub
               </h1>
             </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center justify-start flex-1 gap-1 h-12 bg-muted/30 rounded-full px-2">
+          <nav className="hidden lg:flex items-center justify-start flex-1 gap-0.5 h-10 bg-muted/30 rounded-full px-1.5 mx-2 overflow-hidden">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
+              // Skip logout in the main nav to save space
+              if (item.path === "/api/logout") return null;
+              
               return (
                 <Link key={item.path} href={item.path} data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
                   <Button
                     variant={isActive ? "default" : "ghost"}
                     size="sm"
-                    className={`font-medium gap-1.5 transition-all rounded-full ${isActive ? 'shadow-lg shadow-primary/25' : 'hover:bg-primary/10'}`}
+                    className={`h-8 px-2.5 font-bold gap-1 transition-all rounded-full ${isActive ? 'shadow-md shadow-primary/25' : 'hover:bg-primary/10'}`}
                   >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
+                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                    <span className="text-[11px] uppercase tracking-tight whitespace-nowrap">{item.label}</span>
                   </Button>
                 </Link>
               );
