@@ -1219,20 +1219,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/partners", isAuthenticated, async (req: any, res) => {
+  app.post("/api/partners", isAuthenticated, upload.single("image"), async (req: any, res) => {
     try {
       const role = req.session?.role;
       if (role !== "admin") {
         return res.status(403).json({ message: "Only admins can create partners" });
       }
-      
-      const { insertPartnersSchema } = await import("@shared/schema");
-      const partnerData = insertPartnersSchema.parse(req.body);
+
+      const imageUrl = req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl;
+      const partnerData = insertPartnersSchema.parse({
+        ...req.body,
+        imageUrl,
+      });
+
       const partner = await storage.createPartner(partnerData);
       res.json(partner);
     } catch (error) {
       console.error("Error creating partner:", error);
-      res.status(400).json({ message: "Failed to create partner" });
+      res.status(400).json({ message: error instanceof Error ? error.message : "Failed to create partner" });
     }
   });
 
