@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Game, News as NewsType, Pickem, PickemRules, Changelog, InsertChangelog, StreamRequest, User, Team, Player, Partner } from "@shared/schema";
 import { format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
-import { Plus, Trash2, Edit, Save, Wrench, Users, LayoutDashboard, ShieldCheck, Zap, Newspaper, Coins, Trophy, Calendar, UserPlus, Settings, Heart } from "lucide-react";
+import { Plus, Trash2, Edit, Save, Wrench, Users, LayoutDashboard, ShieldCheck, Zap, Newspaper, Coins, Trophy, Calendar, UserPlus, Settings, Heart, Minus } from "lucide-react";
 import { TEAMS } from "@/lib/teams";
 
 const AVAILABLE_TEAMS = Object.keys(TEAMS);
@@ -755,29 +755,13 @@ function CoinsManager() {
     queryKey: ["/api/users/all"],
   });
 
-  const addCoinsMutation = useMutation({
-    mutationFn: async (data: { userId: string; amount: number }) => {
-      return await apiRequest("POST", "/api/admin/add-coins", data);
+  const updateCoinsMutation = useMutation({
+    mutationFn: async ({ userId, amount, action }: { userId: string; amount: number; action: "add" | "remove" }) => {
+      return await apiRequest("PATCH", `/api/users/${userId}/coins`, { amount, action });
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/users/all"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/balance"] });
-      toast({ title: "Success", description: `Added coins. New balance: ${data.newBalance}` });
-      setAmount(0);
-    },
-    onError: (error: Error) => {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    },
-  });
-
-  const removeCoinsMutation = useMutation({
-    mutationFn: async (data: { userId: string; amount: number }) => {
-      return await apiRequest("POST", "/api/admin/remove-coins", data);
-    },
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users/all"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/balance"] });
-      toast({ title: "Success", description: `Removed coins. New balance: ${data.newBalance}` });
+      toast({ title: "Success", description: `Updated balance for ${data.username}. New balance: ${data.coins} coins` });
       setAmount(0);
     },
     onError: (error: Error) => {
@@ -803,16 +787,15 @@ function CoinsManager() {
                     <SelectValue placeholder="Select a user" />
                   </SelectTrigger>
                   <SelectContent>
-                  <SelectLabel>Users</SelectLabel>
-                  {users && users.length > 0 ? (
-                    users.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>
-                        {u.username} ({u.coins || 0} coins)
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="no-users" disabled>No users found</SelectItem>
-                  )}
+                    {users && users.length > 0 ? (
+                      users.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.username} ({u.coins || 0} coins)
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-users" disabled>No users found</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -821,7 +804,7 @@ function CoinsManager() {
                 <Input
                   id="amount"
                   type="number"
-                  value={amount}
+                  value={amount || ""}
                   onChange={(e) => setAmount(parseInt(e.target.value) || 0)}
                   placeholder="Enter amount"
                 />
@@ -829,8 +812,8 @@ function CoinsManager() {
               <div className="flex gap-4">
                 <Button
                   className="flex-1 gap-2"
-                  onClick={() => selectedUserId && amount > 0 && addCoinsMutation.mutate({ userId: selectedUserId, amount })}
-                  disabled={addCoinsMutation.isPending || !selectedUserId || amount <= 0}
+                  onClick={() => selectedUserId && amount > 0 && updateCoinsMutation.mutate({ userId: selectedUserId, amount, action: "add" })}
+                  disabled={updateCoinsMutation.isPending || !selectedUserId || amount <= 0}
                 >
                   <Plus className="w-4 h-4" />
                   Add Coins
@@ -838,10 +821,10 @@ function CoinsManager() {
                 <Button
                   variant="destructive"
                   className="flex-1 gap-2"
-                  onClick={() => selectedUserId && amount > 0 && removeCoinsMutation.mutate({ userId: selectedUserId, amount })}
-                  disabled={removeCoinsMutation.isPending || !selectedUserId || amount <= 0}
+                  onClick={() => selectedUserId && amount > 0 && updateCoinsMutation.mutate({ userId: selectedUserId, amount, action: "remove" })}
+                  disabled={updateCoinsMutation.isPending || !selectedUserId || amount <= 0}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Minus className="w-4 h-4" />
                   Remove Coins
                 </Button>
               </div>
