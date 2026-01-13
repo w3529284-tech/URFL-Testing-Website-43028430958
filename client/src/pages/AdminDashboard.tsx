@@ -1491,9 +1491,13 @@ function PartnersManager() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (!name || !quote) {
+              toast({ title: "Error", description: "Name and quote are required", variant: "destructive" });
+              return;
+            }
             const formData = new FormData();
-            formData.append("name", name);
-            formData.append("quote", quote);
+            formData.append("name", name.trim());
+            formData.append("quote", quote.trim());
             if (imageFile) {
               formData.append("image", imageFile);
             }

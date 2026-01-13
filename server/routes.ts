@@ -1227,16 +1227,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only admins can create partners" });
       }
 
-      // Handle null/undefined values and ensure they are strings if present
-      const name = req.body.name;
-      const quote = req.body.quote;
+      // Log full request details for debugging
+      console.log("[PARTNERS] req.body content:", req.body);
+      console.log("[PARTNERS] Request file:", req.file ? `File: ${req.file.originalname}` : "No file");
 
-      const imageUrl = req.file ? `/uploads/${req.file.filename}` : (req.body.imageUrl || null);
-      
+      // Use a more robust extraction method
+      const body = req.body || {};
+      const name = body.name || body['name'] || req.query.name;
+      const quote = body.quote || body['quote'] || req.query.quote;
+
+      console.log("[PARTNERS] Extracted name:", name);
+      console.log("[PARTNERS] Extracted quote:", quote);
+
+      const imageUrl = req.file ? `/uploads/${req.file.filename}` : (body.imageUrl || null);
+
+      if (!name || !quote) {
+        return res.status(400).json({ 
+          message: "Name and quote are required.",
+          received: { body: req.body, query: req.query, file: !!req.file }
+        });
+      }
+
       const partnerData = insertPartnersSchema.parse({
-        name,
-        quote,
-        imageUrl,
+        name: String(name).trim(),
+        quote: String(quote).trim(),
+        imageUrl: imageUrl ? String(imageUrl) : null,
       });
 
       const partner = await storage.createPartner(partnerData);
