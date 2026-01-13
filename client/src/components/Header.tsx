@@ -20,6 +20,7 @@ export function Header() {
     { path: "/news", label: "News", icon: Newspaper },
     { path: "/changelogs", label: "Updates", icon: BookOpen },
     { path: "/social", label: "Social", icon: Target },
+    { path: "/partners", label: "Partners", icon: Users },
     { path: "/settings", label: "Settings", icon: Settings },
     { path: "/admin", label: "Admin", icon: Shield },
     { path: "/api/logout", label: "Logout", icon: X },
