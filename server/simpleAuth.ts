@@ -83,15 +83,33 @@ export async function setupAuth(app: Express) {
     if (matchedEnvUser) {
       const userId = `user_${matchedEnvUser.username}`;
       
-      const user = await storage.upsertUser({
-        id: userId,
-        username: matchedEnvUser.username,
-        password: matchedEnvUser.password,
-        firstName: matchedEnvUser.username,
-        lastName: "",
-        role: matchedEnvUser.role,
-        hasCompletedTour: true,
-      });
+      // Check if user exists first to preserve coins
+      let user = await storage.getUser(userId);
+      if (!user) {
+        user = await storage.upsertUser({
+          id: userId,
+          username: matchedEnvUser.username,
+          password: matchedEnvUser.password,
+          firstName: matchedEnvUser.username,
+          lastName: "",
+          role: matchedEnvUser.role,
+          hasCompletedTour: true,
+          coins: 1000,
+        });
+      } else {
+        // Just update basic info if needed, but don't overwrite coins unless specified
+        // We explicitly keep the existing coins
+        user = await storage.upsertUser({
+          id: user.id,
+          username: matchedEnvUser.username,
+          password: user.password,
+          firstName: matchedEnvUser.username,
+          lastName: user.lastName,
+          role: matchedEnvUser.role,
+          hasCompletedTour: true,
+          coins: user.coins,
+        });
+      }
       
       (req.session as any).authenticated = true;
       (req.session as any).userId = userId;

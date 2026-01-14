@@ -736,8 +736,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async placeBet(betData: InsertBet): Promise<Bet> {
-    console.log("[STORAGE] Placing bet:", betData);
-    const [bet] = await db.insert(bets).values(cleanObject(betData) as InsertBet).returning();
+    console.log("[STORAGE] Placing bet logic start:", betData);
+    const cleanData = cleanObject(betData);
+    const [bet] = await db.insert(bets).values(cleanData as InsertBet).returning();
+    console.log("[STORAGE] Bet placed successfully in DB:", bet);
     return bet;
   }
 
@@ -752,6 +754,9 @@ export class DatabaseStorage implements IStorage {
       .set({ coins: amount })
       .where(eq(users.id, userId))
       .returning();
+    
+    // If the user being updated is popfork1, ensure it's synced
+    console.log(`[STORAGE] Updated balance for ${userId} to ${amount}`);
     return user;
   }
 

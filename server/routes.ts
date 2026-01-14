@@ -1337,15 +1337,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      if ((user.coins || 0) < betData.amount) {
+      const currentBalance = user.coins ?? 0;
+      if (currentBalance < betData.amount) {
         return res.status(400).json({ message: "Insufficient balance" });
       }
 
       // Deduct coins first
-      await storage.updateUserBalance(userId, (user.coins || 0) - betData.amount);
+      const newBalance = currentBalance - betData.amount;
+      const updatedUser = await storage.updateUserBalance(userId, newBalance);
+      console.log(`[API] User balance updated in DB: ${updatedUser.coins}`);
 
       const bet = await storage.placeBet(betData);
       
+      console.log(`[API] Bet placed. User: ${userId}, New Balance: ${newBalance}`);
+
       // Broadcast balance update
       const wss = (app as any).wss;
       if (wss) {
@@ -1354,7 +1359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             client.send(JSON.stringify({
               type: "balance_update",
               userId,
-              balance: (user.coins || 0) - betData.amount
+              balance: newBalance
             }));
           }
         });
@@ -1373,8 +1378,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(401).json({ message: "User not identified" });
       }
-      const balance = await storage.getUserBalance(userId);
-      res.json({ balance });
+      const user = await storage.getUser(userId);
+      console.log(`[API] Balance check for ${userId}: ${user?.coins}`);
+      res.json({ balance: user?.coins ?? 0 });
     } catch (error) {
       console.error("Error fetching balance:", error);
       res.status(500).json({ message: "Failed to fetch balance" });
