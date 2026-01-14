@@ -108,7 +108,7 @@ export default function Betting() {
     if (!bet || bet.amount <= 0 || bet.amount > userBalance) return;
 
     const odds = getOdds(game, bet.team);
-    placeBetMutation.mutate({ gameId, team: bet.team, amount: bet.amount, odds });
+    placeBetMutation.mutate({ gameId, team: bet.team, amount: bet.amount, odds: odds });
   };
 
   const currentWeek = games.length > 0 ? Math.max(...games.map(g => g.week)) : 1;
