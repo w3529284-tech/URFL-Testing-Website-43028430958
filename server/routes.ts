@@ -703,8 +703,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Betting endpoints
   app.get("/api/bets", isAuthenticated, async (req: any, res) => {
     try {
-      const bets = await storage.getUserBets(req.session.userId);
-      res.json(bets);
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User not identified" });
+      }
+      console.log(`[API] Fetching bets for userId: ${userId}`);
+      const userBets = await storage.getUserBets(userId);
+      console.log(`[API] Found ${userBets.length} bets for ${userId}`);
+      res.json(userBets);
     } catch (error) {
       console.error("Error fetching bets:", error);
       res.status(500).json({ message: "Failed to fetch bets" });
@@ -713,22 +719,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/bets", isAuthenticated, async (req: any, res) => {
     try {
-      const { gameId, pickedTeam, amount, odds } = req.body;
-      
-      const balance = await storage.getUserBalance(req.session.userId);
-      if (balance < amount) {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User not identified" });
+      }
+
+      const betData = insertBetSchema.parse({
+        ...req.body,
+        userId,
+      });
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const currentBalance = Number(user.coins ?? 0);
+      const betAmount = Number(betData.amount);
+
+      if (currentBalance < betAmount) {
         return res.status(400).json({ message: "Insufficient balance" });
       }
 
-      const finalOdds = Math.round(odds * 100);
-      const bet = await storage.placeBet({ 
-        gameId, 
-        pickedTeam, 
-        amount, 
-        userId: req.session.userId,
-        multiplier: finalOdds,
-        status: 'pending'
-      }); 
+      // Deduct coins first
+      const newBalance = currentBalance - betAmount;
+      const updatedUser = await storage.updateUserBalance(userId, newBalance);
+      console.log(`[API] User balance updated in DB: ${updatedUser.coins}`);
+
+      // Now place the bet
+      const bet = await storage.placeBet(betData);
+      
+      console.log(`[API] Bet placed. User: ${userId}, New Balance: ${newBalance}`);
+
+      // Broadcast balance update
+      const wss = (app as any).wss;
+      if (wss) {
+        wss.clients.forEach((client: any) => {
+          if (client.readyState === 1) { // WebSocket.OPEN
+            client.send(JSON.stringify({
+              type: "balance_update",
+              userId,
+              balance: newBalance
+            }));
+          }
+        });
+      }
       
       res.json(bet);
     } catch (error) {
@@ -739,8 +774,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/balance", isAuthenticated, async (req: any, res) => {
     try {
-      const balance = await storage.getUserBalance(req.session.userId);
-      res.json({ balance });
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User not identified" });
+      }
+      const user = await storage.getUser(userId);
+      console.log(`[API] Balance check for ${userId}: ${user?.coins}`);
+      res.json({ balance: user?.coins ?? 0 });
     } catch (error) {
       console.error("Error fetching balance:", error);
       res.status(500).json({ message: "Failed to fetch balance" });
@@ -1306,88 +1346,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/bets", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "User not identified" });
-      }
-      const bets = await storage.getUserBets(userId);
-      res.json(bets);
-    } catch (error) {
-      console.error("Error fetching bets:", error);
-      res.status(500).json({ message: "Failed to fetch bets" });
-    }
-  });
-
-  app.post("/api/bets", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "User not identified" });
-      }
-
-      const betData = insertBetSchema.parse({
-        ...req.body,
-        userId,
-      });
-
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      const currentBalance = Number(user.coins ?? 0);
-      const betAmount = Number(betData.amount);
-
-      if (currentBalance < betAmount) {
-        return res.status(400).json({ message: "Insufficient balance" });
-      }
-
-      // Deduct coins first
-      const newBalance = currentBalance - betAmount;
-      const updatedUser = await storage.updateUserBalance(userId, newBalance);
-      console.log(`[API] User balance updated in DB: ${updatedUser.coins}`);
-
-      const bet = await storage.placeBet(betData);
-      
-      console.log(`[API] Bet placed. User: ${userId}, New Balance: ${newBalance}`);
-
-      // Broadcast balance update
-      const wss = (app as any).wss;
-      if (wss) {
-        wss.clients.forEach((client: any) => {
-          if (client.readyState === 1) { // WebSocket.OPEN
-            client.send(JSON.stringify({
-              type: "balance_update",
-              userId,
-              balance: newBalance
-            }));
-          }
-        });
-      }
-      
-      res.json(bet);
-    } catch (error) {
-      console.error("Error placing bet:", error);
-      res.status(400).json({ message: "Failed to place bet" });
-    }
-  });
-
-  app.get("/api/balance", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "User not identified" });
-      }
-      const user = await storage.getUser(userId);
-      console.log(`[API] Balance check for ${userId}: ${user?.coins}`);
-      res.json({ balance: user?.coins ?? 0 });
-    } catch (error) {
-      console.error("Error fetching balance:", error);
-      res.status(500).json({ message: "Failed to fetch balance" });
-    }
-  });
 
   // Game Plays endpoints (for play-by-play updates)
   app.get("/api/games/:gameId/plays", async (req, res) => {
