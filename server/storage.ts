@@ -742,17 +742,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async placeBet(betData: InsertBet): Promise<Bet> {
-    console.log("[STORAGE] Placing bet logic start:", betData);
+    console.log("[STORAGE] Placing bet logic start:", JSON.stringify(betData));
     const user = await this.getUser(betData.userId);
     if (!user) throw new Error("User not found");
     
     const betAmount = Number(betData.amount);
-    if ((user.coins ?? 0) < betAmount) {
+    const userCoins = Number(user.coins ?? 0);
+    
+    console.log(`[STORAGE] User balance: ${userCoins}, Bet amount: ${betAmount}`);
+
+    if (userCoins < betAmount) {
       throw new Error("Insufficient balance");
     }
 
     const cleanData = cleanObject(betData);
-    cleanData.amount = betAmount; // Ensure it's a number
+    cleanData.amount = betAmount;
 
     if (cleanData.multiplier !== undefined && cleanData.multiplier !== null) {
       cleanData.multiplier = Number(cleanData.multiplier);
@@ -761,9 +765,10 @@ export class DatabaseStorage implements IStorage {
     const [bet] = await db.insert(bets).values(cleanData as InsertBet).returning();
     
     // Deduct EXACTLY the bet amount from user balance
-    await this.updateUserBalance(betData.userId, (user.coins ?? 0) - betAmount);
+    const newBalance = userCoins - betAmount;
+    await this.updateUserBalance(betData.userId, newBalance);
     
-    console.log("[STORAGE] Bet placed successfully in DB:", bet);
+    console.log(`[STORAGE] Bet placed. New user balance: ${newBalance}`);
     return bet;
   }
 

@@ -727,25 +727,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
       });
 
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      const currentBalance = Number(user.coins ?? 0);
-      const betAmount = Number(betData.amount);
-
-      if (currentBalance < betAmount) {
-        return res.status(400).json({ message: "Insufficient balance" });
-      }
-
-      // Deduct coins first
-      const newBalance = currentBalance - betAmount;
-      const updatedUser = await storage.updateUserBalance(userId, newBalance);
-      console.log(`[API] User balance updated in DB: ${updatedUser.coins}`);
-
-      // Now place the bet
+      // placeBet handles balance check and deduction internally now
       const bet = await storage.placeBet(betData);
+      
+      const user = await storage.getUser(userId);
+      const newBalance = Number(user?.coins ?? 0);
       
       console.log(`[API] Bet placed. User: ${userId}, New Balance: ${newBalance}`);
 
@@ -766,7 +752,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(bet);
     } catch (error) {
       console.error("Error placing bet:", error);
-      res.status(400).json({ message: "Failed to place bet" });
+      res.status(400).json({ message: error instanceof Error ? error.message : "Failed to place bet" });
     }
   });
 
