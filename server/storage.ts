@@ -831,7 +831,8 @@ export class DatabaseStorage implements IStorage {
           const user = await this.getUser(bet.userId);
           if (user) {
             const multiplier = Number(bet.multiplier);
-            const winnings = Math.floor(Number(bet.amount) * (multiplier > 0 ? multiplier : 1));
+            const oddsMultiplier = multiplier > 0 ? multiplier / 100 : 1;
+            const winnings = Math.floor(Number(bet.amount) * oddsMultiplier);
             let newBalance = user.coins ?? 0;
 
             if (bet.status === "won" && newStatus === "lost") {
@@ -859,7 +860,9 @@ export class DatabaseStorage implements IStorage {
         if (bet.status === "won") {
           const user = await this.getUser(bet.userId);
           if (user) {
-            const winnings = Math.floor(bet.amount * (bet.multiplier! / 100));
+            const multiplier = Number(bet.multiplier);
+            const oddsMultiplier = multiplier > 0 ? multiplier / 100 : 1;
+            const winnings = Math.floor(Number(bet.amount) * oddsMultiplier);
             await this.updateUserBalance(bet.userId, (user.coins ?? 0) - winnings);
           }
         }
