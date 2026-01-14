@@ -177,12 +177,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // If game is being marked as final (transition from not final to final), resolve bets
-      if (req.body.isFinal === true && wasNotFinal) {
-        console.log(`[BET RESOLUTION] Game ${id} marked as final. Resolving bets...`);
-        if (updatedGame) {
-          await storage.resolveBetsForGame(id);
-        }
+      // If game is final, always (re)resolve bets to handle score/winner changes
+      if (req.body.isFinal === true || updatedGame.isFinal) {
+        console.log(`[BET RESOLUTION] Game ${id} is final. (Re)resolving bets...`);
+        await storage.resolveBetsForGame(id);
       }
       
       // If game is being marked as not final (transition from final to not final), unresolve bets

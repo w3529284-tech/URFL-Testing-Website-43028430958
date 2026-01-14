@@ -796,21 +796,30 @@ export class DatabaseStorage implements IStorage {
       if (!game || !game.isFinal) return;
 
       const winningTeam = game.team1Score! > game.team2Score! ? game.team1 : game.team2;
-      const gameBets = await db.select().from(bets).where(and(eq(bets.gameId, gameId), eq(bets.status, "pending")));
+      const gameBets = await db.select().from(bets).where(eq(bets.gameId, gameId));
 
       for (const bet of gameBets) {
-        const won = bet.pickedTeam === winningTeam;
-        const status = won ? "won" : "lost";
-        
-        await db.update(bets).set({ won, status }).where(eq(bets.id, bet.id));
+        const currentlyWon = bet.pickedTeam === winningTeam;
+        const newStatus = currentlyWon ? "won" : "lost";
 
-        if (won) {
+        // If the status is changing (e.g. from won to lost or lost to won)
+        if (bet.status !== newStatus) {
           const user = await this.getUser(bet.userId);
           if (user) {
-            // winnings = amount * multiplier (multiplier is already a factor, e.g., 2.5)
             const winnings = Math.floor(bet.amount * (bet.multiplier! || 1));
-            await this.updateUserBalance(bet.userId, (user.coins ?? 0) + winnings);
+            let newBalance = user.coins ?? 0;
+
+            if (bet.status === "won" && newStatus === "lost") {
+              // Was a win, now a loss: Remove previous winnings
+              newBalance = Math.max(0, newBalance - winnings);
+            } else if ((bet.status === "lost" || bet.status === "pending") && newStatus === "won") {
+              // Was a loss or pending, now a win: Add winnings
+              newBalance = newBalance + winnings;
+            }
+
+            await this.updateUserBalance(bet.userId, newBalance);
           }
+          await db.update(bets).set({ won: currentlyWon, status: newStatus }).where(eq(bets.id, bet.id));
         }
       }
     } catch (error) {
