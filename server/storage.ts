@@ -807,8 +807,8 @@ export class DatabaseStorage implements IStorage {
         if (won) {
           const user = await this.getUser(bet.userId);
           if (user) {
-            // winnings = initial amount + (amount * multiplier / 100)
-            const winnings = Math.floor(bet.amount + (bet.amount * (bet.multiplier! / 100)));
+            // winnings = amount * multiplier (multiplier is already a factor, e.g., 2.5)
+            const winnings = Math.floor(bet.amount * (bet.multiplier! || 1));
             await this.updateUserBalance(bet.userId, (user.coins ?? 0) + winnings);
           }
         }
