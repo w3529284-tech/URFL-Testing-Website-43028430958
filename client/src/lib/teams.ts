@@ -1,7 +1,7 @@
 export const TEAMS = {
   "Roman Gladiators": "/roman-gladiators-logo.webp",
   "Miami Gators": "/georgia-gators-logo.webp",
-  "Navada Nighthawks": "/logos/nighthawks.webp",
+  "Nevada Nighthawks": "/logos/nighthawks.webp",
   "New York Cobras": "/new-york-cobras-logo.webp",
   "Jacksonville Ironbacks": "/jacksonville-ironbacks-logo.webp",
   "Tampa Bay Buccaneers": "https://a.espncdn.com/i/teamlogos/nfl/500/tb.png",
@@ -23,4 +23,8 @@ export const TEAMS = {
   "Atlanta Falcons": "https://a.espncdn.com/i/teamlogos/nfl/500/atl.png",
   "Arizona Cardinals": "https://a.espncdn.com/i/teamlogos/nfl/500/ari.png",
   "San Antonio Brahamas": "/san-antonio-brahamas-logo.webp",
+  "Green Bay Packers": "https://a.espncdn.com/i/teamlogos/nfl/500/gb.png",
+  "Chicago Grizzlies": "https://a.espncdn.com/i/teamlogos/nfl/500/chi.png",
+  "Pittsburgh Steelers": "https://a.espncdn.com/i/teamlogos/nfl/500/pit.png",
+  "Tennessee Titans": "https://a.espncdn.com/i/teamlogos/nfl/500/ten.png",
 };

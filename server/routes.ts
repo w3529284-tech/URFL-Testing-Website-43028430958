@@ -403,7 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const defaultTeams = [
           { name: "Roman Gladiators", city: "Rome", division: "NFC_East" },
           { name: "Miami Gators", city: "Miami", division: "NFC_East" },
-          { name: "Navada Nighthawks", city: "Navada", division: "AFC_West" },
+          { name: "Nevada Nighthawks", city: "Nevada", division: "AFC_West" },
           { name: "New York Cobras", city: "New York", division: "AFC_East" },
           { name: "Jacksonville Ironbacks", city: "Jacksonville", division: "NFC_West" },
           { name: "Tampa Bay Buccaneers", city: "Tampa Bay", division: "NFC_West" },
@@ -425,6 +425,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           { name: "Atlanta Falcons", city: "Atlanta", division: "NFC_East" },
           { name: "Arizona Cardinals", city: "Arizona", division: "NFC_West" },
           { name: "San Antonio Brahamas", city: "San Antonio", division: "NFC_West" },
+          { name: "Green Bay Packers", city: "Green Bay", division: "NFC_East" },
+          { name: "Chicago Grizzlies", city: "Chicago", division: "NFC_West" },
+          { name: "Pittsburgh Steelers", city: "Pittsburgh", division: "AFC_East" },
+          { name: "Tennessee Titans", city: "Tennessee", division: "AFC_West" },
         ];
         
         for (const team of defaultTeams) {
