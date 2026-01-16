@@ -287,7 +287,7 @@ function GamesManager() {
               id="week"
               type="number"
               min="1"
-              max="18"
+              max="15"
               value={week}
               onChange={(e) => setWeek(parseInt(e.target.value))}
               required
@@ -410,7 +410,7 @@ function GamesManager() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Weeks</SelectItem>
-                {[...Array(14)].map((_, i) => (
+                {[...Array(15)].map((_, i) => (
                   <SelectItem key={i + 1} value={String(i + 1)}>
                     Week {i + 1}
                   </SelectItem>

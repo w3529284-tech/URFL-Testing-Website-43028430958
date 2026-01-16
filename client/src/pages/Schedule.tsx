@@ -50,10 +50,10 @@ export default function Schedule() {
   }) : [];
 
   const gamesByWeek = filteredGames?.reduce((acc, game) => {
-    if (game.week <= 10 && !acc[game.week]) {
+    if (game.week <= 15 && !acc[game.week]) {
       acc[game.week] = [];
     }
-    if (game.week <= 10) {
+    if (game.week <= 15) {
       acc[game.week].push(game);
     }
     return acc;

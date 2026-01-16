@@ -72,7 +72,7 @@ export default function LiveScores() {
             </span>
           </Badge>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter leading-[0.9]">
-            Gameday <span className="text-muted-foreground/20">W{currentWeek}</span>
+            Gameday <span className="text-muted-foreground/20">S2</span>
           </h1>
         </div>
         
