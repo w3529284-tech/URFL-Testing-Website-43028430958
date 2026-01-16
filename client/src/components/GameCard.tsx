@@ -32,19 +32,26 @@ export function GameCard({ game, onClick }: GameCardProps) {
       
       <div className="p-8 space-y-8 relative z-10">
         <div className="flex justify-between items-center">
-          <Badge 
-            variant={game.isLive ? "default" : "secondary"}
-            className={`text-[10px] font-black tracking-widest uppercase px-4 py-1.5 rounded-full ${
-              game.isLive ? 'animate-pulse bg-primary shadow-lg shadow-primary/20' : 'bg-muted/50 border-none'
-            }`}
-          >
-            {game.isLive ? (
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                Live • {game.quarter}
-              </span>
-            ) : game.isFinal ? 'Final' : 'Scheduled'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge 
+              variant={game.isLive ? "default" : "secondary"}
+              className={`text-[10px] font-black tracking-widest uppercase px-4 py-1.5 rounded-full ${
+                game.isLive ? 'animate-pulse bg-primary shadow-lg shadow-primary/20' : 'bg-muted/50 border-none'
+              }`}
+            >
+              {game.isLive ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                  Live • {game.quarter}
+                </span>
+              ) : game.isFinal ? 'Final' : 'Scheduled'}
+            </Badge>
+            {game.isPrimetime && (
+              <Badge className="bg-amber-500/10 text-amber-500 border-none px-3 py-1 text-[9px] font-black uppercase tracking-widest">
+                Primetime
+              </Badge>
+            )}
+          </div>
           <span className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] italic">Week {game.week}</span>
         </div>
 

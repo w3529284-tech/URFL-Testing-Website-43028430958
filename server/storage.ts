@@ -251,7 +251,7 @@ export class DatabaseStorage implements IStorage {
     const upcomingGames = seasonGames.filter(g => !g.isFinal);
     if (upcomingGames.length > 0) {
       const minWeek = Math.min(...upcomingGames.map(g => g.week));
-      return upcomingGames.filter(g => g.week === minWeek);
+      return seasonGames.filter(g => g.week === minWeek);
     }
 
     const maxWeek = Math.max(...seasonGames.map(g => g.week));

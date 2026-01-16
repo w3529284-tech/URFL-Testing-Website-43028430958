@@ -129,10 +129,15 @@ export default function Schedule() {
                             <h3 className="text-xl font-black italic uppercase tracking-tight">
                               {game.team2} <span className="text-muted-foreground/30 text-base not-italic mx-2">VS</span> {game.team1}
                             </h3>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
                               <Badge className={`text-[9px] font-black uppercase tracking-widest h-5 ${game.isLive ? 'bg-primary' : 'bg-muted/50 border-none'}`}>
                                 {game.isLive ? 'Live' : game.isFinal ? 'Final' : isUpcoming ? 'Scheduled' : 'Past'}
                               </Badge>
+                              {game.isPrimetime && (
+                                <Badge className="bg-amber-500/10 text-amber-500 border-none px-3 h-5 text-[9px] font-black uppercase tracking-widest">
+                                  Primetime
+                                </Badge>
+                              )}
                             </div>
                           </div>
                         </div>
