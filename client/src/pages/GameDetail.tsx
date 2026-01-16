@@ -473,7 +473,6 @@ export default function GameDetail() {
                           </div>
                           <div className="grid grid-cols-1 gap-2">
                             {[
-                              { label: "Ranking", team1: team1Factors.factors.ranking.team1Rank, team2: team1Factors.factors.ranking.team2Rank, key: 'ranking' },
                               { label: "Record", team1: team1Factors.factors.record.team1Record, team2: team1Factors.factors.record.team2Record, key: 'record' },
                               { label: "Point Diff", team1: (standings?.find(s => s.team === game.team1)?.pointDifferential || 0) > 0 ? `+${standings?.find(s => s.team === game.team1)?.pointDifferential}` : standings?.find(s => s.team === game.team1)?.pointDifferential || 0, team2: (standings?.find(s => s.team === game.team2)?.pointDifferential || 0) > 0 ? `+${standings?.find(s => s.team === game.team2)?.pointDifferential}` : standings?.find(s => s.team === game.team2)?.pointDifferential || 0, key: 'pointDiff' },
                               { label: "Schedule", team1: team1Factors.factors.schedule.team1SOS + "%", team2: team1Factors.factors.schedule.team2SOS + "%", key: 'schedule' },

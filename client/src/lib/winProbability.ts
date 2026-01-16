@@ -231,7 +231,6 @@ export function getWinProbabilityFactors(
   team1: TeamAnalysis;
   team2: TeamAnalysis;
   factors: {
-    ranking: { team1Rank: string; team2Rank: string; advantage: string };
     record: { team1Record: string; team2Record: string; advantage: string };
     pointDiff: { team1PD: number; team2PD: number; advantage: string };
     schedule: { team1SOS: number; team2SOS: number; advantage: string };
@@ -250,19 +249,10 @@ export function getWinProbabilityFactors(
   const standing1 = standings.find(s => s.team === game.team1);
   const standing2 = standings.find(s => s.team === game.team2);
 
-  const team1RankStr = getConferenceRanking(game.team1, standings);
-  const team2RankStr = getConferenceRanking(game.team2, standings);
-
   return {
     team1: team1Analysis,
     team2: team2Analysis,
     factors: {
-      ranking: {
-        team1Rank: team1RankStr,
-        team2Rank: team2RankStr,
-        advantage: team1Analysis.ranking < team2Analysis.ranking ? game.team1 :
-                   team2Analysis.ranking < team1Analysis.ranking ? game.team2 : "Even"
-      },
       record: {
         team1Record: `${standing1?.wins || 0}-${standing1?.losses || 0}`,
         team2Record: `${standing2?.wins || 0}-${standing2?.losses || 0}`,
